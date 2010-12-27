@@ -3,4 +3,5 @@
     <string name="hello">Hello World, HotFile!</string>
     <string name="app_name">HotFileDownloader</string>
 <string name="buttonHandler">myClickHandler</string>
+
 </resources>

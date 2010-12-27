@@ -4,4 +4,8 @@
 <PreferenceCategory android:title="Login settings"><EditTextPreference android:title="Username" android:key="username" android:summary="Please maintain your username to Hotfile.com account"></EditTextPreference>
 <EditTextPreference android:key="password" android:summary="Please maintain your username to Hotfile.com account" android:title="Password"></EditTextPreference>
 </PreferenceCategory>
+<PreferenceCategory android:title="Downloading path">
+
+<ListPreference android:title="Choose" android:key="chooseDir"></ListPreference>
+</PreferenceCategory>
 </PreferenceScreen>
