@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+  xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceCategory android:title="Login settings"><EditTextPreference android:title="Username" android:key="username" android:summary="Please maintain your username to Hotfile.com account"></EditTextPreference>
+<EditTextPreference android:key="password" android:summary="Please maintain your username to Hotfile.com account" android:title="Password"></EditTextPreference>
+</PreferenceCategory>
+</PreferenceScreen>
