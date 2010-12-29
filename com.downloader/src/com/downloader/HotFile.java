@@ -11,14 +11,19 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeMap;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
+
+import com.downloader.R.id;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -111,7 +116,7 @@ public class HotFile extends Activity {
 		/*
 		 * Everything have to be checked before run method
 		 */
-		public void downloadFile(String downloadLink, String username, String password, String directory) throws ClientProtocolException, IOException 
+		public void downloadFile(String downloadLink, String username, String passwordmd5, String directory) throws ClientProtocolException, IOException 
 		{
 			InputStream stream = null;
 			BufferedInputStream in = null;
@@ -120,7 +125,7 @@ public class HotFile extends Activity {
 			try{
 				Log.v(LOG_TAG, "Begin downloading");
 				DefaultHttpClient httpclient = new DefaultHttpClient();
-				HttpGet getDirectLink = new HttpGet("http://api.hotfile.com/?action=getdirectdownloadlink&link="+downloadLink+"&username="+username+"&passwordmd5="+password);
+				HttpPost getDirectLink = new HttpPost("http://api.hotfile.com/?action=getdirectdownloadlink&link="+downloadLink+"&username="+username+"&passwordmd5="+passwordmd5);
 				HttpResponse response = httpclient.execute(getDirectLink);
 				HttpEntity entity = response.getEntity();
 				String responseText = EntityUtils.toString(entity);
@@ -209,25 +214,65 @@ public class HotFile extends Activity {
 
 
 	public void myClickHandler(View view) {
-		BackgroundDownloaderAsyncTask task = new BackgroundDownloaderAsyncTask();
-		task.setPreconditions("http://hotfile.com/dl/92148167/7c86b14/fil.txt.html", this.username, this.password, this.directory);
-		task.execute();
+		//BackgroundDownloaderAsyncTask task = new BackgroundDownloaderAsyncTask();
+		//task.setPreconditions("http://hotfile.com/dl/92148167/7c86b14/fil.txt.html", this.username, this.password, this.directory);
+		//task.execute();
+		List<String> list = new ArrayList<String>();
+		list.add("http://hotfile.com/dl/92148167/7c86b14/fil.txt.html");
+		list.add("http://hotfile.com/dl/92539498/131dad0/Gamee.Of.Death.DVDRip.XviD-VoMiT.m90.part1.rar.html");
+		try {
+			checkFileExistsOnHotFileServer(list);
+		} catch (ClientProtocolException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	/*
 	 * Check if file exists on server
+	 * http://api.hotfile.com/?c=checklinks
 	 */
-	/*private List<Boolean> checkFileExistsOnHotFileServer(List<Boolean>)
+	private List<Boolean> checkFileExistsOnHotFileServer(List<String> downloadList) throws ClientProtocolException, IOException
 	{
-		//finish this!!!!!!!
+		List<String> keysIds = cutKeysIdsFromLinks(downloadList);
+		String request = "http://api.hotfile.com/?action=checklinks&ids=";
+		Boolean idStringExist = false;												//check if word 'keys' is in request
+		for(String arg: keysIds)
+		{
+			if(arg.charAt(0) == 'i')request += arg.substring(1) + ",";
+			else
+					if(idStringExist) request += arg.substring(1) + ",";
+					else {
+						request = request.substring(0, request.length()-1);			//remove last comma
+						request += "&keys=" + arg.substring(1) + ",";
+						idStringExist = true;
+					}
+		}
+		request = request.substring(0, request.length()-1);							//remove last comma
 		DefaultHttpClient httpclient = new DefaultHttpClient();
-		HttpGet getDirectLink = new HttpGet("http://api.hotfile.com/?action=getdirectdownloadlink&link="+downloadLink+"&username="+username+"&passwordmd5="+password);
+		HttpPost getDirectLink = new HttpPost(request);
 		HttpResponse response = httpclient.execute(getDirectLink);
 		HttpEntity entity = response.getEntity();
 		String responseText = EntityUtils.toString(entity);
 		return null;
-	}*/
+	}
 
+	private List<String> cutKeysIdsFromLinks(List<String> downloadList)
+	{
+		List<String> ids = new ArrayList<String>();
+		List<String> keys = new ArrayList<String>();
+		for(String link:downloadList)
+		{
+			if(link.lastIndexOf("/") == link.length()-1) link = link.substring(0, link.length()-1);
+			ids.add("i"+link.substring(link.indexOf("dl/")+3, link.indexOf("/", link.indexOf("dl/")+4)));
+			keys.add("k"+link.substring(link.indexOf("/", link.indexOf("dl/")+4)+1, link.lastIndexOf("/")));
+		}
+		ids.addAll(keys);
+		return ids;
+	}
 	/*
 	 * Check if preferences are set
 	 */
@@ -235,7 +280,9 @@ public class HotFile extends Activity {
 		username = preferences.getString("username", null);
 		password = preferences.getString("username", null);
 		directory = preferences.getString("chooseDir", null);
-		File dir = new File(directory.substring(0, directory.lastIndexOf("/")));
+		File dir;
+		if(directory != null) dir = new File(directory.substring(0, directory.lastIndexOf("/")));
+		else dir = new File(Environment.getExternalStorageDirectory()+"/downloads");
 		if(!dir.mkdir())
 			Log.e(LOG_TAG, "Create dir in local failed, maybe dir exists");
 		if(username==null && password == null)
