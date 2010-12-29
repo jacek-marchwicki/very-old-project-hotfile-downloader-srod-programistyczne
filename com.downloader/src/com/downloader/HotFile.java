@@ -2,16 +2,19 @@ package com.downloader;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeMap;
 
@@ -48,20 +51,22 @@ import android.widget.Toast;
  * 2. pobieranie listy z pliku
  * 3. pobieranie kilku plikow naraz
  * 4. minimalny status baterii
- * 5. sprawdzanie waznosci username i password
+ * 																							5. sprawdzanie waznosci username i password
  * 6. zapisywanie wielkosci poszczegolnych plikow w jakims cache
- * 7. przycisk close app
+ * 																							7. przycisk close app
  * 8. dzialanie w tle
  * 9. status na pasku u gory
  * 																							10. md5 password'a
  * 																							11. wybór path do zapisu
- * 12. wczytanie opcji do klasy
+ * 																							12. wczytanie opcji do klasy
  * 13. entry link
+ * 																							14. sprawdzanie waznosci linkow
  */
 
 public class HotFile extends Activity {
 	SharedPreferences preferences;
-
+	List<DownloadingFileItem> finalDownloadLinks;
+	prepareActions check;
 	ProgressBar myProgressBar;
 	int progress = 0;
 
@@ -175,6 +180,7 @@ public class HotFile extends Activity {
 		setContentView(R.layout.main);
 		myProgressBar=(ProgressBar)findViewById(R.id.ProgressBar01);
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
+		check = new prepareActions();
 		checkPreferences();
 		Log.v(LOG_TAG, "Running program...");
 
@@ -201,7 +207,8 @@ public class HotFile extends Activity {
 					"Here you can maintain your user credentials.",
 					Toast.LENGTH_LONG).show();
 			break;
-
+		case R.id.close:
+			super.finish();
 		}
 		return true;
 	}
@@ -217,11 +224,11 @@ public class HotFile extends Activity {
 		//BackgroundDownloaderAsyncTask task = new BackgroundDownloaderAsyncTask();
 		//task.setPreconditions("http://hotfile.com/dl/92148167/7c86b14/fil.txt.html", this.username, this.password, this.directory);
 		//task.execute();
-		List<String> list = new ArrayList<String>();
+		List<String> list = new LinkedList<String>();
 		list.add("http://hotfile.com/dl/92148167/7c86b14/fil.txt.html");
 		list.add("http://hotfile.com/dl/92539498/131dad0/Gamee.Of.Death.DVDRip.XviD-VoMiT.m90.part1.rar.html");
 		try {
-			checkFileExistsOnHotFileServer(list);
+			check.checkFileExistsOnHotFileServer(list);
 		} catch (ClientProtocolException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -231,48 +238,6 @@ public class HotFile extends Activity {
 		}
 	}
 	
-	/*
-	 * Check if file exists on server
-	 * http://api.hotfile.com/?c=checklinks
-	 */
-	private List<Boolean> checkFileExistsOnHotFileServer(List<String> downloadList) throws ClientProtocolException, IOException
-	{
-		List<String> keysIds = cutKeysIdsFromLinks(downloadList);
-		String request = "http://api.hotfile.com/?action=checklinks&ids=";
-		Boolean idStringExist = false;												//check if word 'keys' is in request
-		for(String arg: keysIds)
-		{
-			if(arg.charAt(0) == 'i')request += arg.substring(1) + ",";
-			else
-					if(idStringExist) request += arg.substring(1) + ",";
-					else {
-						request = request.substring(0, request.length()-1);			//remove last comma
-						request += "&keys=" + arg.substring(1) + ",";
-						idStringExist = true;
-					}
-		}
-		request = request.substring(0, request.length()-1);							//remove last comma
-		DefaultHttpClient httpclient = new DefaultHttpClient();
-		HttpPost getDirectLink = new HttpPost(request);
-		HttpResponse response = httpclient.execute(getDirectLink);
-		HttpEntity entity = response.getEntity();
-		String responseText = EntityUtils.toString(entity);
-		return null;
-	}
-
-	private List<String> cutKeysIdsFromLinks(List<String> downloadList)
-	{
-		List<String> ids = new ArrayList<String>();
-		List<String> keys = new ArrayList<String>();
-		for(String link:downloadList)
-		{
-			if(link.lastIndexOf("/") == link.length()-1) link = link.substring(0, link.length()-1);
-			ids.add("i"+link.substring(link.indexOf("dl/")+3, link.indexOf("/", link.indexOf("dl/")+4)));
-			keys.add("k"+link.substring(link.indexOf("/", link.indexOf("dl/")+4)+1, link.lastIndexOf("/")));
-		}
-		ids.addAll(keys);
-		return ids;
-	}
 	/*
 	 * Check if preferences are set
 	 */
@@ -287,21 +252,5 @@ public class HotFile extends Activity {
 			Log.e(LOG_TAG, "Create dir in local failed, maybe dir exists");
 		if(username==null && password == null)
 			Toast.makeText(HotFile.this, "You have to fill preferences", Toast.LENGTH_LONG).show();
-	}
-
-	/*
-	 * Check if free space is available on sdcard
-	 */
-	private long checkFreeSpace(String directory){
-		try{
-			StatFs stat = new StatFs(directory);
-			long bytesAvailable = (long)stat.getBlockSize() *(long)stat.getBlockCount();
-			long megAvailable = bytesAvailable / 1048576;
-			return megAvailable;
-		}
-		catch(Exception e){
-			directory = e.toString();
-			return 0;
-		}
 	}
 }
