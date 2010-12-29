@@ -23,15 +23,6 @@ public class Preferences extends PreferenceActivity {
 			addPreferencesFromResource(R.xml.preferences);
 		     ListPreference deflt = (ListPreference) findPreference("chooseDir");
 		     List<String> list = new ArrayList<String>();
-	/*	     try{
-		     StatFs stat = new StatFs(Environment.getExternalStorageDirectory().getPath());
-		     long bytesAvailable = (long)stat.getBlockSize() *(long)stat.getBlockCount();
-		     long megAvailable = bytesAvailable / 1048576;
-		     }
-		     catch(Exception e){
-		    	 directory = e.toString();
-		    	 }
-		*/     
 		     String cmd = "/system/bin/mount";
 		     try {
 		     Runtime rt = Runtime.getRuntime();
@@ -51,5 +42,6 @@ public class Preferences extends PreferenceActivity {
 		    	 values[i] = list.get(i);
 		      deflt.setEntries(values);
 		      deflt.setEntryValues(values);
+		      deflt.setDefaultValue(values[0]);
 		}
 }

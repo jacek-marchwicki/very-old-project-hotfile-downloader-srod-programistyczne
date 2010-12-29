@@ -6,6 +6,6 @@
 </PreferenceCategory>
 <PreferenceCategory android:title="Downloading path">
 
-<ListPreference android:title="Choose" android:key="chooseDir"></ListPreference>
+<ListPreference android:title="Choose" android:key="chooseDir" android:defaultValue="/mnt/sdcard"></ListPreference>
 </PreferenceCategory>
 </PreferenceScreen>
