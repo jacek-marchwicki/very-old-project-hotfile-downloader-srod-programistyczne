@@ -6,13 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.os.Bundle;
-import android.os.Environment;
-import android.os.StatFs;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
-import android.util.Log;
-import android.widget.Button;
 
 public class Preferences extends PreferenceActivity {
 	

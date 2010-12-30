@@ -1,7 +1,6 @@
 package com.downloader;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.LinkedList;
@@ -10,16 +9,9 @@ import java.util.List;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
-
-import android.os.Environment;
-import android.os.StatFs;
-import android.test.IsolatedContext;
-import android.util.Log;
-import android.widget.Toast;
 
 public class prepareActions {
 
@@ -55,7 +47,6 @@ public class prepareActions {
 		int iterator = 0;
 		while((str = reader.readLine()) != null){
 			if(str.length()>0){
-				++iterator;
 				//DownloadingFileItem item = new DownloadingFileItem(
 				int firstcomma = str.indexOf(",");					//positions of comma's
 				int secondcomma = str.indexOf(",", firstcomma+1);
@@ -67,6 +58,7 @@ public class prepareActions {
 						str.substring(secondcomma+1, thirdcomma),
 						Long.parseLong(str.substring(thirdcomma+1))
 						));
+				++iterator;
 			}
 		}
 		return list;
@@ -86,35 +78,7 @@ public class prepareActions {
 		return ids;
 	}
 	
-	/*
-	 *	Check validity of username and password
-	 *	Example response -> is_premium=1&premium_until=2011-01-01T05:25:58-06:00&hotlink_traffic_kb=209715200
-	 *	Only first we checking already 
-	 */
-	private Boolean checkUsernamePasswordValid(String username, String passwordmd5) throws ClientProtocolException, IOException
-	{
-		String request = "http://api.hotfile.com/?action=getuserinfo&username="+username+"&passwordmd5="+passwordmd5;
-		DefaultHttpClient httpclient = new DefaultHttpClient();
-		HttpPost getDirectLink = new HttpPost(request);
-		HttpResponse response = httpclient.execute(getDirectLink);
-		HttpEntity entity = response.getEntity();
-		String responseText = EntityUtils.toString(entity);
-		return Boolean.parseBoolean(responseText.substring(responseText.indexOf("="), responseText.indexOf("=")+1));
-	}
+
 	
-	/*
-	 * Check if free space is available on sdcard
-	 */
-	private long checkFreeSpace(String directory){
-		try{
-			StatFs stat = new StatFs(directory);
-			long bytesAvailable = (long)stat.getBlockSize() *(long)stat.getBlockCount();
-			long megAvailable = bytesAvailable / 1048576;
-			return megAvailable;
-		}
-		catch(Exception e){
-			directory = e.toString();
-			return 0;
-		}
-	}
+
 }

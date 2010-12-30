@@ -5,7 +5,13 @@
     android:layout_height="fill_parent"
     >
 
-<Button android:text="Download file" android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/Button01" android:onClick="@string/buttonHandler"></Button>
-<ProgressBar android:layout_height="wrap_content" android:id="@+id/ProgressBar01" android:layout_width="fill_parent" style="?android:attr/progressBarStyleHorizontal"></ProgressBar>
+<ListView android:id="@+id/ListView01" android:layout_width="fill_parent" android:layout_height="fill_parent" android:layout_weight="1"></ListView>
+
+<Button android:layout_width="wrap_content" android:id="@+id/Button01" android:layout_height="wrap_content" android:onClick="@string/buttonHandler" android:text="Start download"></Button>
+
+
+<Button android:id="@+id/Button02" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Add links from file"></Button>
+<Button android:id="@+id/Button03" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Add link"></Button>
+<Button android:id="@+id/Button04" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Show download list"></Button>
 
 </LinearLayout>

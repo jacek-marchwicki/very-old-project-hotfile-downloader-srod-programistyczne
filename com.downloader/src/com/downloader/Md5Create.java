@@ -7,19 +7,16 @@ import java.security.NoSuchAlgorithmException;
 public class Md5Create {
 
 	public static String generateMD5Hash(String word){
-		  try {
-	            MessageDigest md = MessageDigest.getInstance("MD5");
-	            byte[] messageDigest = md.digest(word.getBytes());
-	            BigInteger number = new BigInteger(1, messageDigest);
-	            String hashtext = number.toString(16);
-	            while (hashtext.length() < 32) {
-	                hashtext = "0" + hashtext;
-	            }
-	            return hashtext;
-	        }
-	        catch (NoSuchAlgorithmException e) {
-	            throw new RuntimeException(e);
-	        }
+		String hashword = null;
+		try {
+			MessageDigest md5 = MessageDigest.getInstance("MD5");
+			md5.update(word.getBytes());
+			BigInteger hash = new BigInteger(1, md5.digest());
+			hashword = hash.toString(16);
+		} catch (NoSuchAlgorithmException nsae) {
+			// ignore
+		}
+		return hashword;
 	}
-	
+
 }
