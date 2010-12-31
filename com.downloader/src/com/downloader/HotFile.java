@@ -30,7 +30,6 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-
 /*
  * 																							1. sprawdzanie miejsca w pamieci do zapisu
  * 2. pobieranie listy z pliku
@@ -59,48 +58,47 @@ public class HotFile extends Activity {
 	int progress = 0;
 	private DownloadsTableModel tableModel;
 
-
 	public static final String LOG_TAG = "HotFileDownloader Information";
 
-
 	String username, password, directory;
+
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
-		listview = (ListView)findViewById(R.id.ListView01);
+		listview = (ListView) findViewById(R.id.ListView01);
 		tableModel = new DownloadsTableModel();
-	//	downloadList = new DownloadListAdapter();
-		myProgressBar=(ProgressBar)findViewById(R.id.ProgressBar01);
+		// downloadList = new DownloadListAdapter();
+		myProgressBar = (ProgressBar) findViewById(R.id.ProgressBar01);
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
-		Button buttonOnClickShowdownloadlist = (Button)findViewById(R.id.Button04);
-		buttonOnClickShowdownloadlist.setOnClickListener(buttonOnClickShowdownloadlistListener);
+		Button buttonOnClickShowdownloadlist = (Button) findViewById(R.id.Button04);
+		buttonOnClickShowdownloadlist
+				.setOnClickListener(buttonOnClickShowdownloadlistListener);
 		check = new prepareActions();
 		checkPreferences();
 		Log.v(LOG_TAG, "Running program...");
-		//this.startActivity(new Intent(this, DownloadList.class));
-
+		// this.startActivity(new Intent(this, DownloadList.class));
 
 	}
 
-	private Button.OnClickListener buttonOnClickShowdownloadlistListener  = new Button.OnClickListener(){
+	private Button.OnClickListener buttonOnClickShowdownloadlistListener = new Button.OnClickListener() {
 		@Override
-		public void onClick(View v){
+		public void onClick(View v) {
 			Intent intent = new Intent();
 			intent.setClass(HotFile.this, DownloadListAdapter.class);
 			startActivityForResult(intent, 0);
 		}
-	};	
+	};
+
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		// TODO Auto-generated method stub
 		super.onActivityResult(requestCode, resultCode, data);
-		if (requestCode==0)
-		{
-			switch (resultCode)
-			{ case RESULT_OK:
-				//.setText(data.getStringExtra("country"));
+		if (requestCode == 0) {
+			switch (resultCode) {
+			case RESULT_OK:
+				// .setText(data.getStringExtra("country"));
 				break;
 			case RESULT_CANCELED:
 				break;
@@ -108,7 +106,6 @@ public class HotFile extends Activity {
 			}
 		}
 	}
-
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -137,25 +134,26 @@ public class HotFile extends Activity {
 		return true;
 	}
 
-
-	public void buttonOnClickShowdownloadlist(View view){
+	public void buttonOnClickShowdownloadlist(View view) {
 
 	}
 
 	/*
-	 * downloadLink has to be available and valid
-	 * check downloadLink sooner
+	 * downloadLink has to be available and valid check downloadLink sooner
 	 */
 	public void myClickHandler(View view) {
-		//BackgroundDownloaderAsyncTask task = new BackgroundDownloaderAsyncTask();
-		//task.setPreconditions("http://hotfile.com/dl/92148167/7c86b14/fil.txt.html", this.username, this.password, this.directory);
-		//task.execute();
+		// BackgroundDownloaderAsyncTask task = new
+		// BackgroundDownloaderAsyncTask();
+		// task.setPreconditions("http://hotfile.com/dl/92148167/7c86b14/fil.txt.html",
+		// this.username, this.password, this.directory);
+		// task.execute();
 		List<String> list = new LinkedList<String>();
 		list.add("http://hotfile.com/dl/92148167/7c86b14/fil.txt.html");
 		list.add("http://hotfile.com/dl/92539498/131dad0/Gamee.Of.Death.DVDRip.XviD-VoMiT.m90.part1.rar.html");
 		try {
 			check.checkFileExistsOnHotFileServer(list);
-			tableModel.addDownload(new DownloaderHotfile(list.get(0), username, password, directory));
+			tableModel.addDownload(new DownloaderHotfile(list.get(0), username,
+					password, directory));
 		} catch (ClientProtocolException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -173,10 +171,17 @@ public class HotFile extends Activity {
 		password = preferences.getString("username", null);
 		password = "48e75f559cc5504c8992a47181fdf5ad";
 		directory = preferences.getString("chooseDir", null);
-		File dir;
-		if(directory != null) dir = new File(directory);
-		else dir = new File(Environment.getExternalStorageDirectory()+"/downloads/");
-		if(!dir.mkdir())
+		File dir,sd;
+		String state = Environment.getExternalStorageState();
+		if(directory != null) {
+			directory = directory.replace(" ", "");
+			dir = new File(directory);
+		//	sd = new File(Environment.getExternalStorageDirectory().getPath());
+		//	dir = new File(sd.getAbsolutePath()+"/downloads");
+		}
+		else 
+			dir = new File(Environment.getExternalStorageDirectory()+"/downloads");
+		if(!dir.mkdirs())
 			Log.e(LOG_TAG, "Create dir in local failed, maybe dir exists");
 		try{
 			Runtime.getRuntime().exec("chmod 765 "+dir.getPath());
@@ -189,16 +194,9 @@ public class HotFile extends Activity {
 			Toast.makeText(HotFile.this, "You have to fill preferences", Toast.LENGTH_LONG).show();
 	}
 
-
-
-
-
-
 	/* ***********************************************
 	 * 
 	 * ASYNC TASK = MUST BE SUBCLASSED
-	 * 
-	 * 
 	 */
 	public class Async extends AsyncTask<Void, Integer, Void> {
 		String downloadLink, username, password, directory;
@@ -207,14 +205,15 @@ public class HotFile extends Activity {
 		@Override
 		protected void onPostExecute(Void result) {
 			// TODO Auto-generated method stub
-			Toast.makeText(HotFile.this,
-					"onPostExecute", Toast.LENGTH_LONG).show();
-			//butt.setClickable(true);
+			Toast.makeText(HotFile.this, "onPostExecute", Toast.LENGTH_LONG)
+					.show();
+			// butt.setClickable(true);
 		}
 
-		protected void setPreconditions(String link, String username, String password, String directory){
+		protected void setPreconditions(String link, String username,
+				String password, String directory) {
 			downloadLink = link;
-			this.username =username;
+			this.username = username;
 			this.password = Md5Create.generateMD5Hash(password);
 			this.directory = directory;
 		}
@@ -222,23 +221,23 @@ public class HotFile extends Activity {
 		@Override
 		protected void onPreExecute() {
 			// TODO Auto-generated method stub
-			Toast.makeText(HotFile.this,
-					"onPreExecute", Toast.LENGTH_LONG).show();
+			Toast.makeText(HotFile.this, "onPreExecute", Toast.LENGTH_LONG)
+					.show();
 			myProgress = 0;
 		}
 
 		@Override
 		protected Void doInBackground(Void... params) {
 			// TODO Auto-generated method stub
-		//	try {
-		//		downloadFile(downloadLink, username, password, directory);
-	//		} catch (ClientProtocolException e) {
-				// TODO Auto-generated catch block
-	//			e.printStackTrace();
-	//		} catch (IOException e) {
-				// TODO Auto-generated catch block
-	//			e.printStackTrace();
-	//		}
+			// try {
+			// downloadFile(downloadLink, username, password, directory);
+			// } catch (ClientProtocolException e) {
+			// TODO Auto-generated catch block
+			// e.printStackTrace();
+			// } catch (IOException e) {
+			// TODO Auto-generated catch block
+			// e.printStackTrace();
+			// }
 			return null;
 		}
 
@@ -253,24 +252,23 @@ public class HotFile extends Activity {
 		 */
 
 	}
-	
-	public Boolean checkPrecondition(long size, String link, String username, String passwordmd5, String directory)
-	{
+
+	public Boolean checkPrecondition(long size, String link, String username,
+			String passwordmd5, String directory) {
 		try {
 			Boolean firstCond = false, secondCond = false;
-			if(!checkUsernamePasswordValid(username, passwordmd5))
-			{
+			if (!checkUsernamePasswordValid(username, passwordmd5)) {
 
-			}
-			else firstCond = true;
-			if(checkFreeSpace(directory) > size)
-			{
+			} else
+				firstCond = true;
+			if (checkFreeSpace(directory) > size) {
 
-			}
-			else secondCond = true;
-			if(firstCond && secondCond)
+			} else
+				secondCond = true;
+			if (firstCond && secondCond)
 				return true;
-			else return false;
+			else
+				return false;
 		} catch (ClientProtocolException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -282,32 +280,35 @@ public class HotFile extends Activity {
 	}
 
 	/*
-	 *	Check validity of username and password
-	 *	Example response -> is_premium=1&premium_until=2011-01-01T05:25:58-06:00&hotlink_traffic_kb=209715200
-	 *	Only first we checking already 
+	 * Check validity of username and password Example response ->
+	 * is_premium=1&premium_until
+	 * =2011-01-01T05:25:58-06:00&hotlink_traffic_kb=209715200 Only first we
+	 * checking already
 	 */
-	public Boolean checkUsernamePasswordValid(String username, String passwordmd5) throws ClientProtocolException, IOException
-	{
-		String request = "http://api.hotfile.com/?action=getuserinfo&username="+username+"&passwordmd5="+passwordmd5;
+	public Boolean checkUsernamePasswordValid(String username,
+			String passwordmd5) throws ClientProtocolException, IOException {
+		String request = "http://api.hotfile.com/?action=getuserinfo&username="
+				+ username + "&passwordmd5=" + passwordmd5;
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		HttpPost getDirectLink = new HttpPost(request);
 		HttpResponse response = httpclient.execute(getDirectLink);
 		HttpEntity entity = response.getEntity();
 		String responseText = EntityUtils.toString(entity);
-		return Boolean.parseBoolean(responseText.substring(responseText.indexOf("="), responseText.indexOf("=")+1));
+		return Boolean.parseBoolean(responseText.substring(
+				responseText.indexOf("="), responseText.indexOf("=") + 1));
 	}
 
 	/*
 	 * Check if free space is available on sdcard
 	 */
-	public long checkFreeSpace(String directory){
-		try{
+	public long checkFreeSpace(String directory) {
+		try {
 			StatFs stat = new StatFs(directory);
-			long bytesAvailable = (long)stat.getBlockSize() *(long)stat.getBlockCount();
+			long bytesAvailable = (long) stat.getBlockSize()
+					* (long) stat.getBlockCount();
 			long megAvailable = bytesAvailable / 1048576;
 			return megAvailable;
-		}
-		catch(Exception e){
+		} catch (Exception e) {
 			directory = e.toString();
 			return 0;
 		}

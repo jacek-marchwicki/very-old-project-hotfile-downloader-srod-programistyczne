@@ -12,16 +12,16 @@ public class DownloadsTableModel implements Observer {
 	
 	public void addDownload(DownloaderHotfile download)
 	{
-		download.addObserver(this);
+		//download.addObserver(this);
 		downloadList.add(download);
-		
 	}
 
 	@Override
 	public void update(Observable observable, Object data) {
 		// TODO Auto-generated method stub
-		int index = downloadList.indexOf(observable);
-		Log.v("eehhh", "test");
+		if(data != null){
+		Log.i("eehhh", "test");
+		}
 		//alarm, something changed
 	}
 	

@@ -14,7 +14,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 
-public class DownloaderHotfile extends Observable implements Runnable{
+public class DownloaderHotfile implements Runnable{
 
 	  private static final int MAX_BUFFER_SIZE = 1024;
 	public static final String STATUSES[] = {"Downloading",
@@ -42,13 +42,6 @@ public class DownloaderHotfile extends Observable implements Runnable{
 		//this.passwordmd5 = Md5Create.generateMD5Hash(password);
 		this.passwordmd5 = password;
 		this.directory = directory;
-		downloaderHotfile();
-	}
-
-	private void downloaderHotfile(){
-		//Thread thread = new Thread();
-		//thread.start();
-		run();
 	}
 	
 	  public long getSize() {
@@ -62,22 +55,21 @@ public class DownloaderHotfile extends Observable implements Runnable{
 	  
 	  private void error() {
 		    status = ERROR;
-		    stateChanged();
+//		    stateChanged();
 		  }
 	  
 	  public void cancel() {
 		    status = CANCELLED;
-		    stateChanged();
+//		    stateChanged();
 		  }
 	  
 	  public void resume() {
 		    status = DOWNLOADING;
-		    stateChanged();
-		    downloaderHotfile();
+//		    stateChanged();
 		  }
 	  public void pause() {
 		    status = PAUSED;
-		    stateChanged();
+	//	    stateChanged();
 		  }
 	  
 	  // Get this download's status.
@@ -93,7 +85,6 @@ public class DownloaderHotfile extends Observable implements Runnable{
 	public void run(){
 		RandomAccessFile file = null;
 		InputStream stream = null;
-		BufferedInputStream in = null;
 		try{
 		//	Log.v(LOG_TAG, "Begin downloading");
 			DefaultHttpClient httpclient = new DefaultHttpClient();
@@ -113,7 +104,7 @@ public class DownloaderHotfile extends Observable implements Runnable{
 				error();
 			if(this.size == -1){
 				this.size = size;
-				stateChanged();
+		//		stateChanged();
 			}
 			
 			
@@ -126,13 +117,16 @@ public class DownloaderHotfile extends Observable implements Runnable{
 				          data = new byte[MAX_BUFFER_SIZE];
 				else
 					data = new byte[this.size - downloaded];
-			in = new BufferedInputStream(stream);
-			int count = in.read(data);
+			int count = stream.read(data);
 				if(count == -1) break;
 				file.write(data, 0, count);
 				downloaded += count;
-				stateChanged();
+				//stateChanged();
 			}
+			   if (status == DOWNLOADING) {
+			        status = COMPLETE;
+			       // stateChanged();
+			      }
 		}
 		catch(Exception e){
 			error();
@@ -144,11 +138,12 @@ public class DownloaderHotfile extends Observable implements Runnable{
 				} catch (IOException e) {
 
 				}
+				 if (stream != null) {
+				        try {
+				          stream.close();
+				        } catch (Exception e) {}
+				      }
 		}
 	}
-	
-	private void stateChanged(){
-		setChanged();
-		notifyObservers();
-	}
+
 }

@@ -7,7 +7,7 @@ public class DownloadingFileItem {
 	//size: file size in bytes
 	
 	public DownloadingFileItem(int id, Boolean status, String name,
-			String downloadLink, long size) {
+			String downloadLink, int size) {
 		super();
 		this.id = id;
 		this.status = status;
@@ -33,7 +33,7 @@ public class DownloadingFileItem {
 		this.downloadLink = downloadLink;
 	}
 
-	private long size;
+	private int size;
 	
 	/**
 	 * @return the id
@@ -87,7 +87,7 @@ public class DownloadingFileItem {
 	/**
 	 * @param size the size to set
 	 */
-	public void setSize(long size) {
+	public void setSize(int size) {
 		this.size = size;
 	}
 }

@@ -7,11 +7,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 public class DownloadListAdapter extends ArrayAdapter<DownloadingFileItem>{
 	/** Called when the activity is first created. */
 
+	
+	private ListView listView;
+	
 	public DownloadListAdapter(Activity activity, List<DownloadingFileItem> downloadingFiles){
 		super(activity, 0, downloadingFiles);
 	}
@@ -23,14 +28,14 @@ public class DownloadListAdapter extends ArrayAdapter<DownloadingFileItem>{
 	 
 	        // Inflate the views from XML
 	        View rowView = inflater.inflate(R.layout.download_list_layout, null);
-	//        DownloadingFileItem imageAndText = getItem(position);
-	 
+	        DownloadingFileItem imageAndText = getItem(position);
+	        
 	        // Load the image and set it on the ImageView
-	//        ProgressBar progressBar = (ProgressBar) rowView.findViewById(R.id.ProgressBar01);
-	 
+	        ProgressBar progressBar = (ProgressBar) rowView.findViewById(R.id.ProgressBar01);
+	        
 	        // Set the text on the TextView
-	     //   TextView textView = (TextView) rowView.findViewById(R.id.text);
-	        //textView.setText(imageAndText.getText());
+	        TextView textView = (TextView) rowView.findViewById(R.id.text);
+	        textView.setText("text");
 	 
 	        return rowView;
 	    }
