@@ -34,9 +34,13 @@ public class DownloaderHotfile extends Observable implements Runnable{
 	String link, username, passwordmd5, directory;
 	public DownloaderHotfile(String link, String username, String password, String directory)
 	{
+		this.size = -1;
+		this.downloaded = 0;
+		status = DOWNLOADING;
 		this.link = link;
 		this.username = username;
-		this.passwordmd5 = Md5Create.generateMD5Hash(password);
+		//this.passwordmd5 = Md5Create.generateMD5Hash(password);
+		this.passwordmd5 = password;
 		this.directory = directory;
 		downloaderHotfile();
 	}
@@ -100,7 +104,7 @@ public class DownloaderHotfile extends Observable implements Runnable{
 			HttpURLConnection urlConnection = (HttpURLConnection)(new URL(responseText)).openConnection();
 			urlConnection.setRequestProperty("Range", "bytes="+downloaded+"-");
 			urlConnection.connect();
-			if(urlConnection.getResponseCode() != 200)
+			if(urlConnection.getResponseCode()/100 != 2)
 				error();
 		
 			//out = new BufferedOutputStream(file);

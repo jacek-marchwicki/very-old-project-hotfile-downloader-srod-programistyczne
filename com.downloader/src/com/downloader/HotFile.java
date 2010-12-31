@@ -171,12 +171,20 @@ public class HotFile extends Activity {
 	private void checkPreferences(){
 		username = preferences.getString("username", null);
 		password = preferences.getString("username", null);
+		password = "48e75f559cc5504c8992a47181fdf5ad";
 		directory = preferences.getString("chooseDir", null);
 		File dir;
-		if(directory != null) dir = new File(directory.substring(0, directory.lastIndexOf("/")));
-		else dir = new File(Environment.getExternalStorageDirectory()+"/downloads");
+		if(directory != null) dir = new File(directory);
+		else dir = new File(Environment.getExternalStorageDirectory()+"/downloads/");
 		if(!dir.mkdir())
 			Log.e(LOG_TAG, "Create dir in local failed, maybe dir exists");
+		try{
+			Runtime.getRuntime().exec("chmod 765 "+dir.getPath());
+		}
+		catch(Exception e){
+			Log.e(LOG_TAG, e.toString());
+		}
+	//	dir.setReadable(true);
 		if(username==null && password == null)
 			Toast.makeText(HotFile.this, "You have to fill preferences", Toast.LENGTH_LONG).show();
 	}
