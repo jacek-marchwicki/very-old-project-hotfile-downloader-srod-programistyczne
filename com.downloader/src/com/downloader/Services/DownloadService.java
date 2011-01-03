@@ -14,6 +14,7 @@ import org.apache.http.util.EntityUtils;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.IBinder;
 
 public class DownloadService extends Service {
@@ -60,7 +61,11 @@ public class DownloadService extends Service {
 	public void onStart(Intent intent, int startId){
 		super.onStart(intent, startId);
 		this.intent = intent;
-		intent.get
+		Bundle bundle = intent.getExtras();
+		this.link = (String)bundle.get("link");
+		this.username = (String)bundle.get("username");
+		this.passwordmd5 = (String)bundle.get("passwordmd5");
+		this.directory = (String)bundle.get("directory");
 		downloadFile.start();
 		stopSelf();
 	}

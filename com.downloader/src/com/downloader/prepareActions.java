@@ -56,7 +56,7 @@ public class prepareActions {
 						Boolean.parseBoolean(str.substring(firstcomma+1, secondcomma)),
 						downloadList.get(iterator),
 						str.substring(secondcomma+1, thirdcomma),
-						Long.parseLong(str.substring(thirdcomma+1))
+						Integer.parseInt(str.substring(thirdcomma+1))
 						));
 				++iterator;
 			}

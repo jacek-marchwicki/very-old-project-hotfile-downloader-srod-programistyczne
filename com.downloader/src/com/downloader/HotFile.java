@@ -12,6 +12,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 
+import com.downloader.Services.DownloadService;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -40,7 +42,7 @@ import android.widget.Toast;
  * 																							7. przycisk close app
  * 8. dzialanie w tle
  * 9. ?status na pasku u gory
- * 																							10. md5 password'a
+ * 10. md5 password'a
  * 																							11. wybór path do zapisu
  * 																							12. wczytanie opcji do klasy
  * 13. entry link
@@ -86,8 +88,14 @@ public class HotFile extends Activity {
 		@Override
 		public void onClick(View v) {
 			Intent intent = new Intent();
-			intent.setClass(HotFile.this, DownloadListAdapter.class);
-			startActivityForResult(intent, 0);
+			intent.setClass(HotFile.this, DownloadService.class);
+	//		intent.setClass(HotFile.this, DownloadListAdapter.class);
+			Bundle bundle = new Bundle();
+			bundle.putString("link", "http://hotfile.com/dl/92148167/7c86b14/fil.txt.html");
+			bundle.putString("username", username);
+			bundle.putString("password", password);
+			bundle.putString("directory", directory);
+			
 		}
 	};
 
@@ -135,13 +143,15 @@ public class HotFile extends Activity {
 	}
 
 	public void buttonOnClickShowdownloadlist(View view) {
-
+		
 	}
 
 	/*
 	 * downloadLink has to be available and valid check downloadLink sooner
 	 */
 	public void myClickHandler(View view) {
+		//Toast.makeText(HotFile.this, , Toast.LENGTH_LONG).show();
+		String aaa = Md5Create.generateMD5Hash("puyyut");
 		// BackgroundDownloaderAsyncTask task = new
 		// BackgroundDownloaderAsyncTask();
 		// task.setPreconditions("http://hotfile.com/dl/92148167/7c86b14/fil.txt.html",
