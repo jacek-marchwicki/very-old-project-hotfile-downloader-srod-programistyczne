@@ -1,13 +1,9 @@
-package com.downloader.FileReading;
+package com.downloader;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import com.downloader.R;
-import com.downloader.R.layout;
 
 import android.app.ListActivity;
 import android.content.Intent;
@@ -15,6 +11,10 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.Toast;
+
+import com.downloader.R;
+import com.downloader.FileReading.FileArrayAdapter;
+import com.downloader.FileReading.Option;
 
 public class FileChooser extends ListActivity {
     /** Called when the activity is first created. */
@@ -99,6 +99,7 @@ public class FileChooser extends ListActivity {
     	setFilepath(o.getPath());
     	setFilename(o.getName());	
     	setResult(RESULT_OK, (new Intent()).setAction(filepath));
+    	super.finish();
     
     }
 
