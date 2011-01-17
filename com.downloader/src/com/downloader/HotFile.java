@@ -1,7 +1,15 @@
 package com.downloader;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.RandomAccessFile;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -17,6 +25,8 @@ import com.downloader.Services.DownloadService;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Path;
+import android.graphics.PathDashPathEffect;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -31,6 +41,7 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+import android.content.Context;
 
 /*
  * 																							1. sprawdzanie miejsca w pamieci do zapisu
@@ -43,7 +54,7 @@ import android.widget.Toast;
  * 8. dzialanie w tle
  * 9. ?status na pasku u gory
  * 10. md5 password'a
- * 																							11. wybór path do zapisu
+ * 																							11. wybï¿½r path do zapisu
  * 																							12. wczytanie opcji do klasy
  * 13. entry link
  * 																							14. sprawdzanie waznosci linkow
@@ -75,15 +86,57 @@ public class HotFile extends Activity {
 		myProgressBar = (ProgressBar) findViewById(R.id.ProgressBar01);
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
 		Button buttonOnClickShowdownloadlist = (Button) findViewById(R.id.Button04);
-		buttonOnClickShowdownloadlist
-				.setOnClickListener(buttonOnClickShowdownloadlistListener);
+		buttonOnClickShowdownloadlist.setOnClickListener(buttonOnClickShowdownloadlistListener);
+		
 		check = new prepareActions();
+		Button btAddLinksFile = (Button) findViewById(R.id.Button02);
+		btAddLinksFile.setOnClickListener(buttontAddLinksFile);
+		
 		checkPreferences();
 		Log.v(LOG_TAG, "Running program...");
 		// this.startActivity(new Intent(this, DownloadList.class));
 
 	}
-
+	
+	private static int CODE = 1;
+	
+	private void AddLinksFile(String filename) throws IOException{
+		
+		File file = new File(filename); 
+		try { 
+		  InputStream instream = new FileInputStream(file); 
+			
+		    if (instream != null) {
+	      // prepare the file for reading
+		    	InputStreamReader inputreader = new InputStreamReader(instream);
+		    	BufferedReader rd = new BufferedReader( inputreader );
+		    	 String line;
+		         List<String> list = new ArrayList<String>();
+		         // read every line of the file into the line-variable, on line at the time
+		         while (( line = rd.readLine())  != null) {
+		           // do something with the settings from the file
+		       	  list.add(line);
+		         }
+		    	
+		    }
+		}catch( Exception e){}
+ 
+    }
+	
+	private Button.OnClickListener buttontAddLinksFile = new Button.OnClickListener() {
+		@Override
+		public void onClick(View v) {
+			
+			try {
+				Intent i = new Intent(HotFile.this, FileChooser.class);
+				startActivityForResult(i, CODE);
+				
+			}catch (Exception e){}
+			
+		}
+	};
+	
+	
 	private Button.OnClickListener buttonOnClickShowdownloadlistListener = new Button.OnClickListener() {
 		@Override
 		public void onClick(View v) {
@@ -103,10 +156,18 @@ public class HotFile extends Activity {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		// TODO Auto-generated method stub
 		super.onActivityResult(requestCode, resultCode, data);
-		if (requestCode == 0) {
+		if (requestCode == CODE) {
 			switch (resultCode) {
 			case RESULT_OK:
 				// .setText(data.getStringExtra("country"));
+				
+				if(data!=null)
+					try {
+						AddLinksFile(data.getAction());
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				break;
 			case RESULT_CANCELED:
 				break;
@@ -172,7 +233,9 @@ public class HotFile extends Activity {
 			e.printStackTrace();
 		}
 	}
-
+	public void btAddLinksFile(){
+		
+	}
 	/*
 	 * Check if preferences are set
 	 */
@@ -236,6 +299,8 @@ public class HotFile extends Activity {
 			myProgress = 0;
 		}
 
+		
+		
 		@Override
 		protected Void doInBackground(Void... params) {
 			// TODO Auto-generated method stub
