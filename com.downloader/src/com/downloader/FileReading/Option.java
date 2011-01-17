@@ -1,4 +1,4 @@
-package com.downloader;
+package com.downloader.FileReading;
 
 public class Option implements Comparable<Option>{
     private String name;

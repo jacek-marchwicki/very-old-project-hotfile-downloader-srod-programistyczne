@@ -20,6 +20,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 
+import com.downloader.FileReading.FileChooser;
 import com.downloader.Services.DownloadService;
 
 import android.app.Activity;
