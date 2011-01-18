@@ -1,10 +1,24 @@
 package com.downloader;
 
-public class DownloadingFileItem {
+import java.io.File;
+
+import android.app.Activity;
+import android.os.Bundle;
+
+public class DownloadingFileItem extends Activity{
 	//id: link id
 	//status: links status - 0=not found, 1=normal working link, 2=hotlink link
 	//name: file name
 	//size: file size in bytes
+	
+	@Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);        
+    }
+	
+	public DownloadingFileItem(){
+		
+	}
 	
 	public DownloadingFileItem(int id, Boolean status, String name,
 			String downloadLink, int size) {

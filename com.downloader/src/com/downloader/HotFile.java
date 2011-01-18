@@ -18,6 +18,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -26,13 +27,16 @@ import android.os.Environment;
 import android.os.StatFs;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.downloader.Services.DownloadService;
@@ -131,13 +135,26 @@ public class HotFile extends Activity {
 					}
 	};
 	
-	
+	int i=0;
 	private Button.OnClickListener buttonOnClickShowdownloadlistListener = new Button.OnClickListener() {
 		@Override
 		public void onClick(View v) {
-			Intent intent = new Intent();
-			intent.setClass(HotFile.this, DownloadService.class);
+			try{
+				++i;
+			LinearLayout ll = (LinearLayout)findViewById(R.id.mylayout);
+			LayoutInflater ly =(LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			View customView =  ly.inflate(R.layout.downloadingitem, null);
+			TextView tv = (TextView)customView.findViewById(R.id.TextView001);
+			tv.setText("qwerty"+i);
+			//LinearLayout l2 = (LinearLayout)findViewById(R.layout.downloadingitem);
+			ll.addView(customView);
+	//		Intent intent = new Intent();
+		//	intent.setClass(HotFile.this, DownloadService.class);
 	//		intent.setClass(HotFile.this, DownloadListAdapter.class);
+			}
+			catch(Exception e){
+				Log.v(LOG_TAG, e.toString());
+			}
 			Bundle bundle = new Bundle();
 			bundle.putString("link", "http://hotfile.com/dl/92148167/7c86b14/fil.txt.html");
 			bundle.putString("username", username);

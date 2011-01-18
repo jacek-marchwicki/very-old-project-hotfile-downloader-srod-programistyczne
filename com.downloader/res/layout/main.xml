@@ -2,9 +2,15 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    >
+    android:layout_height="fill_parent">
+<LinearLayout
+xmlns:android="http://schemas.android.com/apk/res/android"
+android:orientation="vertical"
+    android:id="@+id/mylayout"
+    android:layout_width="fill_parent" 
+android:layout_height="wrap_content">
 
+</LinearLayout>
 <ListView android:id="@+id/ListView01" android:layout_width="fill_parent" android:layout_height="fill_parent" android:layout_weight="1"></ListView>
 
 <Button android:layout_width="wrap_content" android:id="@+id/Button01" android:layout_height="wrap_content" android:onClick="@string/buttonHandler" android:text="Start download"></Button>

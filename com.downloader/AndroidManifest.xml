@@ -16,6 +16,7 @@
 
 
 <activity android:name="FileChooser" android:label="@layout/file_view"></activity>
+<activity android:label="@layout/downloadingitem" android:name="DownloadingFileItem"></activity>
 </application>
     <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="8"/>
 
