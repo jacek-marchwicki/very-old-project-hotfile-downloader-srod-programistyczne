@@ -1,8 +1,10 @@
-package com.downloader;
+package old;
 
 import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
+
+import com.downloader.DownloaderHotfile;
 
 import android.util.Log;
 

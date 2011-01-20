@@ -1,6 +1,11 @@
-package com.downloader;
+package old;
 
 import java.util.List;
+
+import com.downloader.DownloadingFileItem;
+import com.downloader.R;
+import com.downloader.R.id;
+import com.downloader.R.layout;
 
 import android.app.Activity;
 import android.view.LayoutInflater;

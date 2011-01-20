@@ -10,12 +10,16 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import old.DownloadService;
+import old.DownloadsTableModel;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
+
 
 import android.app.Activity;
 import android.content.Context;
@@ -39,7 +43,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.downloader.Services.DownloadService;
 
 /*
  * 																							1. sprawdzanie miejsca w pamieci do zapisu
@@ -61,13 +64,13 @@ import com.downloader.Services.DownloadService;
 
 public class HotFile extends Activity {
 	ListView listview;
-	DownloadListAdapter downloadList;
 	SharedPreferences preferences;
 	static List<DownloadingFileItem> finalDownloadLinks;
 	prepareActions check;
 	ProgressBar myProgressBar;
 	int progress = 0;
 	private DownloadsTableModel tableModel;
+	List<Intent> downloadingList;
 
 	public static final String LOG_TAG = "HotFileDownloader Information";
 
@@ -77,6 +80,7 @@ public class HotFile extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		downloadingList = new ArrayList<Intent>();
 		setContentView(R.layout.main);
 		listview = (ListView) findViewById(R.id.ListView01);
 		tableModel = new DownloadsTableModel();
@@ -231,12 +235,12 @@ public class HotFile extends Activity {
 		// this.username, this.password, this.directory);
 		// task.execute();
 		List<String> list = new LinkedList<String>();
+		list.add("http://hotfile.com/dl/81363200/ba7f841/Ostatnia-DVDRip.PL.part1.rar.html");
 		list.add("http://hotfile.com/dl/92148167/7c86b14/fil.txt.html");
 		list.add("http://hotfile.com/dl/92539498/131dad0/Gamee.Of.Death.DVDRip.XviD-VoMiT.m90.part1.rar.html");
 		try {
 			check.checkFileExistsOnHotFileServer(list);
-			tableModel.addDownload(new DownloaderHotfile(list.get(0), username,
-					password, directory));
+			beginDownloading(list.get(0), username,aaa, directory);
 		} catch (ClientProtocolException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -245,9 +249,19 @@ public class HotFile extends Activity {
 			e.printStackTrace();
 		}
 	}
-	public void btAddLinksFile(){
-		
+	
+	
+	private void beginDownloading(String link, String username, String passwordmd5, String directory)
+	{
+		Intent intent = new Intent(this,  DownloaderHotfile.class);
+		intent.putExtra("link", link);
+		intent.putExtra("username", username);
+		intent.putExtra("password", passwordmd5);
+		intent.putExtra("directory", directory);
+		downloadingList.add(intent);
+		startService(intent);
 	}
+	
 	/*
 	 * Check if preferences are set
 	 */
