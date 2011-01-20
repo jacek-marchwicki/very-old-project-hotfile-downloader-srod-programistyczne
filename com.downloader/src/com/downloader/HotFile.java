@@ -1,5 +1,4 @@
 package com.downloader;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -9,6 +8,8 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import old.DownloadService;
 import old.DownloadsTableModel;
@@ -71,8 +72,8 @@ public class HotFile extends Activity {
 	int progress = 0;
 	private DownloadsTableModel tableModel;
 	List<Intent> downloadingList;
-
 	public static final String LOG_TAG = "HotFileDownloader Information";
+	List<String> listOfDownloadingFiles;
 
 	String username, password, directory;
 
@@ -82,18 +83,20 @@ public class HotFile extends Activity {
 		super.onCreate(savedInstanceState);
 		downloadingList = new ArrayList<Intent>();
 		setContentView(R.layout.main);
+		listOfDownloadingFiles = new ArrayList<String>();
 		listview = (ListView) findViewById(R.id.ListView01);
 		tableModel = new DownloadsTableModel();
+		
 		// downloadList = new DownloadListAdapter();
 		myProgressBar = (ProgressBar) findViewById(R.id.ProgressBar01);
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
 		Button buttonOnClickShowdownloadlist = (Button) findViewById(R.id.Button04);
 		buttonOnClickShowdownloadlist.setOnClickListener(buttonOnClickShowdownloadlistListener);
-		
+		ArrayList<String> listOfDownloadingFiles = new ArrayList<String>();
 		check = new prepareActions();
 		Button btAddLinksFile = (Button) findViewById(R.id.Button02);
 		btAddLinksFile.setOnClickListener(buttontAddLinksFile);
-		
+		//comp
 		checkPreferences();
 		Log.v(LOG_TAG, "Running program...");
 		// this.startActivity(new Intent(this, DownloadList.class));
@@ -125,6 +128,25 @@ public class HotFile extends Activity {
  
     }
 	
+	
+	/// <summary>
+    /// Isolate links from string
+    /// </summary>
+    /// <param name="link">line of text</param>
+    private boolean getLinkFromText(String link)
+    {
+    	Pattern p = Pattern.compile("http://([\\w+?\\.\\w+])+([a-zA-Z0-9\\~\\!\\@\\#\\$\\%\\^\\&amp;\\*\\(\\)_\\-\\=\\+\\\\\\/\\?\\.\\:\\;\\'\\,]*)?");
+        //MatchResult mp 
+    	Matcher m = p.matcher(link);
+    	return m.matches();
+    /*	String[] sp = p.split(link); 
+    	
+    	
+    	for (String s: sp){
+    		Toast.makeText(HotFile.this,s,Toast.LENGTH_LONG).show();
+    	}*/
+    }
+	
 	private Button.OnClickListener buttontAddLinksFile = new Button.OnClickListener() {
 		@Override
 		public void onClick(View v) {
@@ -139,22 +161,27 @@ public class HotFile extends Activity {
 					}
 	};
 	
-	int i=0;
+	
+	public void addLineToDownloadListBox(String line){
+		LinearLayout ll = (LinearLayout)findViewById(R.id.mylayout);
+		LayoutInflater ly =(LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		View customView =  ly.inflate(R.layout.downloadingitem, null);
+		
+		TextView tv = (TextView)customView.findViewById(R.id.TextView001);
+		if (line == "")
+			tv.setText("");	//tu ma byc czyszczenie text boxa, ale je
+		else
+			tv.setText(line);
+		ll.addView(customView);
+	}
+	//List<>
 	private Button.OnClickListener buttonOnClickShowdownloadlistListener = new Button.OnClickListener() {
 		@Override
 		public void onClick(View v) {
 			try{
-				++i;
-			LinearLayout ll = (LinearLayout)findViewById(R.id.mylayout);
-			LayoutInflater ly =(LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			View customView =  ly.inflate(R.layout.downloadingitem, null);
-			TextView tv = (TextView)customView.findViewById(R.id.TextView001);
-			tv.setText("qwerty"+i);
-			//LinearLayout l2 = (LinearLayout)findViewById(R.layout.downloadingitem);
-			ll.addView(customView);
-	//		Intent intent = new Intent();
-		//	intent.setClass(HotFile.this, DownloadService.class);
-	//		intent.setClass(HotFile.this, DownloadListAdapter.class);
+				
+				for(String s: listOfDownloadingFiles)
+					addLineToDownloadListBox(s);
 			}
 			catch(Exception e){
 				Log.v(LOG_TAG, e.toString());
