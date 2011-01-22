@@ -6,6 +6,7 @@ import java.io.RandomAccessFile;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.DecimalFormat;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -29,7 +30,7 @@ public class DownloaderHotfile extends IntentService{
 
 	ProgressBar progressBar;
 	private int progress = 10;
-	final Notification notification = new Notification(R.drawable.icon, "simulating a download", System.currentTimeMillis());;
+	final Notification notification = new Notification(R.drawable.icon, "Downloading file", System.currentTimeMillis());;
 	public DownloaderHotfile() {
 		super("Download service");
 		// TODO Auto-generated constructor stub
@@ -50,6 +51,7 @@ public class DownloaderHotfile extends IntentService{
 	private int size; // size of download in bytes
 	private int downloaded; // number of bytes downloaded
 	private int status; // current status of download
+	private int id; //id in the downloading list for notification area
 	String link, username, passwordmd5, directory;
 
 	public long getSize() {
@@ -90,6 +92,7 @@ public class DownloaderHotfile extends IntentService{
 	}
 
 	public void runDownload(){
+		//android.os.Debug.waitForDebugger();
 		RandomAccessFile file = null;
 		InputStream stream = null;
 		try{
@@ -119,12 +122,14 @@ public class DownloaderHotfile extends IntentService{
 			notification.contentView.setProgressBar(R.id.status_progress, size, progress, false);
 			getApplicationContext();
 			final NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
-			notificationManager.notify(42, notification);
+			notificationManager.notify(id, notification);
 
 			file = new RandomAccessFile(directory+getUrl(new URL(responseText)), "rw");		//change filename
 			file.seek(downloaded);
 			stream = urlConnection.getInputStream();
+			int percentLevel = 2;
 			while(status == DOWNLOADING){
+			//	android.os.Debug.waitForDebugger();
 				byte data[]; 
 				if(this.size - downloaded  >  MAX_BUFFER_SIZE)
 					data = new byte[MAX_BUFFER_SIZE];
@@ -134,9 +139,13 @@ public class DownloaderHotfile extends IntentService{
 				if(count == -1) break;
 				file.write(data, 0, count);
 				downloaded += count;
-				if(size*0.02 == downloaded){notification.contentView.setProgressBar(R.id.status_progress, size, downloaded, false);
-						notificationManager.notify(42, notification);
-						Log.v("A", "WSZED£EM");
+				 //DecimalFormat df = new DecimalFormat("#.##");
+		//		if(downloaded > 8379000)
+		//			Log.v("x", "a");
+				if((int)(((double)downloaded/(double)size)*100)==percentLevel){notification.contentView.setProgressBar(R.id.status_progress, size, downloaded, false);
+						notificationManager.notify(id, notification);
+						Log.v("A"+id, "WSZEDLEM" + percentLevel +"% pobranych");
+						percentLevel = percentLevel < 100 ? percentLevel + 2 : 100;
 				}
 				//stateChanged();
 			}
@@ -167,6 +176,7 @@ public class DownloaderHotfile extends IntentService{
 
 	@Override
 	protected void onHandleIntent(Intent intent) {
+	//	android.os.Debug.waitForDebugger();
 		Log.v("A", "1");
 		this.size = -1;
 		this.downloaded = 0;
@@ -176,6 +186,7 @@ public class DownloaderHotfile extends IntentService{
 		//this.passwordmd5 = Md5Create.generateMD5Hash(password);
 		this.passwordmd5 = intent.getStringExtra("password");
 		this.directory = intent.getStringExtra("directory");
+		this.id = Integer.parseInt(intent.getStringExtra("id"));
 		Log.v("A", "2");
 		try {
 			createNotification(intent);

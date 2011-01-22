@@ -263,11 +263,25 @@ public class HotFile extends Activity {
 		// task.execute();
 		List<String> list = new LinkedList<String>();
 		list.add("http://hotfile.com/dl/81363200/ba7f841/Ostatnia-DVDRip.PL.part1.rar.html");
+		list.add("http://hotfile.com/dl/98588098/f5c4897/4.pdf.html"); //2MB
+		list.add("http://hotfile.com/dl/98588065/ece61ef/1.pdf.html");//4MB
+		
 		list.add("http://hotfile.com/dl/92148167/7c86b14/fil.txt.html");
 		list.add("http://hotfile.com/dl/92539498/131dad0/Gamee.Of.Death.DVDRip.XviD-VoMiT.m90.part1.rar.html");
 		try {
 			check.checkFileExistsOnHotFileServer(list);
-			beginDownloading(list.get(0), username,aaa, directory);
+			beginDownloading(list.get(1), username,aaa, directory,1);
+			beginDownloading(list.get(2), username,aaa, directory,2);
+		
+	/*		long percentLevel = 2;
+			while(downloaded != size){
+				downloaded += 1024;
+			long a  =((size*percentLevel)/(100*1024));
+			long b = downloaded; 
+			if(a == b){
+					percentLevel = percentLevel < 100 ? percentLevel += 2 : 100;
+			}}*/
+			
 		} catch (ClientProtocolException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -278,13 +292,14 @@ public class HotFile extends Activity {
 	}
 	
 	
-	private void beginDownloading(String link, String username, String passwordmd5, String directory)
+	private void beginDownloading(String link, String username, String passwordmd5, String directory, int id)
 	{
 		Intent intent = new Intent(this,  DownloaderHotfile.class);
 		intent.putExtra("link", link);
 		intent.putExtra("username", username);
 		intent.putExtra("password", passwordmd5);
 		intent.putExtra("directory", directory);
+		intent.putExtra("id", Integer.toString(id));
 		downloadingList.add(intent);
 		startService(intent);
 	}
@@ -297,8 +312,7 @@ public class HotFile extends Activity {
 		password = preferences.getString("username", null);
 		password = "48e75f559cc5504c8992a47181fdf5ad";
 		directory = preferences.getString("chooseDir", null);
-		File dir,sd;
-		String state = Environment.getExternalStorageState();
+		File dir;
 		if(directory != null) {
 			directory = directory.replace(" ", "");
 			dir = new File(directory);
@@ -318,67 +332,6 @@ public class HotFile extends Activity {
 	//	dir.setReadable(true);
 		if(username==null && password == null)
 			Toast.makeText(HotFile.this, "You have to fill preferences", Toast.LENGTH_LONG).show();
-	}
-
-	/* ***********************************************
-	 * 
-	 * ASYNC TASK = MUST BE SUBCLASSED
-	 */
-	public class Async extends AsyncTask<Void, Integer, Void> {
-		String downloadLink, username, password, directory;
-		int myProgress;
-
-		@Override
-		protected void onPostExecute(Void result) {
-			// TODO Auto-generated method stub
-			Toast.makeText(HotFile.this, "onPostExecute", Toast.LENGTH_LONG)
-					.show();
-			// butt.setClickable(true);
-		}
-
-		protected void setPreconditions(String link, String username,
-				String password, String directory) {
-			downloadLink = link;
-			this.username = username;
-			this.password = Md5Create.generateMD5Hash(password);
-			this.directory = directory;
-		}
-
-		@Override
-		protected void onPreExecute() {
-			// TODO Auto-generated method stub
-			Toast.makeText(HotFile.this, "onPreExecute", Toast.LENGTH_LONG)
-					.show();
-			myProgress = 0;
-		}
-
-		
-		
-		@Override
-		protected Void doInBackground(Void... params) {
-			// TODO Auto-generated method stub
-			// try {
-			// downloadFile(downloadLink, username, password, directory);
-			// } catch (ClientProtocolException e) {
-			// TODO Auto-generated catch block
-			// e.printStackTrace();
-			// } catch (IOException e) {
-			// TODO Auto-generated catch block
-			// e.printStackTrace();
-			// }
-			return null;
-		}
-
-		@Override
-		protected void onProgressUpdate(Integer... values) {
-			// TODO Auto-generated method stub
-			myProgressBar.setProgress(values[0]);
-		}
-
-		/*
-		 * Everything have to be checked before run method
-		 */
-
 	}
 
 	public Boolean checkPrecondition(long size, String link, String username,
