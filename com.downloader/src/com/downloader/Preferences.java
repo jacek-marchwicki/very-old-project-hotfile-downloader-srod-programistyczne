@@ -28,7 +28,7 @@ public class Preferences extends PreferenceActivity {
 		    
 		     while ((rs = rd.readLine()) != null)
 		    	 if(rs.contains("mnt") && rs.contains("sd") && rs.contains("dev")) 
-		    		 list.add(rs.substring(rs.indexOf(" "), rs.indexOf(" ", rs.indexOf(" ")+1))+"/downloads/");
+		    		 list.add(rs.substring(rs.indexOf(" /"), rs.indexOf(" ", rs.indexOf(" /")+1))+"/downloads/");
 		     rd.close();
 		     ps.waitFor();
 		     } catch(Exception e) {

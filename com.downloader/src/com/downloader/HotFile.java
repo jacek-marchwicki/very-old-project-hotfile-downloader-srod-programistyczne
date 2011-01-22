@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import old.DownloadService;
 import old.DownloadsTableModel;
 
 import org.apache.http.HttpEntity;
@@ -26,7 +25,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.StatFs;
@@ -46,21 +44,25 @@ import android.widget.Toast;
 
 
 /*
- * 																							1. sprawdzanie miejsca w pamieci do zapisu
+ * 1. sprawdzanie miejsca w pamieci do zapisu podczas downloadu
  * 2. pobieranie listy z pliku
- * 3. pobieranie kilku plikow naraz
+ * 																							3. pobieranie kilku plikow naraz
  * 4. minimalny status baterii
  * 																							5. sprawdzanie waznosci username i password
  * 6. zapisywanie wielkosci poszczegolnych plikow w jakims cache
  * 																							7. przycisk close app
- * 8. dzialanie w tle
- * 9. ?status na pasku u gory
- * 10. md5 password'a
+ * 																							8. dzialanie w tle
+ * 																							9. ?status na pasku u gory
+ * 																							10. md5 password'a
  * 																							11. wybï¿½r path do zapisu
  * 																							12. wczytanie opcji do klasy
  * 13. entry link
  * 																							14. sprawdzanie waznosci linkow
  * 15. wznawianie sciagania
+ * 16. update preferencji w momencie wyjœcia z okna preferencji
+ * 17. stop je¿eli plik nie istnieje
+ * 18. sprawdzenie czy android nie killuje programu
+ * 19. dodanie ikony programu
  */
 
 public class HotFile extends Activity {
@@ -70,7 +72,6 @@ public class HotFile extends Activity {
 	prepareActions check;
 	ProgressBar myProgressBar;
 	int progress = 0;
-	private DownloadsTableModel tableModel;
 	List<Intent> downloadingList;
 	public static final String LOG_TAG = "HotFileDownloader Information";
 	List<String> listOfDownloadingFiles;
@@ -85,7 +86,6 @@ public class HotFile extends Activity {
 		setContentView(R.layout.main);
 		listOfDownloadingFiles = new ArrayList<String>();
 		listview = (ListView) findViewById(R.id.ListView01);
-		tableModel = new DownloadsTableModel();
 		
 		// downloadList = new DownloadListAdapter();
 		myProgressBar = (ProgressBar) findViewById(R.id.ProgressBar01);
@@ -268,10 +268,10 @@ public class HotFile extends Activity {
 		
 		list.add("http://hotfile.com/dl/92148167/7c86b14/fil.txt.html");
 		list.add("http://hotfile.com/dl/92539498/131dad0/Gamee.Of.Death.DVDRip.XviD-VoMiT.m90.part1.rar.html");
-		try {
-			check.checkFileExistsOnHotFileServer(list);
-			beginDownloading(list.get(1), username,aaa, directory,1);
-			beginDownloading(list.get(2), username,aaa, directory,2);
+//		try {
+		//	check.checkFileExistsOnHotFileServer(list);
+			beginDownloading(list.get(3), username,aaa, directory,1);
+	//		beginDownloading(list.get(2), username,aaa, directory,2);
 		
 	/*		long percentLevel = 2;
 			while(downloaded != size){
@@ -282,26 +282,29 @@ public class HotFile extends Activity {
 					percentLevel = percentLevel < 100 ? percentLevel += 2 : 100;
 			}}*/
 			
-		} catch (ClientProtocolException e) {
+		//} catch (ClientProtocolException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
+//			e.printStackTrace();
+//		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+			//e.printStackTrace();
+		//}
 	}
 	
 	
 	private void beginDownloading(String link, String username, String passwordmd5, String directory, int id)
 	{
-		Intent intent = new Intent(this,  DownloaderHotfile.class);
+		DownloaderHotFileThread mDownloaderHotFileThread = new DownloaderHotFileThread(this, link, username, passwordmd5, directory, id);
+		mDownloaderHotFileThread.start();
+		/*		Intent intent = new Intent(this,  DownloaderHotfile.class);
 		intent.putExtra("link", link);
 		intent.putExtra("username", username);
 		intent.putExtra("password", passwordmd5);
 		intent.putExtra("directory", directory);
 		intent.putExtra("id", Integer.toString(id));
 		downloadingList.add(intent);
-		startService(intent);
+		startService(intent);*/
+		
 	}
 	
 	/*

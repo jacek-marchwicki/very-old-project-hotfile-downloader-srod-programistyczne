@@ -6,7 +6,6 @@ import java.io.RandomAccessFile;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.text.DecimalFormat;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -14,9 +13,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 
-import com.downloader.R;
-
-import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -26,17 +22,12 @@ import android.util.Log;
 import android.widget.ProgressBar;
 import android.widget.RemoteViews;
 
-public class DownloaderHotfile extends IntentService implements Runnable{
+public class DownloaderHotFileThread implements Runnable {
 
 	ProgressBar progressBar;
 	private int progress = 10;
-	final Notification notification = new Notification(R.drawable.icon, "Downloading file", System.currentTimeMillis());;
-	public DownloaderHotfile() {
-		super("Download service");
-		// TODO Auto-generated constructor stub
-	}
 	
-	private Intent intent;
+	private Thread mThread;
 	private static final int MAX_BUFFER_SIZE = 1024;
 	public static final String STATUSES[] = {"Downloading",
 		"Paused", "Complete", "Cancelled", "Error"};
@@ -48,13 +39,47 @@ public class DownloaderHotfile extends IntentService implements Runnable{
 	public static final int CANCELLED = 3;
 	public static final int ERROR = 4;
 
-
+	android.content.Context context; 
 	private int size; // size of download in bytes
 	private int downloaded; // number of bytes downloaded
 	private int status; // current status of download
 	private int id; //id in the downloading list for notification area
 	String link, username, passwordmd5, directory;
 
+final Notification notification = new Notification(R.drawable.icon, "Downloading file", System.currentTimeMillis());;
+	
+	public DownloaderHotFileThread(Context context, String link, String username, String password, String directory, int id) {
+		this.context = context;
+		this.size = -1;
+		this.downloaded = 0;
+		status = DOWNLOADING;
+		this.link = link;
+		this.username = username;
+		this.passwordmd5 = password;
+		this.directory = directory;
+		this.id = id;
+	}
+	
+	public void start(){
+		if(mThread == null){
+			mThread = new Thread(this);
+			mThread.start();
+		}
+	}
+	
+	public void run() {
+		// TODO Auto-generated method stub
+		try {
+			createNotification();
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Log.v("A", "3");
+
+		runDownload();	
+	}
+	
 	public long getSize() {
 		return size;
 	}
@@ -93,11 +118,20 @@ public class DownloaderHotfile extends IntentService implements Runnable{
 		return ((float) downloaded / size) * 100;
 	}
 
+	private void createNotification() throws MalformedURLException{
+		final PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, new Intent(), 0);
+		notification.flags = notification.flags | Notification.FLAG_AUTO_CANCEL;
+		notification.contentView = new RemoteViews(context.getPackageName(), R.layout.download_progress_up);
+		notification.contentIntent = pendingIntent;
+		notification.contentView.setImageViewResource(R.id.status_icon, R.drawable.ic_menu_save);
+		notification.contentView.setTextViewText(R.id.status_text, getUrl(new URL(this.link)));
+	}
+	
 	public void runDownload(){
-		//android.os.Debug.waitForDebugger();
+		android.os.Debug.waitForDebugger();
 		RandomAccessFile file = null;
 		InputStream stream = null;
-		final NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
+		final NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 		try{
 			//	Log.v(LOG_TAG, "Begin downloading");
 			DefaultHttpClient httpclient = new DefaultHttpClient();
@@ -123,32 +157,40 @@ public class DownloaderHotfile extends IntentService implements Runnable{
 				//		stateChanged();
 			}
 			notification.contentView.setProgressBar(R.id.status_progress, size, progress, false);
-			getApplicationContext();
 			notificationManager.notify(id, notification);
 			file = new RandomAccessFile(directory+getUrl(new URL(responseText)), "rw");		//change filename
 			file.seek(downloaded);
 			stream = urlConnection.getInputStream();
 			int percentLevel = 2;
-			while(status == DOWNLOADING){
+			byte data[] = new byte[MAX_BUFFER_SIZE];
+			int len1 =0;
+			while((len1 = stream.read(data)) > 0){
 				//	android.os.Debug.waitForDebugger();
-				byte data[]; 
-				if(this.size - downloaded  >  MAX_BUFFER_SIZE)
-					data = new byte[MAX_BUFFER_SIZE];
-				else
-					data = new byte[this.size - downloaded];
-				int count = stream.read(data);
-				if(count == -1) break;
-				file.write(data, 0, count);
-				downloaded += count;
-				if((int)(((double)	downloaded/(double)size)*100)==percentLevel){
+				
+				//if(this.size - downloaded  >  MAX_BUFFER_SIZE)
+//					data = new byte[MAX_BUFFER_SIZE];
+	//			else
+					//data = new byte[this.size - downloaded];
+				//int count = stream.read(data);
+				//if(count == -1) break;
+				file.write(data, 0, len1);
+				downloaded += len1;
+				if((int)(((double)	downloaded/(double)size)*100)==percentLevel && size >= 50 * MAX_BUFFER_SIZE){
 					notification.contentView.setProgressBar(R.id.status_progress, size, downloaded, false);
 					notificationManager.notify(id, notification);
 					Log.v("A"+id, "WSZEDLEM" + percentLevel +"% pobranych");
 					percentLevel = percentLevel < 100 ? percentLevel + 2 : 100;
 				}
+				else{
+						notification.contentView.setProgressBar(R.id.status_progress, size, downloaded, false);
+						notificationManager.notify(id, notification);
+					}
 				//stateChanged();
 			}
+			file.close();
+			stream.close();
 			if (status == DOWNLOADING) {
+				notification.flags = notification.flags | Notification.FLAG_AUTO_CANCEL;
 				notification.contentView.removeAllViews(id);
 				notificationManager.notify(id, notification);
 				//notificationManager.cancelAll();
@@ -174,48 +216,6 @@ public class DownloaderHotfile extends IntentService implements Runnable{
 				}
 		}
 	}
-
-	@Override
-	protected void onHandleIntent(Intent intent) {
-		//	android.os.Debug.waitForDebugger();
-		Log.v("A", "1");
-		this.intent = intent;
-		this.size = -1;
-		this.downloaded = 0;
-		status = DOWNLOADING;
-		this.link = this.intent.getStringExtra("link");
-		this.username = this.intent.getStringExtra("username");
-		//this.passwordmd5 = Md5Create.generateMD5Hash(password);
-		this.passwordmd5 = this.intent.getStringExtra("password");
-		this.directory = this.intent.getStringExtra("directory");
-		this.id = Integer.parseInt(this.intent.getStringExtra("id"));
-		Log.v("A", "2");
-		new Thread(this).start();
-		Log.v("A", "3");
-	}
-
-	private void createNotification(Intent intent) throws MalformedURLException{
-		final PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, 0);
-		notification.flags = notification.flags | Notification.FLAG_ONGOING_EVENT;
-		notification.contentView = new RemoteViews(getApplicationContext().getPackageName(), R.layout.download_progress_up);
-		notification.contentIntent = pendingIntent;
-		notification.contentView.setImageViewResource(R.id.status_icon, R.drawable.ic_menu_save);
-		notification.contentView.setTextViewText(R.id.status_text, getUrl(new URL(this.link)));
-	}
-
-	@Override
-	public void run() {
-		// TODO Auto-generated method stub
-		try {
-			createNotification(intent);
-		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		Log.v("A", "3");
-
-		runDownload();	
-	}
-
+	
 
 }
