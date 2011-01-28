@@ -422,10 +422,24 @@ public class HotFile extends Activity {
 		public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
 				String key) {
 			// TODO Auto-generated method stub
-			if (password == key){}
 			
-			Toast.makeText(HotFile.this, "Here you can maintain your user credentials.",
-					Toast.LENGTH_LONG).show();
+			if (key.equals("password") && !password.equals(preferences.getString("username", null))){
+				password = preferences.getString("password", null);
+				Toast.makeText(HotFile.this, "The password has been changed",
+						Toast.LENGTH_LONG).show();
+			}else
+				if(key.equals("username") && !username.equals(preferences.getString("username", null))){
+					username = preferences.getString("username", null);
+					Toast.makeText(HotFile.this, "The username has been changed",
+							Toast.LENGTH_LONG).show();
+				}	
+				else
+					if(key.equals("chooseDir") && !directory.equals(preferences.getString("chooseDir", null))){
+						directory = preferences.getString("chooseDir", null);
+						Toast.makeText(HotFile.this, "The directory has been changed",
+								Toast.LENGTH_LONG).show();
+					}
+			
 		}
 	};
 
