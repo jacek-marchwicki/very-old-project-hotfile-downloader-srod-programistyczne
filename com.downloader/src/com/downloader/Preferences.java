@@ -5,6 +5,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
@@ -39,5 +40,6 @@ public class Preferences extends PreferenceActivity {
 		      deflt.setEntries(values);
 		      deflt.setEntryValues(values);
 		      deflt.setDefaultValue(values[0]);
+		 
 		}
 }

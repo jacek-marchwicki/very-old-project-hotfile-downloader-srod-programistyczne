@@ -18,11 +18,14 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 
+import com.downloader.FileReading.FileChooser;
+
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.StatFs;
@@ -57,8 +60,8 @@ import android.widget.Toast;
  * 13. entry link
  * 																							14. sprawdzanie waznosci linkow
  * 15. wznawianie sciagania
- * 16. update preferencji w momencie wyjœcia z okna preferencji
- * 17. stop je¿eli plik nie istnieje
+ * 16. update preferencji w momencie wyjï¿½cia z okna preferencji
+ * 17. stop jeï¿½eli plik nie istnieje
  * 18. sprawdzenie czy android nie killuje programu
  * 19. dodanie ikony programu
  */
@@ -73,7 +76,7 @@ public class HotFile extends Activity {
 	List<Intent> downloadingList;
 	public static final String LOG_TAG = "HotFileDownloader Information";
 	List<String> listOfDownloadingFiles;
-
+	
 	String username, password, directory;
 
 	/** Called when the activity is first created. */
@@ -86,11 +89,13 @@ public class HotFile extends Activity {
 		listview = (ListView) findViewById(R.id.ListView01);
 		
 		// downloadList = new DownloadListAdapter();
+		
+		
 		myProgressBar = (ProgressBar) findViewById(R.id.ProgressBar01);
+		
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
 		Button buttonOnClickShowdownloadlist = (Button) findViewById(R.id.Button04);
 		buttonOnClickShowdownloadlist.setOnClickListener(buttonOnClickShowdownloadlistListener);
-		ArrayList<String> listOfDownloadingFiles = new ArrayList<String>();
 		check = new prepareActions();
 		Button btAddLinksFile = (Button) findViewById(R.id.Button02);
 		btAddLinksFile.setOnClickListener(buttontAddLinksFile);
@@ -100,8 +105,9 @@ public class HotFile extends Activity {
 		// this.startActivity(new Intent(this, DownloadList.class));
 
 	}
-	
+
 	private static int CODE = 1;
+	private static int CODEpre =2;
 	
 	private void AddLinksFile(String filename) throws IOException{
 		
@@ -133,7 +139,7 @@ public class HotFile extends Activity {
     /// <param name="link">line of text</param>
     private boolean getLinkFromText(String link)
     {
-    	Pattern p = Pattern.compile("http://([\\w+?\\.\\w+])+([a-zA-Z0-9\\~\\!\\@\\#\\$\\%\\^\\&amp;\\*\\(\\)_\\-\\=\\+\\\\\\/\\?\\.\\:\\;\\'\\,]*)?");
+    	Pattern p = Pattern.compile("http://([\\w+?\\.\\w+])+hotfile.com/+([a-zA-Z0-9\\~\\!\\@\\#\\$\\%\\^\\&amp;\\*\\(\\)_\\-\\=\\+\\\\\\/\\?\\.\\:\\;\\'\\,]*)?");
         //MatchResult mp 
     	Matcher m = p.matcher(link);
     	return m.matches();
@@ -167,12 +173,13 @@ public class HotFile extends Activity {
 		
 		TextView tv = (TextView)customView.findViewById(R.id.TextView001);
 		if (line == "")
-			tv.setText("");	//tu ma byc czyszczenie text boxa, ale je
+			tv.setText("");	//tu ma byc czyszczenie text boxa, ale jeszcze nie ma
 		else
 			tv.setText(line);
 		ll.addView(customView);
 	}
-	//List<>
+	
+	
 	private Button.OnClickListener buttonOnClickShowdownloadlistListener = new Button.OnClickListener() {
 		@Override
 		public void onClick(View v) {
@@ -215,6 +222,15 @@ public class HotFile extends Activity {
 
 			}
 		}
+		else
+			if (requestCode == CODEpre){
+				switch (resultCode) {
+				case RESULT_OK:
+					
+				case RESULT_CANCELED:
+					break;
+				}
+			}
 	}
 
 	@Override
@@ -230,14 +246,18 @@ public class HotFile extends Activity {
 		switch (item.getItemId()) {
 		// We have only one menu option
 		case R.id.preferences:
+			try{
 			// Launch Preference activity
 			Intent i = new Intent(HotFile.this, Preferences.class);
 			startActivity(i);
 			// A toast is a view containing a quick little message for the user.
-			Toast.makeText(HotFile.this,
-					"Here you can maintain your user credentials.",
+			Toast.makeText(HotFile.this, "Here you can maintain your user credentials.",
 					Toast.LENGTH_LONG).show();
+			preferences.registerOnSharedPreferenceChangeListener(prefListener);
 			break;
+			}
+			catch(Exception e){}
+			
 		case R.id.close:
 			super.finish();
 		}
@@ -395,4 +415,19 @@ public class HotFile extends Activity {
 			return 0;
 		}
 	}
+
+	public OnSharedPreferenceChangeListener prefListener = new OnSharedPreferenceChangeListener() {
+		
+		@Override
+		public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
+				String key) {
+			// TODO Auto-generated method stub
+			if (password == key){}
+			
+			Toast.makeText(HotFile.this, "Here you can maintain your user credentials.",
+					Toast.LENGTH_LONG).show();
+		}
+	};
+
+
 }

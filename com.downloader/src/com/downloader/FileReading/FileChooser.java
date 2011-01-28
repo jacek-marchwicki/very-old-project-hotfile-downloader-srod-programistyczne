@@ -1,4 +1,4 @@
-package com.downloader;
+package com.downloader.FileReading;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -13,16 +13,13 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.downloader.R;
-import com.downloader.FileReading.FileArrayAdapter;
-import com.downloader.FileReading.Option;
+import com.downloader.R.layout;
 
 public class FileChooser extends ListActivity {
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        filename = "";
-        filepath= "";
         currentDir = new File("/sdcard/");
         fill(currentDir);
 
@@ -30,21 +27,8 @@ public class FileChooser extends ListActivity {
     }
     private File currentDir;
     private FileArrayAdapter adapter;
-    private String filename;
-    private String filepath;
+
     
-    private void setFilename(String fn){
-    	this.filename = fn;
-    }
-    public String getFilename(){
-    	return filename;
-    }
-    private void setFilepath(String fp){
-    	this.filepath = fp;
-    }
-    public String getFilepath(){
-    	return filepath;
-    }
     
     private void fill(File f)
     {
@@ -96,9 +80,7 @@ public class FileChooser extends ListActivity {
     private void onFileClick(Option o)
     {
     	Toast.makeText(this, "File Clicked: "+o.getName(), Toast.LENGTH_SHORT).show();
-    	setFilepath(o.getPath());
-    	setFilename(o.getName());	
-    	setResult(RESULT_OK, (new Intent()).setAction(filepath));
+    	setResult(RESULT_OK, (new Intent()).setAction(o.getPath()));
     	super.finish();
     
     }
