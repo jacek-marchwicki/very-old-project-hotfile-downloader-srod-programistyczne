@@ -48,7 +48,9 @@ public class TextProgressBar extends ProgressBar {
 	        this.text = text;  
 	        drawableStateChanged();  
 	    }  
-	  
+	    
+
+	    
 	    public void setTextColor(int color) {  
 	        textPaint.setColor(color);  
 	        drawableStateChanged();  

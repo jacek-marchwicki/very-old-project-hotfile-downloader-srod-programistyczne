@@ -42,6 +42,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -491,6 +492,14 @@ public class HotFile extends Activity {
 			long itemId = addItemToDatabase(listItem.getDownloadLink(),listItem.getSize(),0); //adding to database
 			if (itemId != (-1)){		//if the file has been added to database
 				listItem.setId(itemId);
+				View customView = ((LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.download_progress_window, null);
+				customView.setId((int)itemId);
+				customView.setOnClickListener(relativeLayoutListener);
+				
+				//RelativeLayout relativeLayout = ()findViewById(R.layout.ProgressBar1);
+				//relativeLayout.setId((int)itemId);
+				//relativeLayout.onKeyDown(1, event);
+				//relativeLayout.setOnClickListener(relativeLayoutListener);
 				listItem.setProgressBar(new TextProgressBar(this));
 				listItem =addProgressBarToDownloadListBox(listItem); 
 				listOfDownloadingFiles.add(listItem);	//adding to list
@@ -502,6 +511,13 @@ public class HotFile extends Activity {
 		showNotification(numberofAddedFiles + " files have been added");
 		
 	}
+	
+	private View.OnClickListener relativeLayoutListener = new View.OnClickListener(){
+		@Override
+		public void onClick(View arg0) {
+			showNotification("blllaa" + arg0.getId());
+		};
+	};
 	
 	private boolean removeFile(long id){
 		
