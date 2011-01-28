@@ -11,6 +11,13 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+import android.database.SQLException;
+import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -18,7 +25,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 
-import com.downloader.FileReading.FileChooser;
+import stroringdata.DBAdapter;
+
 
 
 import android.app.Activity;
@@ -26,6 +34,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.StatFs;
@@ -78,7 +87,6 @@ public class HotFile extends Activity {
 	List<String> listOfDownloadingFiles;
 	
 	String username, password, directory;
-
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -103,11 +111,15 @@ public class HotFile extends Activity {
 		checkPreferences();
 		Log.v(LOG_TAG, "Running program...");
 		// this.startActivity(new Intent(this, DownloadList.class));
+		
+		
+		
+		db = new DBAdapter(this);
+		db.open();
 
 	}
 
 	private static int CODE = 1;
-	private static int CODEpre =2;
 	
 	private void AddLinksFile(String filename) throws IOException{
 		
@@ -126,9 +138,20 @@ public class HotFile extends Activity {
 		           // do something with the settings from the file
 		       	  list.add(line);
 		         }
-		    	
+		         
+		         
+		         for(String s: list){
+		        	 listOfDownloadingFiles.add(s);
+		        	 addItemToDataBase(s,s.length(),0); 
+		        	 
+		        	 getItemFromDatabase();
+		         }
+		   //  
 		    }
-		}catch( Exception e){}
+		}catch( Exception e){
+			Log.v(LOG_TAG, "error " + e.toString());
+			
+		}
  
     }
 	
@@ -162,7 +185,7 @@ public class HotFile extends Activity {
 			}catch (Exception e){
 				Log.v(LOG_TAG,"Exception "+e.toString());
 			}
-					}
+		}
 	};
 	
 	
@@ -222,15 +245,6 @@ public class HotFile extends Activity {
 
 			}
 		}
-		else
-			if (requestCode == CODEpre){
-				switch (resultCode) {
-				case RESULT_OK:
-					
-				case RESULT_CANCELED:
-					break;
-				}
-			}
 	}
 
 	@Override
@@ -443,5 +457,29 @@ public class HotFile extends Activity {
 		}
 	};
 
-
+	
+	//------------------DATABASE ---------------------------
+	DBAdapter db;
+	
+	public void addItemToDataBase(String link, int totalSize, int downloadedSize){
+	//	db.open();
+		db.addItem(link, totalSize, downloadedSize);
+	}
+	
+	public void getItemFromDatabase(){
+		//db.open();
+		Cursor c = db.getAllItems();
+		while (c.moveToNext()){
+				long row = c.getLong(0);
+				String link = c.getString(1);
+				int size = c.getInt(2);
+				int downSize = c.getInt(3);
+				Toast.makeText(HotFile.this, "row: "+row +" link:"+link+" size:"+size+ " dow:"+downSize ,
+				Toast.LENGTH_LONG).show();
+		}
+		
+	}
+		
+	//------------------END DATABASE -----------------------
+	
 }

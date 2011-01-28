@@ -1,4 +1,4 @@
-package com.downloader.FileReading;
+package com.downloader;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -13,6 +13,8 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.downloader.R;
+import com.downloader.FileReading.FileArrayAdapter;
+import com.downloader.FileReading.Option;
 import com.downloader.R.layout;
 
 public class FileChooser extends ListActivity {
