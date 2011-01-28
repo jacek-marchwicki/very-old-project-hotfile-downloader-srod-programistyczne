@@ -144,6 +144,8 @@ public class HotFile extends Activity {
 		textBoxInProgress.setText("0% z " + item.getSize());
 		textBoxUpper.setText(item.getName());
 		item.setProgressBar(progressBar);
+		customView.setId((int)item.getId());
+		customView.setOnLongClickListener(relativeLayoutListener);
 		ll.addView(customView);
 		return item;
 		
@@ -492,9 +494,7 @@ public class HotFile extends Activity {
 			long itemId = addItemToDatabase(listItem.getDownloadLink(),listItem.getSize(),0); //adding to database
 			if (itemId != (-1)){		//if the file has been added to database
 				listItem.setId(itemId);
-				View customView = ((LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.download_progress_window, null);
-				customView.setId((int)itemId);
-				customView.setOnClickListener(relativeLayoutListener);
+
 				
 				//RelativeLayout relativeLayout = ()findViewById(R.layout.ProgressBar1);
 				//relativeLayout.setId((int)itemId);
@@ -512,11 +512,14 @@ public class HotFile extends Activity {
 		
 	}
 	
-	private View.OnClickListener relativeLayoutListener = new View.OnClickListener(){
+	private View.OnLongClickListener relativeLayoutListener = new View.OnLongClickListener() {
+		
 		@Override
-		public void onClick(View arg0) {
-			showNotification("blllaa" + arg0.getId());
-		};
+		public boolean onLongClick(View v) {
+			// TODO Auto-generated method stub
+			showNotification("blllaa" + v.getId());
+			return false;
+		}
 	};
 	
 	private boolean removeFile(long id){
