@@ -132,9 +132,7 @@ public class HotFile extends Activity {
 		         
 		         for(DownloadingFileItem s: finalDownloadLinks){
 		        	 listOfDownloadingFiles.add(s.getDownloadLink());
-		        	 addItemToDataBase(s.getDownloadLink(),s.getSize(),0); 
-		        	 
-		        	 getItemFromDatabase();
+		        	 addItemToDatabase(s.getDownloadLink(),s.getSize(),0); 
 		         }
 		   //  
 		    }
@@ -451,13 +449,28 @@ public class HotFile extends Activity {
 	//------------------DATABASE ---------------------------
 	DBAdapter db;
 	
-	public void addItemToDataBase(String link, long l, int downloadedSize){
-	//	db.open();
+	public void addItemToDatabase(String link, long l, int downloadedSize){
 		db.addItem(link, l, downloadedSize);
 	}
 	
-	public void getItemFromDatabase(){
-		//db.open();
+	public boolean deleteItemFromDatabase(long id){
+		return db.deleteItem(id);
+	}
+	
+	public void getItemFromDatabase(long id){
+		Cursor c = db.getItem(id);
+		
+		while (c.moveToNext()){
+				long row = c.getLong(0);
+				String link = c.getString(1);
+				int size = c.getInt(2);
+				int downSize = c.getInt(3);
+				Toast.makeText(HotFile.this, "row: "+row +" link:"+link+" size:"+size+ " dow:"+downSize ,
+				Toast.LENGTH_LONG).show();
+		}
+	}
+	
+	public void getAllItemsFromDatabase(){
 		Cursor c = db.getAllItems();
 		while (c.moveToNext()){
 				long row = c.getLong(0);
@@ -467,7 +480,10 @@ public class HotFile extends Activity {
 				Toast.makeText(HotFile.this, "row: "+row +" link:"+link+" size:"+size+ " dow:"+downSize ,
 				Toast.LENGTH_LONG).show();
 		}
-		
+	}
+	
+	public boolean updateItemInDatabase(long rowId, String link, int totalSize, int downloadedSize){
+		return db.updateItem(rowId, link, totalSize, downloadedSize);
 	}
 		
 	//------------------END DATABASE -----------------------
