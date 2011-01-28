@@ -73,6 +73,7 @@ final Notification notification = new Notification(R.drawable.icon, "Downloading
 			createNotification();
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
+			Log.v("A", "4");
 			e.printStackTrace();
 		}
 		Log.v("A", "3");
@@ -126,6 +127,7 @@ final Notification notification = new Notification(R.drawable.icon, "Downloading
 		notification.contentView.setImageViewResource(R.id.status_icon, R.drawable.ic_menu_save);
 		notification.contentView.setTextViewText(R.id.status_text, getUrl(new URL(this.link)));
 	}
+	
 	
 	public void runDownload(){
 		android.os.Debug.waitForDebugger();

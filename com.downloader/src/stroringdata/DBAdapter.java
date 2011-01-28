@@ -52,11 +52,11 @@ public class DBAdapter
     }
     
     //---insert a title into the database---
-    public long addItem(String link, int totalSize, int downloadedSize) 
+    public long addItem(String link, long l, int downloadedSize) 
     {
         ContentValues initialValues = new ContentValues();
         initialValues.put(KEY_LINK, link);
-        initialValues.put(KEY_TOTALSIZE, totalSize);
+        initialValues.put(KEY_TOTALSIZE, l);
         initialValues.put(KEY_DOWNLOADEDSIZE, downloadedSize);
         return db.insert(DATABASE_TABLE, null, initialValues);
     }

@@ -11,13 +11,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import android.content.ContentValues;
-import android.content.Context;
-import android.database.Cursor;
-import android.database.SQLException;
-import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
-
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -26,9 +19,6 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 
 import stroringdata.DBAdapter;
-
-
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -138,11 +128,11 @@ public class HotFile extends Activity {
 		           // do something with the settings from the file
 		       	  list.add(line);
 		         }
+		         finalDownloadLinks = check.checkFileExistsOnHotFileServer(list);
 		         
-		         
-		         for(String s: list){
-		        	 listOfDownloadingFiles.add(s);
-		        	 addItemToDataBase(s,s.length(),0); 
+		         for(DownloadingFileItem s: finalDownloadLinks){
+		        	 listOfDownloadingFiles.add(s.getDownloadLink());
+		        	 addItemToDataBase(s.getDownloadLink(),s.getSize(),0); 
 		        	 
 		        	 getItemFromDatabase();
 		         }
@@ -461,9 +451,9 @@ public class HotFile extends Activity {
 	//------------------DATABASE ---------------------------
 	DBAdapter db;
 	
-	public void addItemToDataBase(String link, int totalSize, int downloadedSize){
+	public void addItemToDataBase(String link, long l, int downloadedSize){
 	//	db.open();
-		db.addItem(link, totalSize, downloadedSize);
+		db.addItem(link, l, downloadedSize);
 	}
 	
 	public void getItemFromDatabase(){
