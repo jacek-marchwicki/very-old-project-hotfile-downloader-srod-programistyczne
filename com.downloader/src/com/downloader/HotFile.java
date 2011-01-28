@@ -1,4 +1,5 @@
 package com.downloader;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -17,6 +18,8 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
+
+import com.downloader.Widgets.TextProgressBar;
 
 import stroringdata.DBAdapter;
 import android.app.Activity;
@@ -85,10 +88,6 @@ public class HotFile extends Activity {
 		setContentView(R.layout.main);
 		listOfDownloadingFiles = new ArrayList<DownloadingFileItem>();
 		listview = (ListView) findViewById(R.id.ListView01);
-		
-		// downloadList = new DownloadListAdapter();
-		
-		
 		myProgressBar = (ProgressBar) findViewById(R.id.ProgressBar01);
 		
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -97,6 +96,8 @@ public class HotFile extends Activity {
 		check = new prepareActions();
 		Button btAddLinksFile = (Button) findViewById(R.id.Button02);
 		btAddLinksFile.setOnClickListener(buttontAddLinksFile);
+		Button btAddLink = (Button) findViewById(R.id.Button03);
+		btAddLink.setOnClickListener(buttonAddLink);
 		//comp
 		Log.v(LOG_TAG, "Running program...");
 		// this.startActivity(new Intent(this, DownloadList.class));
@@ -111,6 +112,53 @@ public class HotFile extends Activity {
 	private static int CODE = 1;
 	
 	
+	
+	/// <summary>
+    /// Isolate links from string
+    /// </summary>
+    /// <param name="link">line of text</param>
+    private boolean getLinkFromText(String link)
+    {
+    	Pattern p = Pattern.compile("http://([\\w+?\\.\\w+])+hotfile.com/+([a-zA-Z0-9\\~\\!\\@\\#\\$\\%\\^\\&amp;\\*\\(\\)_\\-\\=\\+\\\\\\/\\?\\.\\:\\;\\'\\,]*)?");
+        //MatchResult mp 
+    	Matcher m = p.matcher(link);
+    	return m.matches();
+    /*	String[] sp = p.split(link); 
+    	
+    	
+    	for (String s: sp){
+    		Toast.makeText(HotFile.this,s,Toast.LENGTH_LONG).show();
+    	}*/
+    }
+	
+	
+	public void addProgressBarToDownloadListBox(TextProgressBar progressBar){
+		LinearLayout ll = (LinearLayout)findViewById(R.id.mylayout);
+		LayoutInflater ly =(LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		View customView =  ly.inflate(R.layout.download_progress_window, null);
+		TextProgressBar tv = (TextProgressBar)customView.findViewById(R.id.TextView001);
+		ll.addView(customView);
+		
+	}
+	
+	public void addLineToDownloadListBox(String line){
+		LinearLayout ll = (LinearLayout)findViewById(R.id.mylayout);
+		LayoutInflater ly =(LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		View customView =  ly.inflate(R.layout.downloadingitem, null);
+		TextView tv = (TextView)customView.findViewById(R.id.TextView001);
+		if (line == "")
+			tv.setText("sa");	//tu ma byc czyszczenie text boxa, ale jeszcze nie ma
+		else
+			tv.setText(line);
+		ll.addView(customView);
+		int i=0;
+		while (i < 100){
+			TextProgressBar tx = new TextProgressBar(this);
+			tx.setProgress(i);
+			tx.setText(i+"%");
+			i += 10;
+			}
+	}
 	
 	private Button.OnClickListener buttonOnClickShowdownloadlistListener = new Button.OnClickListener() {
 		@Override
@@ -132,6 +180,19 @@ public class HotFile extends Activity {
 		}
 	};
 
+	private Button.OnClickListener buttonAddLink = new Button.OnClickListener() {
+		@Override
+		public void onClick(View v) {
+			
+			try {
+				buttonOnClickShowdownloadlist(v);
+			}catch (Exception e){
+				Log.v(LOG_TAG,"Exception "+e.toString());
+			}
+		}
+	};
+	
+	
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		// TODO Auto-generated method stub
@@ -188,7 +249,9 @@ public class HotFile extends Activity {
 	}
 
 	public void buttonOnClickShowdownloadlist(View view) {
-		
+		int i = 0;
+		addProgressBarToDownloadListBox(new TextProgressBar(this));
+
 	}
 
 	/*
@@ -440,33 +503,6 @@ public class HotFile extends Activity {
 			}
 		return false;
 		
-	}
-	
-    private boolean getLinkFromText(String link)
-    {
-    	Pattern p = Pattern.compile("http://([\\w+?\\.\\w+])+hotfile.com/+([a-zA-Z0-9\\~\\!\\@\\#\\$\\%\\^\\&amp;\\*\\(\\)_\\-\\=\\+\\\\\\/\\?\\.\\:\\;\\'\\,]*)?");
-        //MatchResult mp 
-    	Matcher m = p.matcher(link);
-    	return m.matches();
-    /*	String[] sp = p.split(link); 
-    	
-    	
-    	for (String s: sp){
-    		Toast.makeText(HotFile.this,s,Toast.LENGTH_LONG).show();
-    	}*/
-    }
-
-	public void addLineToDownloadListBox(String line){
-		LinearLayout ll = (LinearLayout)findViewById(R.id.mylayout);
-		LayoutInflater ly =(LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		View customView =  ly.inflate(R.layout.downloadingitem, null);
-		
-		TextView tv = (TextView)customView.findViewById(R.id.TextView001);
-		if (line == "")
-			tv.setText("");	//tu ma byc czyszczenie text boxa, ale jeszcze nie ma
-		else
-			tv.setText(line);
-		ll.addView(customView);
 	}
 	
 	//----------------END ADDING FILES---------------------
