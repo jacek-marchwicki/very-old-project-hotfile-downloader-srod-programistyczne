@@ -19,7 +19,7 @@ public class prepareActions {
 	 * Check if file exists on server
 	 * http://api.hotfile.com/?c=checklinks
 	 */
-	public List<DownloadingFileItem> checkFileExistsOnHotFileServer(List<String> downloadList) throws ClientProtocolException, IOException
+	public List<DownloadingFileItem> prepareFilesToDownload(List<String> downloadList) throws ClientProtocolException, IOException
 	{
 		List<String> keysIds = cutKeysIdsFromLinks(downloadList);
 		String request = "http://api.hotfile.com/?action=checklinks&ids=";
@@ -41,6 +41,7 @@ public class prepareActions {
 		HttpResponse response = httpclient.execute(getDirectLink);
 		HttpEntity entity = response.getEntity();
 		String responseText = EntityUtils.toString(entity);
+		
 		List<DownloadingFileItem> list = new LinkedList<DownloadingFileItem>();
 		BufferedReader reader = new BufferedReader(new StringReader(responseText));
 		String str;
@@ -51,7 +52,7 @@ public class prepareActions {
 				int firstcomma = str.indexOf(",");					//positions of comma's
 				int secondcomma = str.indexOf(",", firstcomma+1);
 				int thirdcomma = str.indexOf(",", secondcomma+1);
-				list.add(new DownloadingFileItem(
+				list.add(new DownloadingFileItem(0,
 						Integer.parseInt(str.substring(0, firstcomma)),
 						Boolean.parseBoolean(str.substring(firstcomma+1, secondcomma)),
 						downloadList.get(iterator),
@@ -64,6 +65,8 @@ public class prepareActions {
 		return list;
 	}
 
+	
+	
 	private List<String> cutKeysIdsFromLinks(List<String> downloadList)
 	{
 		List<String> ids = new LinkedList<String>();
@@ -77,8 +80,6 @@ public class prepareActions {
 		ids.addAll(keys);
 		return ids;
 	}
-	
-
 	
 
 }

@@ -6,7 +6,8 @@ import android.app.Activity;
 import android.os.Bundle;
 
 public class DownloadingFileItem extends Activity{
-	//id: link id
+	//id: link id from database!
+	//linkID: link id from hotfile! 
 	//status: links status - 0=not found, 1=normal working link, 2=hotlink link
 	//name: file name
 	//size: file size in bytes
@@ -20,17 +21,19 @@ public class DownloadingFileItem extends Activity{
 		
 	}
 	
-	public DownloadingFileItem(int id, Boolean status, String name,
+	public DownloadingFileItem(long id, int linkID, Boolean status, String name,
 			String downloadLink, int size) {
 		super();
-		this.id = id;
+		this.id = id;		//id of database
+		this.linkID = linkID;		//id of hotfile
 		this.status = status;
 		this.name = name;
 		this.downloadLink = downloadLink;
 		this.size = size;
 	}
-
-	private int id;
+	
+	private long id;
+	private int linkID;
 	private Boolean status;
 	private String name, downloadLink;
 	/**
@@ -52,14 +55,14 @@ public class DownloadingFileItem extends Activity{
 	/**
 	 * @return the id
 	 */
-	public int getId() {
+	public long getId() {
 		return id;
 	}
 
 	/**
 	 * @param id the id to set
 	 */
-	public void setId(int id) {
+	public void setId(long id) {
 		this.id = id;
 	}
 

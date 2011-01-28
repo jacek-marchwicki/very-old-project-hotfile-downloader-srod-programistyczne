@@ -68,13 +68,13 @@ import android.widget.Toast;
 public class HotFile extends Activity {
 	ListView listview;
 	SharedPreferences preferences;
-	static List<DownloadingFileItem> finalDownloadLinks;
+//	static List<DownloadingFileItem> finalDownloadLinks;
 	prepareActions check;
 	ProgressBar myProgressBar;
 	int progress = 0;
 	List<Intent> downloadingList;
 	public static final String LOG_TAG = "HotFileDownloader Information";
-	List<String> listOfDownloadingFiles;
+	List<DownloadingFileItem> listOfDownloadingFiles;
 	
 	String username, password, directory;
 	/** Called when the activity is first created. */
@@ -83,7 +83,7 @@ public class HotFile extends Activity {
 		super.onCreate(savedInstanceState);
 		downloadingList = new ArrayList<Intent>();
 		setContentView(R.layout.main);
-		listOfDownloadingFiles = new ArrayList<String>();
+		listOfDownloadingFiles = new ArrayList<DownloadingFileItem>();
 		listview = (ListView) findViewById(R.id.ListView01);
 		
 		// downloadList = new DownloadListAdapter();
@@ -98,7 +98,6 @@ public class HotFile extends Activity {
 		Button btAddLinksFile = (Button) findViewById(R.id.Button02);
 		btAddLinksFile.setOnClickListener(buttontAddLinksFile);
 		//comp
-		checkPreferences();
 		Log.v(LOG_TAG, "Running program...");
 		// this.startActivity(new Intent(this, DownloadList.class));
 		
@@ -111,84 +110,6 @@ public class HotFile extends Activity {
 
 	private static int CODE = 1;
 	
-	private void AddLinksFile(String filename) throws IOException{
-		
-		File file = new File(filename); 
-		try { 
-		  InputStream instream = new FileInputStream(file); 
-			
-		    if (instream != null) {
-	      // prepare the file for reading
-		    	InputStreamReader inputreader = new InputStreamReader(instream);
-		    	BufferedReader rd = new BufferedReader( inputreader );
-		    	 String line;
-		         List<String> list = new ArrayList<String>();
-		         // read every line of the file into the line-variable, on line at the time
-		         while (( line = rd.readLine())  != null) {
-		           // do something with the settings from the file
-		       	  list.add(line);
-		         }
-		         finalDownloadLinks = check.checkFileExistsOnHotFileServer(list);
-		         
-		         for(DownloadingFileItem s: finalDownloadLinks){
-		        	 listOfDownloadingFiles.add(s.getDownloadLink());
-		        	 addItemToDatabase(s.getDownloadLink(),s.getSize(),0); 
-		         }
-		   //  
-		    }
-		}catch( Exception e){
-			Log.v(LOG_TAG, "error " + e.toString());
-			
-		}
- 
-    }
-	
-	
-	/// <summary>
-    /// Isolate links from string
-    /// </summary>
-    /// <param name="link">line of text</param>
-    private boolean getLinkFromText(String link)
-    {
-    	Pattern p = Pattern.compile("http://([\\w+?\\.\\w+])+hotfile.com/+([a-zA-Z0-9\\~\\!\\@\\#\\$\\%\\^\\&amp;\\*\\(\\)_\\-\\=\\+\\\\\\/\\?\\.\\:\\;\\'\\,]*)?");
-        //MatchResult mp 
-    	Matcher m = p.matcher(link);
-    	return m.matches();
-    /*	String[] sp = p.split(link); 
-    	
-    	
-    	for (String s: sp){
-    		Toast.makeText(HotFile.this,s,Toast.LENGTH_LONG).show();
-    	}*/
-    }
-	
-	private Button.OnClickListener buttontAddLinksFile = new Button.OnClickListener() {
-		@Override
-		public void onClick(View v) {
-			
-			try {
-				Intent i = new Intent(HotFile.this, FileChooser.class);
-				startActivityForResult(i, CODE);
-				
-			}catch (Exception e){
-				Log.v(LOG_TAG,"Exception "+e.toString());
-			}
-		}
-	};
-	
-	
-	public void addLineToDownloadListBox(String line){
-		LinearLayout ll = (LinearLayout)findViewById(R.id.mylayout);
-		LayoutInflater ly =(LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		View customView =  ly.inflate(R.layout.downloadingitem, null);
-		
-		TextView tv = (TextView)customView.findViewById(R.id.TextView001);
-		if (line == "")
-			tv.setText("");	//tu ma byc czyszczenie text boxa, ale jeszcze nie ma
-		else
-			tv.setText(line);
-		ll.addView(customView);
-	}
 	
 	
 	private Button.OnClickListener buttonOnClickShowdownloadlistListener = new Button.OnClickListener() {
@@ -196,8 +117,8 @@ public class HotFile extends Activity {
 		public void onClick(View v) {
 			try{
 				
-				for(String s: listOfDownloadingFiles)
-					addLineToDownloadListBox(s);
+			//	for(String s: listOfDownloadingFiles)
+			//		addLineToDownloadListBox(s);
 			}
 			catch(Exception e){
 				Log.v(LOG_TAG, e.toString());
@@ -222,10 +143,10 @@ public class HotFile extends Activity {
 				
 				if(data!=null)
 					try {
-						AddLinksFile(data.getAction());
+						AddLinksFromFile(data.getAction());
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
-						e.printStackTrace();
+						showNotification("Error occured "+e);
 					}
 				break;
 			case RESULT_CANCELED:
@@ -446,11 +367,118 @@ public class HotFile extends Activity {
 	};
 
 	
+	public void showNotification(String notification){
+		Toast.makeText(HotFile.this, notification ,
+				Toast.LENGTH_LONG).show();
+	}
+
+	//----------------ADDING FILES -------------------------
+
+	private Button.OnClickListener buttontAddLinksFile = new Button.OnClickListener() {
+		@Override
+		public void onClick(View v) {
+			
+			try {
+				Intent i = new Intent(HotFile.this, FileChooser.class);
+				startActivityForResult(i, CODE);
+				
+			}catch (Exception e){
+				Log.v(LOG_TAG,"Exception "+e.toString());
+			}
+		}
+	};
+	
+	private void AddLinksFromFile(String filename) throws IOException{
+		
+		File file = new File(filename); 
+		try { 
+		  InputStream instream = new FileInputStream(file); 
+			
+		    if (instream != null) {
+	      // prepare the file for reading
+		    	InputStreamReader inputreader = new InputStreamReader(instream);
+		    	BufferedReader rd = new BufferedReader( inputreader );
+		    	 String line;
+		         List<String> list = new ArrayList<String>();
+		         // read every line of the file into the line-variable, on line at the time
+		         while (( line = rd.readLine())  != null) {
+		       	  list.add(line);
+		         }
+		         
+		         addNewFiles(list);	//passing the list of links to the method
+		    }
+		}catch( Exception e){
+			Log.v(LOG_TAG, "error " + e.toString());
+			showNotification("Error occured when adding links from a file" );
+		}
+    }
+	
+	private void addNewFiles(List<String> linksList) throws ClientProtocolException, IOException{
+		List<DownloadingFileItem> downList = check.prepareFilesToDownload(linksList);
+		int numberofAddedFiles = downList.size();
+		
+		for (DownloadingFileItem listItem: downList){
+			long itemId = addItemToDatabase(listItem.getDownloadLink(),listItem.getSize(),0); //adding to database
+			if (itemId != (-1)){		//if the file has been added to database
+				listItem.setId(itemId);
+				listOfDownloadingFiles.add(listItem);	//adding to list
+			}
+			else
+				--numberofAddedFiles;	//the item has not been added
+		}
+		showNotification(numberofAddedFiles + " files have been added");
+		
+	}
+	
+	private boolean removeFile(long id){
+		
+		for (DownloadingFileItem listItem: listOfDownloadingFiles)
+			if (listItem.getId() == id && db.deleteItem(id)){
+				listOfDownloadingFiles.remove(listItem);
+				showNotification("The link has been removed");
+				return true;
+			}
+		return false;
+		
+	}
+	
+    private boolean getLinkFromText(String link)
+    {
+    	Pattern p = Pattern.compile("http://([\\w+?\\.\\w+])+hotfile.com/+([a-zA-Z0-9\\~\\!\\@\\#\\$\\%\\^\\&amp;\\*\\(\\)_\\-\\=\\+\\\\\\/\\?\\.\\:\\;\\'\\,]*)?");
+        //MatchResult mp 
+    	Matcher m = p.matcher(link);
+    	return m.matches();
+    /*	String[] sp = p.split(link); 
+    	
+    	
+    	for (String s: sp){
+    		Toast.makeText(HotFile.this,s,Toast.LENGTH_LONG).show();
+    	}*/
+    }
+
+	public void addLineToDownloadListBox(String line){
+		LinearLayout ll = (LinearLayout)findViewById(R.id.mylayout);
+		LayoutInflater ly =(LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		View customView =  ly.inflate(R.layout.downloadingitem, null);
+		
+		TextView tv = (TextView)customView.findViewById(R.id.TextView001);
+		if (line == "")
+			tv.setText("");	//tu ma byc czyszczenie text boxa, ale jeszcze nie ma
+		else
+			tv.setText(line);
+		ll.addView(customView);
+	}
+	
+	//----------------END ADDING FILES---------------------
+	
+	
+	
+	
 	//------------------DATABASE ---------------------------
 	DBAdapter db;
 	
-	public void addItemToDatabase(String link, long l, int downloadedSize){
-		db.addItem(link, l, downloadedSize);
+	public long addItemToDatabase(String link, long l, int downloadedSize){
+		return db.addItem(link, l, downloadedSize);
 	}
 	
 	public boolean deleteItemFromDatabase(long id){
@@ -465,8 +493,7 @@ public class HotFile extends Activity {
 				String link = c.getString(1);
 				int size = c.getInt(2);
 				int downSize = c.getInt(3);
-				Toast.makeText(HotFile.this, "row: "+row +" link:"+link+" size:"+size+ " dow:"+downSize ,
-				Toast.LENGTH_LONG).show();
+				showNotification("row: "+row +" link:"+link+" size:"+size+ " dow:"+downSize);
 		}
 	}
 	
@@ -477,8 +504,7 @@ public class HotFile extends Activity {
 				String link = c.getString(1);
 				int size = c.getInt(2);
 				int downSize = c.getInt(3);
-				Toast.makeText(HotFile.this, "row: "+row +" link:"+link+" size:"+size+ " dow:"+downSize ,
-				Toast.LENGTH_LONG).show();
+				showNotification("row: "+row +" link:"+link+" size:"+size+ " dow:"+downSize);
 		}
 	}
 	
