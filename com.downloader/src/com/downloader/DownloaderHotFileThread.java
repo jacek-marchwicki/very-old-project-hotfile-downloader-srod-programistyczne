@@ -165,14 +165,6 @@ final Notification notification = new Notification(R.drawable.icon, "Downloading
 			byte data[] = new byte[MAX_BUFFER_SIZE];
 			int len1 =0;
 			while((len1 = stream.read(data)) > 0){
-				//	android.os.Debug.waitForDebugger();
-				
-				//if(this.size - downloaded  >  MAX_BUFFER_SIZE)
-//					data = new byte[MAX_BUFFER_SIZE];
-	//			else
-					//data = new byte[this.size - downloaded];
-				//int count = stream.read(data);
-				//if(count == -1) break;
 				file.write(data, 0, len1);
 				downloaded += len1;
 				if((int)(((double)	downloaded/(double)size)*100)==percentLevel && size >= 50 * MAX_BUFFER_SIZE){
