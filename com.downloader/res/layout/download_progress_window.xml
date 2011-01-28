@@ -7,4 +7,6 @@
 			android:layout_width="fill_parent" android:layout_height="wrap_content"
 			android:layout_below="@id/status_text" android:progressDrawable="@android:drawable/progress_horizontal"
 			android:indeterminate="false" android:indeterminateOnly="false" />		
+<TextView android:id="@+id/status_text" android:layout_width="wrap_content"
+			android:layout_height="wrap_content"/>
 </RelativeLayout>

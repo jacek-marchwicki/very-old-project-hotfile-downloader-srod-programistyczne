@@ -132,12 +132,19 @@ public class HotFile extends Activity {
     }
 	
 	
-	public void addProgressBarToDownloadListBox(TextProgressBar progressBar){
+	public DownloadingFileItem addProgressBarToDownloadListBox(DownloadingFileItem item){
+		TextProgressBar progressBar = item.getTextProgressBar();
 		LinearLayout ll = (LinearLayout)findViewById(R.id.mylayout);
 		LayoutInflater ly =(LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		View customView =  ly.inflate(R.layout.download_progress_window, null);
-		TextProgressBar tv = (TextProgressBar)customView.findViewById(R.id.TextView001);
+		TextView textBoxUpper = (TextView)customView.findViewById(R.id.status_text);
+		TextProgressBar textBoxInProgress = (TextProgressBar)customView.findViewById(R.id.status_progress);
+		textBoxInProgress.setProgress(0);
+		textBoxInProgress.setText("0% z " + item.getSize());
+		textBoxUpper.setText(item.getName());
+		item.setProgressBar(progressBar);
 		ll.addView(customView);
+		return item;
 		
 	}
 	
@@ -250,7 +257,7 @@ public class HotFile extends Activity {
 
 	public void buttonOnClickShowdownloadlist(View view) {
 		int i = 0;
-		addProgressBarToDownloadListBox(new TextProgressBar(this));
+		//addProgressBarToDownloadListBox(new TextProgressBar(this));
 
 	}
 
@@ -484,7 +491,10 @@ public class HotFile extends Activity {
 			long itemId = addItemToDatabase(listItem.getDownloadLink(),listItem.getSize(),0); //adding to database
 			if (itemId != (-1)){		//if the file has been added to database
 				listItem.setId(itemId);
+				listItem.setProgressBar(new TextProgressBar(this));
+				listItem =addProgressBarToDownloadListBox(listItem); 
 				listOfDownloadingFiles.add(listItem);	//adding to list
+				
 			}
 			else
 				--numberofAddedFiles;	//the item has not been added
