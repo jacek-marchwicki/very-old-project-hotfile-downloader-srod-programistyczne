@@ -22,12 +22,10 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RemoteViews;
-import android.widget.TextView;
 
 public class DownloaderHotFileThread implements Runnable {
 
@@ -55,7 +53,7 @@ public class DownloaderHotFileThread implements Runnable {
 
 final Notification notification = new Notification(R.drawable.icon, "Downloading file", System.currentTimeMillis());
 	
-	public DownloaderHotFileThread(Context context, String link, String username, String password, String directory, int id, TextProgressBar  textBoxProgressBar) {
+	public DownloaderHotFileThread(Context context, String link, String username, String password, String directory, int id) {
 		this.context = context;
 		this.size = -1;
 		this.downloaded = 0;

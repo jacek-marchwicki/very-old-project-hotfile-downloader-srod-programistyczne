@@ -23,7 +23,6 @@ import com.downloader.Widgets.TextProgressBar;
 
 import stroringdata.DBAdapter;
 import android.app.Activity;
-import android.app.LauncherActivity.ListItem;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -43,7 +42,6 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -136,7 +134,6 @@ public class HotFile extends Activity {
 	
 	
 	public DownloadingFileItem addProgressBarToDownloadListBox(DownloadingFileItem item){
-		TextProgressBar progressBar = item.getTextProgressBar();
 		LinearLayout ll = (LinearLayout)findViewById(R.id.mylayout);
 		LayoutInflater ly =(LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		View customView =  ly.inflate(R.layout.download_progress_window, null);
@@ -146,7 +143,6 @@ public class HotFile extends Activity {
 		textBoxInProgress.setMax(100);
 		textBoxInProgress.setText("0% z " + item.getSize());
 		textBoxUpper.setText(item.getName());
-		item.setProgressBar(progressBar);
 		customView.setId((int)item.getId());
 		customView.setOnLongClickListener(relativeLayoutListener);
 		ll.addView(customView);
@@ -310,9 +306,9 @@ public class HotFile extends Activity {
 	}
 	
 	
-	private void beginDownloading(String link, String username, String passwordmd5, String directory, int id, TextProgressBar textBoxProgressBar)
+	private void beginDownloading(String link, String username, String passwordmd5, String directory, int id)
 	{
-		DownloaderHotFileThread mDownloaderHotFileThread = new DownloaderHotFileThread(this, link, username, passwordmd5, directory, id, textBoxProgressBar);
+		DownloaderHotFileThread mDownloaderHotFileThread = new DownloaderHotFileThread(this, link, username, passwordmd5, directory, id);
 		mDownloaderHotFileThread.start();
 		/*		Intent intent = new Intent(this,  DownloaderHotfile.class);
 		intent.putExtra("link", link);
@@ -504,7 +500,6 @@ public class HotFile extends Activity {
 				//relativeLayout.setId((int)itemId);
 				//relativeLayout.onKeyDown(1, event);
 				//relativeLayout.setOnClickListener(relativeLayoutListener);
-				listItem.setProgressBar(new TextProgressBar(this));
 				listItem =addProgressBarToDownloadListBox(listItem); 
 				listOfDownloadingFiles.add(listItem);	//adding to list
 				
@@ -524,7 +519,7 @@ public class HotFile extends Activity {
 			showNotification("blllaa" + v.getId());
 			//tak powinno byæ
 			//beginDownloading(downList.get(v.getId()).getDownloadLink(), username,password, directory,v.getId(), downList.get(v.getId()).getTextProgressBar());
-			beginDownloading(downList.get(0).getName(), username,password, directory,0, downList.get(0).getTextProgressBar());
+			beginDownloading(downList.get(0).getName(), username,password, directory,0);
 			return false;
 		}
 	};

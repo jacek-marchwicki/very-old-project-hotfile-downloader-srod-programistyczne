@@ -1,9 +1,5 @@
 package com.downloader;
 
-import java.io.File;
-
-import com.downloader.Widgets.TextProgressBar;
-
 import android.app.Activity;
 import android.os.Bundle;
 
@@ -40,15 +36,6 @@ public class DownloadingFileItem extends Activity{
 	private int linkID;
 	private Boolean status;
 	private String name, downloadLink;
-	public static TextProgressBar textProgressBar;
-	
-	public void setProgressBar(TextProgressBar textProgressBar){
-		DownloadingFileItem.textProgressBar = textProgressBar;
-	}
-	
-	public TextProgressBar getTextProgressBar(){
-		return textProgressBar;
-	} 
 	
 	/**
 	 * @return the downloadLink
