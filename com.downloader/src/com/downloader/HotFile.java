@@ -516,10 +516,10 @@ public class HotFile extends Activity {
 		@Override
 		public boolean onLongClick(View v) {
 			// TODO Auto-generated method stub
-			showNotification("blllaa" + v.getId());
-			//tak powinno by�
+			showNotification("kliniete!" + v.getId());
+			//tak powinno byc
 			//beginDownloading(downList.get(v.getId()).getDownloadLink(), username,password, directory,v.getId(), downList.get(v.getId()).getTextProgressBar());
-			beginDownloading(downList.get(0).getName(), username,password, directory,0);
+	//		beginDownloading(downList.get(0).getName(), username,password, directory,0);
 			return false;
 		}
 	};
