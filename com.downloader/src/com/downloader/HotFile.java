@@ -23,6 +23,7 @@ import com.downloader.Widgets.TextProgressBar;
 
 import stroringdata.DBAdapter;
 import android.app.Activity;
+import android.app.LauncherActivity.ListItem;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -49,7 +50,7 @@ import android.widget.Toast;
 
 /*
  * 1. sprawdzanie miejsca w pamieci do zapisu podczas downloadu
- * 2. pobieranie listy z pliku
+ * 																							2. pobieranie listy z pliku
  * 																							3. pobieranie kilku plikow naraz
  * 4. minimalny status baterii
  * 																							5. sprawdzanie waznosci username i password
@@ -63,10 +64,10 @@ import android.widget.Toast;
  * 13. entry link
  * 																							14. sprawdzanie waznosci linkow
  * 15. wznawianie sciagania
- * 16. update preferencji w momencie wyjï¿½cia z okna preferencji
+ * 																							16. update preferencji w momencie wyjï¿½cia z okna preferencji
  * 17. stop jeï¿½eli plik nie istnieje
  * 18. sprawdzenie czy android nie killuje programu
- * 19. dodanie ikony programu
+ * 																							19. dodanie ikony programu
  */
 
 public class HotFile extends Activity {
@@ -99,6 +100,7 @@ public class HotFile extends Activity {
 		btAddLinksFile.setOnClickListener(buttontAddLinksFile);
 		Button btAddLink = (Button) findViewById(R.id.Button03);
 		btAddLink.setOnClickListener(buttonAddLink);
+		checkPreferences();
 		//comp
 		Log.v(LOG_TAG, "Running program...");
 		// this.startActivity(new Intent(this, DownloadList.class));
@@ -141,6 +143,7 @@ public class HotFile extends Activity {
 		TextView textBoxUpper = (TextView)customView.findViewById(R.id.status_text);
 		TextProgressBar textBoxInProgress = (TextProgressBar)customView.findViewById(R.id.status_progress);
 		textBoxInProgress.setProgress(0);
+		textBoxInProgress.setMax(100);
 		textBoxInProgress.setText("0% z " + item.getSize());
 		textBoxUpper.setText(item.getName());
 		item.setProgressBar(progressBar);
@@ -155,6 +158,7 @@ public class HotFile extends Activity {
 		LinearLayout ll = (LinearLayout)findViewById(R.id.mylayout);
 		LayoutInflater ly =(LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		View customView =  ly.inflate(R.layout.downloadingitem, null);
+		customView.setId(0);
 		TextView tv = (TextView)customView.findViewById(R.id.TextView001);
 		if (line == "")
 			tv.setText("sa");	//tu ma byc czyszczenie text boxa, ale jeszcze nie ma
@@ -284,7 +288,7 @@ public class HotFile extends Activity {
 		list.add("http://hotfile.com/dl/92539498/131dad0/Gamee.Of.Death.DVDRip.XviD-VoMiT.m90.part1.rar.html");
 //		try {
 		//	check.checkFileExistsOnHotFileServer(list);
-			beginDownloading(list.get(3), username,aaa, directory,1);
+		//	beginDownloading(list.get(3), username,aaa, directory,1);
 	//		beginDownloading(list.get(2), username,aaa, directory,2);
 		
 	/*		long percentLevel = 2;
@@ -306,9 +310,9 @@ public class HotFile extends Activity {
 	}
 	
 	
-	private void beginDownloading(String link, String username, String passwordmd5, String directory, int id)
+	private void beginDownloading(String link, String username, String passwordmd5, String directory, int id, TextProgressBar textBoxProgressBar)
 	{
-		DownloaderHotFileThread mDownloaderHotFileThread = new DownloaderHotFileThread(this, link, username, passwordmd5, directory, id);
+		DownloaderHotFileThread mDownloaderHotFileThread = new DownloaderHotFileThread(this, link, username, passwordmd5, directory, id, textBoxProgressBar);
 		mDownloaderHotFileThread.start();
 		/*		Intent intent = new Intent(this,  DownloaderHotfile.class);
 		intent.putExtra("link", link);
@@ -485,9 +489,9 @@ public class HotFile extends Activity {
 			showNotification("Error occured when adding links from a file" );
 		}
     }
-	
+	public static List<DownloadingFileItem> downList;
 	private void addNewFiles(List<String> linksList) throws ClientProtocolException, IOException{
-		List<DownloadingFileItem> downList = check.prepareFilesToDownload(linksList);
+		downList = check.prepareFilesToDownload(linksList);
 		int numberofAddedFiles = downList.size();
 		
 		for (DownloadingFileItem listItem: downList){
@@ -518,6 +522,9 @@ public class HotFile extends Activity {
 		public boolean onLongClick(View v) {
 			// TODO Auto-generated method stub
 			showNotification("blllaa" + v.getId());
+			//tak powinno byæ
+			//beginDownloading(downList.get(v.getId()).getDownloadLink(), username,password, directory,v.getId(), downList.get(v.getId()).getTextProgressBar());
+			beginDownloading(downList.get(0).getName(), username,password, directory,0, downList.get(0).getTextProgressBar());
 			return false;
 		}
 	};

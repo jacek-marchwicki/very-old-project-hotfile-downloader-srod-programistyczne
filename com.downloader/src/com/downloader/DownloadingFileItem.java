@@ -40,10 +40,10 @@ public class DownloadingFileItem extends Activity{
 	private int linkID;
 	private Boolean status;
 	private String name, downloadLink;
-	private TextProgressBar textProgressBar;
+	public static TextProgressBar textProgressBar;
 	
 	public void setProgressBar(TextProgressBar textProgressBar){
-		this.textProgressBar = textProgressBar;
+		DownloadingFileItem.textProgressBar = textProgressBar;
 	}
 	
 	public TextProgressBar getTextProgressBar(){

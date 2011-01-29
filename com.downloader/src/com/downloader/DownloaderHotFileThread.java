@@ -13,14 +13,21 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 
+import com.downloader.Widgets.TextProgressBar;
+
+import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RemoteViews;
+import android.widget.TextView;
 
 public class DownloaderHotFileThread implements Runnable {
 
@@ -46,9 +53,9 @@ public class DownloaderHotFileThread implements Runnable {
 	private int id; //id in the downloading list for notification area
 	String link, username, passwordmd5, directory;
 
-final Notification notification = new Notification(R.drawable.icon, "Downloading file", System.currentTimeMillis());;
+final Notification notification = new Notification(R.drawable.icon, "Downloading file", System.currentTimeMillis());
 	
-	public DownloaderHotFileThread(Context context, String link, String username, String password, String directory, int id) {
+	public DownloaderHotFileThread(Context context, String link, String username, String password, String directory, int id, TextProgressBar  textBoxProgressBar) {
 		this.context = context;
 		this.size = -1;
 		this.downloaded = 0;
@@ -58,12 +65,16 @@ final Notification notification = new Notification(R.drawable.icon, "Downloading
 		this.passwordmd5 = password;
 		this.directory = directory;
 		this.id = id;
+		//this.textBoxProgressBar = textBoxProgressBar;
+		//this.textBoxProgressBar.setProgress(50);
+		run();
+		
 	}
 	
 	public void start(){
 		if(mThread == null){
-			mThread = new Thread(this);
-			mThread.start();
+	//		mThread = new Thread(this);
+	//		mThread.start();
 		}
 	}
 	
@@ -158,6 +169,7 @@ final Notification notification = new Notification(R.drawable.icon, "Downloading
 				this.size = size;
 				//		stateChanged();
 			}
+			
 			notification.contentView.setProgressBar(R.id.status_progress, size, progress, false);
 			notificationManager.notify(id, notification);
 			file = new RandomAccessFile(directory+getUrl(new URL(responseText)), "rw");		//change filename
@@ -172,10 +184,12 @@ final Notification notification = new Notification(R.drawable.icon, "Downloading
 				if((int)(((double)	downloaded/(double)size)*100)==percentLevel && size >= 50 * MAX_BUFFER_SIZE){
 					notification.contentView.setProgressBar(R.id.status_progress, size, downloaded, false);
 					notificationManager.notify(id, notification);
+					updateProgressBarToDownloadListBox(percentLevel, 100);
 					Log.v("A"+id, "WSZEDLEM" + percentLevel +"% pobranych");
 					percentLevel = percentLevel < 100 ? percentLevel + 2 : 100;
 				}
 				else{
+						//updateProgressBarToDownloadListBox(size, downloaded);
 						notification.contentView.setProgressBar(R.id.status_progress, size, downloaded, false);
 						notificationManager.notify(id, notification);
 					}
@@ -199,6 +213,7 @@ final Notification notification = new Notification(R.drawable.icon, "Downloading
 		finally{
 			if(file != null)
 				try {
+					updateProgressBarToDownloadListBox(100, 100);
 					file.close();
 				} catch (IOException e) {
 					Log.v("A", e.toString());
@@ -212,4 +227,15 @@ final Notification notification = new Notification(R.drawable.icon, "Downloading
 	}
 	
 
+	public void updateProgressBarToDownloadListBox(int percent,int max){
+		LinearLayout ll = (LinearLayout)((Activity) context).findViewById(R.id.mylayout);
+		View customView =ll.getChildAt(this.id);
+		TextProgressBar textBoxInProgress = (TextProgressBar)customView.findViewById(R.id.status_progress);
+		if(max==100)textBoxInProgress.setMax(max);
+		textBoxInProgress.setProgress(percent);
+		textBoxInProgress.setText(percent+"%");
+	//	ll.updateViewLayout(customView, null);
+		
+	}
+	
 }
