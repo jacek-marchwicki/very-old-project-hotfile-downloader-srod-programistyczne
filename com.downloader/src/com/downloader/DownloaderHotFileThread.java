@@ -163,11 +163,11 @@ final Notification notification = new Notification(R.drawable.icon, "Downloading
 			int size = urlConnection.getContentLength();
 			if(size < 1)
 				error();
-			if(this.size == -1){
+			if(this.size == -1){	///?? a w przeciwnym wypadku to co????!
 				this.size = size;
 				//		stateChanged();
 			}
-			
+						
 			notification.contentView.setProgressBar(R.id.status_progress, size, progress, false);
 			notificationManager.notify(id, notification);
 			file = new RandomAccessFile(directory+getUrl(new URL(responseText)), "rw");		//change filename
@@ -176,10 +176,45 @@ final Notification notification = new Notification(R.drawable.icon, "Downloading
 			int percentLevel = 2;
 			byte data[] = new byte[MAX_BUFFER_SIZE];
 			int len1 =0;
+			
+			double averageSize = size/100;			//average size for 1%	
+			
+			
+			if ((int)averageSize > MAX_BUFFER_SIZE)		//downloading bigger files	
+				while((len1 = stream.read(data)) > 0){
+					file.write(data, 0, len1);
+					downloaded += len1;
+					
+					if (downloaded > averageSize){ // jezeli wielkosc sciagnietego pliku jest wieksza niz ta przewidywana dla danego %
+						//show progess bar , ktory bedzie trzeba zwiekszyc o 1%
+						averageSize += averageSize;	//podwoj wartosc, aby byla rowna kolejnemu %
+					}
+				}
+			else{	//downloading smaller files
+				
+				averageSize = MAX_BUFFER_SIZE / averageSize;
+				
+				while((len1 = stream.read(data)) > 0){
+					file.write(data, 0, len1);
+					downloaded += len1;
+					
+					// w kazdej iteracji zwieksz progress bar o averageSize
+					
+					
+				}
+			}
+			
+			//ustaw progress bar na 100% i koniec
+			
+			
+			
+			
+			
+			/*
 			while((len1 = stream.read(data)) > 0){
 				file.write(data, 0, len1);
 				downloaded += len1;
-				if((int)(((double)	downloaded/(double)size)*100)==percentLevel && size >= 50 * MAX_BUFFER_SIZE){
+				if(size >= (50 * MAX_BUFFER_SIZE) && (int)getProgress()>=percentLevel){ //when file is too small, don't set progress bar
 					notification.contentView.setProgressBar(R.id.status_progress, size, downloaded, false);
 					notificationManager.notify(id, notification);
 					updateProgressBarToDownloadListBox(percentLevel, 100);
@@ -193,6 +228,8 @@ final Notification notification = new Notification(R.drawable.icon, "Downloading
 					}
 				//stateChanged();
 			}
+			
+			*/
 			file.close();
 			stream.close();
 			if (status == DOWNLOADING) {

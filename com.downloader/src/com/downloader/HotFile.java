@@ -517,7 +517,7 @@ public class HotFile extends Activity {
 		public boolean onLongClick(View v) {
 			// TODO Auto-generated method stub
 			showNotification("blllaa" + v.getId());
-			//tak powinno byæ
+			//tak powinno byï¿½
 			//beginDownloading(downList.get(v.getId()).getDownloadLink(), username,password, directory,v.getId(), downList.get(v.getId()).getTextProgressBar());
 			beginDownloading(downList.get(0).getName(), username,password, directory,0);
 			return false;
@@ -544,15 +544,15 @@ public class HotFile extends Activity {
 	//------------------DATABASE ---------------------------
 	DBAdapter db;
 	
-	public long addItemToDatabase(String link, long l, int downloadedSize){
+	private long addItemToDatabase(String link, long l, int downloadedSize){
 		return db.addItem(link, l, downloadedSize);
 	}
 	
-	public boolean deleteItemFromDatabase(long id){
+	private boolean deleteItemFromDatabase(long id){
 		return db.deleteItem(id);
 	}
 	
-	public void getItemFromDatabase(long id){
+	private void getItemFromDatabase(long id){
 		Cursor c = db.getItem(id);
 		
 		while (c.moveToNext()){
@@ -564,7 +564,7 @@ public class HotFile extends Activity {
 		}
 	}
 	
-	public void getAllItemsFromDatabase(){
+	private void getAllItemsFromDatabase(){
 		Cursor c = db.getAllItems();
 		while (c.moveToNext()){
 				long row = c.getLong(0);
@@ -575,7 +575,7 @@ public class HotFile extends Activity {
 		}
 	}
 	
-	public boolean updateItemInDatabase(long rowId, String link, int totalSize, int downloadedSize){
+	private boolean updateItemInDatabase(long rowId, String link, int totalSize, int downloadedSize){
 		return db.updateItem(rowId, link, totalSize, downloadedSize);
 	}
 		
