@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -23,11 +24,18 @@ import com.downloader.Widgets.TextProgressBar;
 
 import stroringdata.DBAdapter;
 import android.app.Activity;
+import android.app.DownloadManager;
+import android.app.DownloadManager.Query;
+import android.app.DownloadManager.Request;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.database.Cursor;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.StatFs;
@@ -38,6 +46,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -91,18 +100,23 @@ public class HotFile extends Activity {
 		myProgressBar = (ProgressBar) findViewById(R.id.ProgressBar01);
 		
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
-		Button buttonOnClickShowdownloadlist = (Button) findViewById(R.id.Button04);
-		buttonOnClickShowdownloadlist.setOnClickListener(buttonOnClickShowdownloadlistListener);
+		
+		
+		/*
+		 * ADDING BUTTON CLICKS
+		 */
+		((Button) findViewById(R.id.Button_download)).setOnClickListener(buttonOnClickDownload);
+		((Button) findViewById(R.id.Button_showdownloadlist)).setOnClickListener(buttonOnClickShowdownloadlistListener);
+		((Button) findViewById(R.id.Button_addlinksfromfile)).setOnClickListener(buttontAddLinksFile);
+		((Button) findViewById(R.id.Button_addlinkfromclipboard)).setOnClickListener(buttonAddLink);
+		
 		check = new prepareActions();
-		Button btAddLinksFile = (Button) findViewById(R.id.Button02);
-		btAddLinksFile.setOnClickListener(buttontAddLinksFile);
-		Button btAddLink = (Button) findViewById(R.id.Button03);
-		btAddLink.setOnClickListener(buttonAddLink);
 		checkPreferences();
 		//comp
 		Log.v(LOG_TAG, "Running program...");
 		// this.startActivity(new Intent(this, DownloadList.class));
 		
+
 		
 		
 		db = new DBAdapter(this);
@@ -110,6 +124,13 @@ public class HotFile extends Activity {
 
 	}
 
+	@Override
+	public void onResume(){
+		super.onResume();
+		IntentFilter completeFilter = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
+		registerReceiver(completeReceiver, completeFilter);
+	}
+	
 	private static int CODE = 1;
 	
 	
@@ -170,13 +191,12 @@ public class HotFile extends Activity {
 			}
 	}
 	
-	private Button.OnClickListener buttonOnClickShowdownloadlistListener = new Button.OnClickListener() {
-		@Override
+	private OnClickListener buttonOnClickShowdownloadlistListener = new OnClickListener() {
 		public void onClick(View v) {
 			try{
-				
 			//	for(String s: listOfDownloadingFiles)
 			//		addLineToDownloadListBox(s);
+				startActivity(new Intent(DownloadManager.ACTION_VIEW_DOWNLOADS));
 			}
 			catch(Exception e){
 				Log.v(LOG_TAG, e.toString());
@@ -186,16 +206,35 @@ public class HotFile extends Activity {
 			bundle.putString("username", username);
 			bundle.putString("password", password);
 			bundle.putString("directory", directory);
-			
 		}
 	};
 
-	private Button.OnClickListener buttonAddLink = new Button.OnClickListener() {
-		@Override
+	private OnClickListener buttonAddLink = new OnClickListener() {
 		public void onClick(View v) {
 			
 			try {
-				buttonOnClickShowdownloadlist(v);
+				//buttonOnClickShowdownloadlist(v);
+				long id; 
+				DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+				Uri uri = Uri.parse("http://www.android-app-developer.co.uk/android-app-development-docs/android-writing-zippy-android-apps.pdf");
+				DownloadManager.Request request = new DownloadManager.Request(uri);
+				request.setTitle("aaa");
+				List<String> pathSegments = uri.getPathSegments();
+				request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, pathSegments.get(pathSegments.size()-1)+"9");
+				Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).mkdirs();
+				id = downloadManager.enqueue(request);
+				Query query = new Query();
+				query.setFilterById(id);
+				Cursor cursor = downloadManager.query(query);
+				int idStatus = cursor.getColumnIndex(DownloadManager.COLUMN_URI);
+				StringBuffer sb = new StringBuffer();
+				cursor.moveToFirst();
+				do{
+					sb.append(DownloadManager.COLUMN_URI+"=").append("newURI");
+				}while(cursor.moveToNext());
+				cursor.moveToFirst();
+				Log.d("DownloadManagerSample", cursor.getString(idStatus));
+
 			}catch (Exception e){
 				Log.v(LOG_TAG,"Exception "+e.toString());
 			}
@@ -267,7 +306,8 @@ public class HotFile extends Activity {
 	/*
 	 * downloadLink has to be available and valid check downloadLink sooner
 	 */
-	public void myClickHandler(View view) {
+	private OnClickListener buttonOnClickDownload = new OnClickListener() {
+		public void onClick(View v) {
 		//Toast.makeText(HotFile.this, , Toast.LENGTH_LONG).show();
 		String aaa = Md5Create.generateMD5Hash("puyyut");
 		// BackgroundDownloaderAsyncTask task = new
@@ -282,9 +322,9 @@ public class HotFile extends Activity {
 		
 		list.add("http://hotfile.com/dl/92148167/7c86b14/fil.txt.html");
 		list.add("http://hotfile.com/dl/92539498/131dad0/Gamee.Of.Death.DVDRip.XviD-VoMiT.m90.part1.rar.html");
-//		try {
-		//	check.checkFileExistsOnHotFileServer(list);
-		//	beginDownloading(list.get(3), username,aaa, directory,1);
+		//try {
+		//check.checkFileExistsOnHotFileServer(list);
+			beginDownloading(list.get(3), username,aaa, directory,1);
 	//		beginDownloading(list.get(2), username,aaa, directory,2);
 		
 	/*		long percentLevel = 2;
@@ -296,20 +336,21 @@ public class HotFile extends Activity {
 					percentLevel = percentLevel < 100 ? percentLevel += 2 : 100;
 			}}*/
 			
-		//} catch (ClientProtocolException e) {
+//		} catch (ClientProtocolException e) {
 			// TODO Auto-generated catch block
-//			e.printStackTrace();
+//		e.printStackTrace();
 //		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			//e.printStackTrace();
+	//		e.printStackTrace();
 		//}
-	}
+	}};
 	
 	
 	private void beginDownloading(String link, String username, String passwordmd5, String directory, int id)
 	{
 		DownloaderHotFileThread mDownloaderHotFileThread = new DownloaderHotFileThread(this, link, username, passwordmd5, directory, id);
-		mDownloaderHotFileThread.start();
+		//mDownloaderHotFileThread.start();
+		mDownloaderHotFileThread.run();
 		/*		Intent intent = new Intent(this,  DownloaderHotfile.class);
 		intent.putExtra("link", link);
 		intent.putExtra("username", username);
@@ -320,6 +361,7 @@ public class HotFile extends Activity {
 		startService(intent);*/
 		
 	}
+
 	
 	/*
 	 * Check if preferences are set
@@ -447,8 +489,7 @@ public class HotFile extends Activity {
 
 	//----------------ADDING FILES -------------------------
 
-	private Button.OnClickListener buttontAddLinksFile = new Button.OnClickListener() {
-		@Override
+	private OnClickListener buttontAddLinksFile = new OnClickListener() {
 		public void onClick(View v) {
 			
 			try {
@@ -580,5 +621,18 @@ public class HotFile extends Activity {
 	}
 		
 	//------------------END DATABASE -----------------------
+	
+	
+	private BroadcastReceiver  completeReceiver = new BroadcastReceiver() {
+		
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			// TODO Auto-generated method stub
+		}
+		
+		
+		
+	};
+	
 	
 }

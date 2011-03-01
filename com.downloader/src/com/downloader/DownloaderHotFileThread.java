@@ -265,7 +265,7 @@ final Notification notification = new Notification(R.drawable.icon, "Downloading
 	public void updateProgressBarToDownloadListBox(int percent,int max){
 		LinearLayout ll = (LinearLayout)((Activity) context).findViewById(R.id.mylayout);
 		View customView =ll.getChildAt(this.id);
-		TextProgressBar textBoxInProgress = (TextProgressBar)customView.findViewById(R.id.status_progress);
+		TextProgressBar textBoxInProgress = (TextProgressBar)customView.findViewById(R.id.status_progress); //ERROR
 		if(max==100)textBoxInProgress.setMax(max);
 		textBoxInProgress.setProgress(percent);
 		textBoxInProgress.setText(percent+"%");

@@ -1,12 +1,14 @@
 package com.downloader;
 
 import android.app.Activity;
+import android.view.Menu;
+import android.view.MenuItem;
 
 
 public class OperationsOnFile extends Activity{
 	 /** Called when the activity is first created. */
 	
-	    @Override
+	/*    @Override
 	    public boolean onCreateOptionsMenu(Menu menu) {
 	    super.onCreateOptionsMenu(menu);
 	    // Create and add new menu items.
@@ -18,8 +20,8 @@ public class OperationsOnFile extends Activity{
 	    itemAdd.setIcon(R.drawable.add_new_item);
 	    itemRem.setIcon(R.drawable.remove_item);
 	    // Allocate shortcuts to each of them.
-	    itemAdd.setShortcut(’0’, ‘a’);
-	    itemRem.setShortcut(’1’, ‘r’);
+	    itemAdd.setShortcut("");
+	    itemRem.setShortcut("");
 	    return true;
 	    }
 
@@ -45,5 +47,5 @@ public class OperationsOnFile extends Activity{
 	    
 	    public void o_stop(){
 	    	
-	    }
+	    }*/
 }
