@@ -218,6 +218,7 @@ public class HotFile extends Activity {
 				DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
 				Uri uri = Uri.parse("http://www.android-app-developer.co.uk/android-app-development-docs/android-writing-zippy-android-apps.pdf");
 				DownloadManager.Request request = new DownloadManager.Request(uri);
+				
 				request.setTitle("aaa");
 				List<String> pathSegments = uri.getPathSegments();
 				request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, pathSegments.get(pathSegments.size()-1)+"9");
