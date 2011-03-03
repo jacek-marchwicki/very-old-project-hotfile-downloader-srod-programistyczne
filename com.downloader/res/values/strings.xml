@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="hello">Hello World, HotFile!</string>
-    <string name="app_name">HotFileDownloader</string>
+	<string name="hello">Hello World, HotFile!</string>
+	<string name="app_name">HotFileDownloader</string>
 
-
+	<string name="start">Start</string>
+	<string name="stop">stop</string>
+	<string name="pause">pause</string>
+	<string name="resume">resume</string>
+	<string name="quit">quit</string>
 
 
 </resources>

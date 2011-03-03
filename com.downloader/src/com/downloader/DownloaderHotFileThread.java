@@ -13,8 +13,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 
-import com.downloader.Widgets.TextProgressBar;
-
 import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -27,8 +25,11 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RemoteViews;
 
+import com.downloader.Widgets.TextProgressBar;
+
 public class DownloaderHotFileThread implements Runnable {
 
+	private static final int _MIN_PROCENT_DIFF = 5;
 	ProgressBar progressBar;
 	private int progress = 10;
 	
@@ -69,12 +70,12 @@ final Notification notification = new Notification(R.drawable.icon, "Downloading
 		
 	}
 	
-	public void start(){
+	/*public void start(){
 		if(mThread == null){
 	//		mThread = new Thread(this);
 	//		mThread.start();
 		}
-	}
+	}*/
 	
 	public void run() {
 		// TODO Auto-generated method stub
@@ -210,26 +211,21 @@ final Notification notification = new Notification(R.drawable.icon, "Downloading
 			
 			
 			
-			/*
+			int oldProcent = 0;
 			while((len1 = stream.read(data)) > 0){
 				file.write(data, 0, len1);
-				downloaded += len1;
-				if(size >= (50 * MAX_BUFFER_SIZE) && (int)getProgress()>=percentLevel){ //when file is too small, don't set progress bar
-					notification.contentView.setProgressBar(R.id.status_progress, size, downloaded, false);
+				int newProcent = (int)getProgress();
+				if (newProcent - oldProcent > _MIN_PROCENT_DIFF) {
+					notification.contentView.setProgressBar(R.id.status_progress, 100, newProcent, false);
 					notificationManager.notify(id, notification);
 					updateProgressBarToDownloadListBox(percentLevel, 100);
 					Log.v("A"+id, "WSZEDLEM" + percentLevel +"% pobranych");
-					percentLevel = percentLevel < 100 ? percentLevel + 2 : 100;
+					oldProcent = newProcent;
 				}
-				else{
-						//updateProgressBarToDownloadListBox(size, downloaded);
-						notification.contentView.setProgressBar(R.id.status_progress, size, downloaded, false);
-						notificationManager.notify(id, notification);
-					}
+				downloaded += len1;
 				//stateChanged();
 			}
 			
-			*/
 			file.close();
 			stream.close();
 			if (status == DOWNLOADING) {

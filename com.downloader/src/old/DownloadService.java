@@ -14,7 +14,6 @@ import org.apache.http.util.EntityUtils;
 
 import android.app.Service;
 import android.content.Intent;
-import android.os.Bundle;
 import android.os.IBinder;
 
 public class DownloadService extends Service {
@@ -33,6 +32,20 @@ public class DownloadService extends Service {
 	public static final int COMPLETE = 2;
 	public static final int CANCELLED = 3;
 	public static final int ERROR = 4;
+	
+	private UpdateThread updateThread = null;
+	
+	private class UpdateThread extends Thread {
+		@Override
+		public void run() {
+			// Tworzenie watkow do downloadu
+			if (updateThread != this) {
+                throw new IllegalStateException(
+                        "multiple UpdateThreads in DownloadService");
+            }
+		}
+		
+	}
 
 	public DownloadService(String link, String username, String password, String directory)
 	{
@@ -45,6 +58,16 @@ public class DownloadService extends Service {
 		this.passwordmd5 = password;
 		this.directory = directory;
 	}
+	
+	@Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        int returnValue = super.onStartCommand(intent, flags, startId);
+        if (updateThread == null) {
+        	updateThread = new UpdateThread();
+        	updateThread.stop();
+        }
+        return returnValue;
+    }
 
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -55,19 +78,6 @@ public class DownloadService extends Service {
 	@Override
 	public void onCreate(){
 		super.onCreate();
-	}
-
-	@Override
-	public void onStart(Intent intent, int startId){
-		super.onStart(intent, startId);
-		this.intent = intent;
-		Bundle bundle = intent.getExtras();
-		this.link = (String)bundle.get("link");
-		this.username = (String)bundle.get("username");
-		this.passwordmd5 = (String)bundle.get("passwordmd5");
-		this.directory = (String)bundle.get("directory");
-		downloadFile.start();
-		stopSelf();
 	}
 
 	public String getUrl(URL url) {

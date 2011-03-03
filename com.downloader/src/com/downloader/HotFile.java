@@ -6,7 +6,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -20,13 +19,10 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 
-import com.downloader.Widgets.TextProgressBar;
-
 import stroringdata.DBAdapter;
 import android.app.Activity;
 import android.app.DownloadManager;
 import android.app.DownloadManager.Query;
-import android.app.DownloadManager.Request;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -35,7 +31,6 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.StatFs;
@@ -53,6 +48,8 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.downloader.Widgets.TextProgressBar;
 
 
 /*
@@ -109,7 +106,6 @@ public class HotFile extends Activity {
 		((Button) findViewById(R.id.Button_showdownloadlist)).setOnClickListener(buttonOnClickShowdownloadlistListener);
 		((Button) findViewById(R.id.Button_addlinksfromfile)).setOnClickListener(buttontAddLinksFile);
 		((Button) findViewById(R.id.Button_addlinkfromclipboard)).setOnClickListener(buttonAddLink);
-		
 		check = new prepareActions();
 		checkPreferences();
 		//comp
