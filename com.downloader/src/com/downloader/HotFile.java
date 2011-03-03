@@ -132,22 +132,26 @@ public class HotFile extends Activity {
 	
 	
 	/// <summary>
-    /// Isolate links from string
-    /// </summary>
-    /// <param name="link">line of text</param>
-    private boolean getLinkFromText(String link)
-    {
-    	Pattern p = Pattern.compile("http://([\\w+?\\.\\w+])+hotfile.com/+([a-zA-Z0-9\\~\\!\\@\\#\\$\\%\\^\\&amp;\\*\\(\\)_\\-\\=\\+\\\\\\/\\?\\.\\:\\;\\'\\,]*)?");
-        //MatchResult mp 
-    	Matcher m = p.matcher(link);
-    	return m.matches();
-    /*	String[] sp = p.split(link); 
-    	
-    	
-    	for (String s: sp){
-    		Toast.makeText(HotFile.this,s,Toast.LENGTH_LONG).show();
-    	}*/
-    }
+	   /// Isolate links from string
+	   /// </summary>
+	   /// <param name="link">line of text</param>
+	   private List<String> getLinkFromText(String link, String serviceName)
+	   {
+	       link = "http://www.hotfile.com/dl/92148167/7c86b14/fil.txt.htmlyuiouytnrb ...j ,nkiu \r\n " +
+	       		"http://hotfile.www.com/dl/92148167/7c86b14/fil.txt.html http://hotfile.com/dl/92148167/7c86b14/fil.txt.html";
+	       String[] list = link.split("\\ ");
+	       Pattern p = Pattern.compile("http://(www\\.)?"+serviceName+".*");
+	       List<String> resultList = new ArrayList<String>();
+
+	       for(String s: list){
+
+	               Matcher m = p.matcher(s);
+	               if (m.matches())
+	                       resultList.add(s);
+	       }
+
+	       return resultList;
+	   }
 	
 	
 	public DownloadingFileItem addProgressBarToDownloadListBox(DownloadingFileItem item){
@@ -241,7 +245,6 @@ public class HotFile extends Activity {
 	
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		// TODO Auto-generated method stub
 		super.onActivityResult(requestCode, resultCode, data);
 		if (requestCode == CODE) {
 			switch (resultCode) {
@@ -251,8 +254,7 @@ public class HotFile extends Activity {
 				if(data!=null)
 					try {
 						AddLinksFromFile(data.getAction());
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
+					} catch (IOException e) { 
 						showNotification("Error occured "+e);
 					}
 				break;
@@ -334,10 +336,8 @@ public class HotFile extends Activity {
 			}}*/
 			
 //		} catch (ClientProtocolException e) {
-			// TODO Auto-generated catch block
 //		e.printStackTrace();
 //		} catch (IOException e) {
-			// TODO Auto-generated catch block
 	//		e.printStackTrace();
 		//}
 	}};
@@ -407,10 +407,8 @@ public class HotFile extends Activity {
 			else
 				return false;
 		} catch (ClientProtocolException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return false;
@@ -456,8 +454,6 @@ public class HotFile extends Activity {
 		@Override
 		public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
 				String key) {
-			// TODO Auto-generated method stub
-			
 			if (key.equals("password") && !password.equals(preferences.getString("username", null))){
 				password = preferences.getString("password", null);
 				Toast.makeText(HotFile.this, "The password has been changed",
@@ -553,7 +549,7 @@ public class HotFile extends Activity {
 		
 		@Override
 		public boolean onLongClick(View v) {
-			// TODO Auto-generated method stub
+			// TODO dlugi klik cos mial robic
 			showNotification("kliniete!" + v.getId());
 			//tak powinno byc
 			//beginDownloading(downList.get(v.getId()).getDownloadLink(), username,password, directory,v.getId(), downList.get(v.getId()).getTextProgressBar());
@@ -624,7 +620,7 @@ public class HotFile extends Activity {
 		
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			// TODO Auto-generated method stub
+			//TODO cos trzeba odbierac
 		}
 		
 		

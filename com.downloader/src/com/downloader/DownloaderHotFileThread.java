@@ -78,11 +78,9 @@ final Notification notification = new Notification(R.drawable.icon, "Downloading
 	}*/
 	
 	public void run() {
-		// TODO Auto-generated method stub
 		try {
 			createNotification();
 		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
 			Log.v("A", "4");
 			e.printStackTrace();
 		}

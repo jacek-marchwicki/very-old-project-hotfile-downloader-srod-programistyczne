@@ -1,4 +1,4 @@
-package old;
+package com.downloader.Services;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,32 +14,33 @@ import org.apache.http.util.EntityUtils;
 
 import android.app.Service;
 import android.content.Intent;
+import android.database.ContentObserver;
+import android.os.Handler;
 import android.os.IBinder;
 
 public class DownloadService extends Service {
-
-	private static final int MAX_BUFFER_SIZE = 1024;
-	public static final String STATUSES[] = {"Downloading",
-		"Paused", "Complete", "Cancelled", "Error"};
-	private Intent intent;
-	private int size; // size of download in bytes
-	private int downloaded; // number of bytes downloaded
-	private int status; // current status of download
-	String link, username, passwordmd5, directory;
-
-	public static final int DOWNLOADING = 0;
-	public static final int PAUSED = 1;
-	public static final int COMPLETE = 2;
-	public static final int CANCELLED = 3;
-	public static final int ERROR = 4;
 	
-	private UpdateThread updateThread = null;
+	private DownloadContentObserver mObserver;
+
+	
+	private UpdateThread mUpdateThread = null; //private CLASS
+	
+	
+	private class DownloadContentObserver extends ContentObserver {
+		public DownloadContentObserver() {
+		 super(new Handler());
+		}
+		
+		public void onChange(final boolean selfChange) {
+			//TODO uzupe³niæ from onChange downloaService
+		}
+	}
 	
 	private class UpdateThread extends Thread {
 		@Override
 		public void run() {
-			// Tworzenie watkow do downloadu
-			if (updateThread != this) {
+			// TODO Tworzenie watkow do downloadu
+			if (mUpdateThread != this) {
                 throw new IllegalStateException(
                         "multiple UpdateThreads in DownloadService");
             }
@@ -49,30 +50,22 @@ public class DownloadService extends Service {
 
 	public DownloadService(String link, String username, String password, String directory)
 	{
-		this.size = -1;
-		this.downloaded = 0;
-		status = DOWNLOADING;
-		this.link = link;
-		this.username = username;
-		//this.passwordmd5 = Md5Create.generateMD5Hash(password);
-		this.passwordmd5 = password;
-		this.directory = directory;
+		
 	}
 	
 	@Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         int returnValue = super.onStartCommand(intent, flags, startId);
-        if (updateThread == null) {
-        	updateThread = new UpdateThread();
-        	updateThread.stop();
+        if (mUpdateThread == null) {
+        	mUpdateThread = new UpdateThread();
+        	mUpdateThread.stop();
         }
         return returnValue;
     }
 
 	@Override
 	public IBinder onBind(Intent intent) {
-		// TODO Auto-generated method stub
-		return null;
+		 throw new UnsupportedOperationException("Cannot bind to Download Manager Service");
 	}
 
 	@Override
@@ -83,11 +76,6 @@ public class DownloadService extends Service {
 	public String getUrl(URL url) {
 		String fileName = url.getFile();
 		return fileName.substring(fileName.lastIndexOf('/') + 1);
-	}
-
-	private void error() {
-		status = ERROR;
-		//		    stateChanged();
 	}
 
 	private Thread downloadFile = new Thread(){
