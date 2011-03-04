@@ -32,7 +32,7 @@ public class DownloadService extends Service {
 		}
 		
 		public void onChange(final boolean selfChange) {
-			//TODO uzupe³niæ from onChange downloaService
+			//TODO uzupeï¿½niï¿½ from onChange downloaService
 		}
 	}
 	
@@ -82,6 +82,7 @@ public class DownloadService extends Service {
 		public void run(){
 			RandomAccessFile file = null;
 			InputStream stream = null;
+			/*
 			try{
 				//	Log.v(LOG_TAG, "Begin downloading");
 				DefaultHttpClient httpclient = new DefaultHttpClient();
@@ -140,7 +141,7 @@ public class DownloadService extends Service {
 							stream.close();
 						} catch (Exception e) {}
 					}
-			}
+			}*/
 		}
 	};
 
