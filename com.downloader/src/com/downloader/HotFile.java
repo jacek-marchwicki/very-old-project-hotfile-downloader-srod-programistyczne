@@ -130,286 +130,6 @@ public class HotFile extends Activity {
 
 	private static int CODE = 1;
 
-	// / <summary>
-	// / Isolate links from string
-	// / </summary>
-	// / <param name="link">line of text</param>
-	private List<String> getLinkFromText(String link, String serviceName) {
-		link = "http://www.hotfile.com/dl/92148167/7c86b14/fil.txt.htmlyuiouytnrb ...j ,nkiu \r\n "
-				+ "http://hotfile.www.com/dl/92148167/7c86b14/fil.txt.html http://hotfile.com/dl/92148167/7c86b14/fil.txt.html";
-		String[] list = link.split("\\ ");
-		Pattern p = Pattern.compile("http://(www\\.)?" + serviceName + ".*");
-		List<String> resultList = new ArrayList<String>();
-
-		for (String s : list) {
-
-			Matcher m = p.matcher(s);
-			if (m.matches())
-				resultList.add(s);
-		}
-
-		return resultList;
-	}
-
-	
-
-	public void addLineToDownloadListBox(String line) {
-		LinearLayout ll = (LinearLayout) findViewById(R.id.mylayout);
-		LayoutInflater ly = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		View customView = ly.inflate(R.layout.downloadingitem, null);
-		customView.setId(0);
-		TextView tv = (TextView) customView.findViewById(R.id.TextView001);
-		if (line == "")
-			tv.setText("sa"); // tu ma byc czyszczenie text boxa, ale jeszcze
-								// nie ma
-		else
-			tv.setText(line);
-		ll.addView(customView);
-		int i = 0;
-		while (i < 100) {
-			TextProgressBar tx = new TextProgressBar(this);
-			tx.setProgress(i);
-			tx.setText(i + "%");
-			i += 10;
-		}
-	}
-
-	private OnClickListener buttonOnClickShowdownloadlistListener = new OnClickListener() {
-		public void onClick(View v) {
-			try {
-				// for(String s: listOfDownloadingFiles)
-				// addLineToDownloadListBox(s);
-				//startActivity(new Intent());
-			//	Intent intent = new Intent(
-				
-
-				Intent i = new Intent(HotFile.this, DownloadList.class);
-				startActivity(i);
-			} catch (Exception e) {
-				Log.v(LOG_TAG, e.toString());
-			}
-//			Bundle bundle = new Bundle();
-//			bundle.putString("link",
-//					"http://hotfile.com/dl/92148167/7c86b14/fil.txt.html");
-//			bundle.putString("username", username);
-//			bundle.putString("password", password);
-//			bundle.putString("directory", directory);
-			
-		}
-	};
-
-	private OnClickListener buttonAddLink = new OnClickListener() {
-		public void onClick(View v) {
-
-			try {
-				// buttonOnClickShowdownloadlist(v);
-				long id;
-				DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
-				Uri uri = Uri
-						.parse("http://www.android-app-developer.co.uk/android-app-development-docs/android-writing-zippy-android-apps.pdf");
-				DownloadManager.Request request = new DownloadManager.Request(
-						uri);
-
-				request.setTitle("aaa");
-				List<String> pathSegments = uri.getPathSegments();
-				request.setDestinationInExternalPublicDir(
-						Environment.DIRECTORY_DOWNLOADS,
-						pathSegments.get(pathSegments.size() - 1) + "9");
-				Environment.getExternalStoragePublicDirectory(
-						Environment.DIRECTORY_DOWNLOADS).mkdirs();
-				id = downloadManager.enqueue(request);
-				Query query = new Query();
-				query.setFilterById(id);
-				Cursor cursor = downloadManager.query(query);
-				int idStatus = cursor
-						.getColumnIndex(DownloadManager.COLUMN_URI);
-				StringBuffer sb = new StringBuffer();
-				cursor.moveToFirst();
-				do {
-					sb.append(DownloadManager.COLUMN_URI + "=")
-							.append("newURI");
-				} while (cursor.moveToNext());
-				cursor.moveToFirst();
-				Log.d("DownloadManagerSample", cursor.getString(idStatus));
-
-			} catch (Exception e) {
-				Log.v(LOG_TAG, "Exception " + e.toString());
-			}
-		}
-	};
-
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		super.onActivityResult(requestCode, resultCode, data);
-		if (requestCode == CODE) {
-			switch (resultCode) {
-			case RESULT_OK:
-				// .setText(data.getStringExtra("country"));
-
-				if (data != null)
-					try {
-						AddLinksFromFile(data.getAction());
-					} catch (IOException e) {
-						showNotification("Error occured " + e);
-					}
-				break;
-			case RESULT_CANCELED:
-				break;
-
-			}
-		}
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.contextmenu, menu);
-		return true;
-	}
-
-	// This method is called once the menu is selected
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		// We have only one menu option
-		case R.id.preferences:
-			try {
-				// Launch Preference activity
-				Intent i = new Intent(HotFile.this, Preferences.class);
-				startActivity(i);
-				// A toast is a view containing a quick little message for the
-				// user.
-				Toast.makeText(HotFile.this,
-						"Here you can maintain your user credentials.",
-						Toast.LENGTH_LONG).show();
-				preferences
-						.registerOnSharedPreferenceChangeListener(prefListener);
-				break;
-			} catch (Exception e) {
-			}
-
-		case R.id.close:
-			super.finish();
-		}
-		return true;
-	}
-
-	public void buttonOnClickShowdownloadlist(View view) {
-		int i = 0;
-		// addProgressBarToDownloadListBox(new TextProgressBar(this));
-
-	}
-
-	/*
-	 * downloadLink has to be available and valid check downloadLink sooner
-	 */
-	private OnClickListener buttonOnClickDownload = new OnClickListener() {
-		public void onClick(View v) {
-			// Toast.makeText(HotFile.this, , Toast.LENGTH_LONG).show();
-			String aaa = Md5Create.generateMD5Hash("puyyut");
-			// BackgroundDownloaderAsyncTask task = new
-			// BackgroundDownloaderAsyncTask();
-			// task.setPreconditions("http://hotfile.com/dl/92148167/7c86b14/fil.txt.html",
-			// this.username, this.password, this.directory);
-			// task.execute();
-			List<String> list = new LinkedList<String>();
-			list.add("http://hotfile.com/dl/81363200/ba7f841/Ostatnia-DVDRip.PL.part1.rar.html");
-			list.add("http://hotfile.com/dl/98588098/f5c4897/4.pdf.html"); // 2MB
-			list.add("http://hotfile.com/dl/98588065/ece61ef/1.pdf.html");// 4MB
-
-			list.add("http://hotfile.com/dl/92148167/7c86b14/fil.txt.html");
-			list.add("http://hotfile.com/dl/92539498/131dad0/Gamee.Of.Death.DVDRip.XviD-VoMiT.m90.part1.rar.html");
-			// try {
-			// check.checkFileExistsOnHotFileServer(list);
-			beginDownloading(list.get(3), username, aaa, directory, 1);
-			// beginDownloading(list.get(2), username,aaa, directory,2);
-
-			/*
-			 * long percentLevel = 2; while(downloaded != size){ downloaded +=
-			 * 1024; long a =((size*percentLevel)/(100*1024)); long b =
-			 * downloaded; if(a == b){ percentLevel = percentLevel < 100 ?
-			 * percentLevel += 2 : 100; }}
-			 */
-
-			// } catch (ClientProtocolException e) {
-			// e.printStackTrace();
-			// } catch (IOException e) {
-			// e.printStackTrace();
-			// }
-		}
-	};
-
-	private void beginDownloading(String link, String username,
-			String passwordmd5, String directory, int id) {
-		DownloaderHotFileThread mDownloaderHotFileThread = new DownloaderHotFileThread(
-				this, link, username, passwordmd5, directory, id);
-		// mDownloaderHotFileThread.start();
-		mDownloaderHotFileThread.run();
-		/*
-//		 * Intent intent = new Intent(this, DownloaderHotfile.class);
-		 * intent.putExtra("link", link); intent.putExtra("username", username);
-		 * intent.putExtra("password", passwordmd5);
-		 * intent.putExtra("directory", directory); intent.putExtra("id",
-		 * Integer.toString(id)); downloadingList.add(intent);
-		 * startService(intent);
-		 */
-
-	}
-
-	/*
-	 * Check if preferences are set
-	 */
-	private void checkPreferences() {
-		username = preferences.getString("username", null);
-		password = preferences.getString("username", null);
-		password = "48e75f559cc5504c8992a47181fdf5ad";
-		directory = preferences.getString("chooseDir", null);
-		File dir;
-		if (directory != null) {
-			directory = directory.replace(" ", "");
-			dir = new File(directory);
-			// sd = new
-			// File(Environment.getExternalStorageDirectory().getPath());
-			// dir = new File(sd.getAbsolutePath()+"/downloads");
-		} else
-			dir = new File(Environment.getExternalStorageDirectory()
-					+ "/downloads");
-		if (!dir.mkdirs())
-			Log.e(LOG_TAG, "Create dir in local failed, maybe dir exists");
-		try {
-			Runtime.getRuntime().exec("chmod 765 " + dir.getPath());
-		} catch (Exception e) {
-			Log.e(LOG_TAG, e.toString());
-		}
-		// dir.setReadable(true);
-		if (username == null && password == null)
-			Toast.makeText(HotFile.this, "You have to fill preferences",
-					Toast.LENGTH_LONG).show();
-	}
-
-	public Boolean checkPrecondition(long size, String link, String username,
-			String passwordmd5, String directory) {
-		try {
-			Boolean firstCond = false, secondCond = false;
-			if (!checkUsernamePasswordValid(username, passwordmd5)) {
-
-			} else
-				firstCond = true;
-			if (checkFreeSpace(directory) > size) {
-
-			} else
-				secondCond = true;
-			if (firstCond && secondCond)
-				return true;
-			else
-				return false;
-		} catch (ClientProtocolException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return false;
-	}
 
 	/*
 	 * Check validity of username and password Example response ->
@@ -446,6 +166,135 @@ public class HotFile extends Activity {
 		}
 	}
 
+	public void showNotification(String notification) {
+		Toast.makeText(HotFile.this, notification, Toast.LENGTH_LONG).show();
+	}
+
+
+	@Override //result of an activity. called automatically
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if (requestCode == CODE) { //called by OnClickListener buttontAddLinksFile 
+			switch (resultCode) {
+			case RESULT_OK:
+				if (data != null)
+					try {
+						AddLinksFromFile(data.getAction());
+						
+					} catch (IOException e) {
+						showNotification("Error occured " + e);
+					}
+				break;
+			case RESULT_CANCELED:
+				break;
+
+			}
+		}
+	}
+	
+
+	
+	// ----------------SHOW DOWNLOADED LIST -------------------------
+	private OnClickListener buttonOnClickShowdownloadlistListener = new OnClickListener() {
+		public void onClick(View v) {
+			try {
+
+				Intent i = new Intent(HotFile.this, DownloadList.class);
+				startActivity(i);
+			} catch (Exception e) {
+				Log.v(LOG_TAG, e.toString());
+			}			
+		}
+	};
+	// ----------------END SHOW DOWNLOADED LIST -------------------------
+	
+	// ----------------MENU-------------------------
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.contextmenu, menu);
+		return true;
+	}
+
+	// This method is called once the menu is selected
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		// We have only one menu option
+		case R.id.preferences:
+			try {
+				// Launch Preference activity
+				Intent i = new Intent(HotFile.this, Preferences.class);
+				startActivity(i);
+				// A toast is a view containing a quick little message for the
+				// user.
+				Toast.makeText(HotFile.this,
+						"Here you can maintain your user credentials.",
+						Toast.LENGTH_LONG).show();
+				preferences
+						.registerOnSharedPreferenceChangeListener(prefListener);
+				break;
+			} catch (Exception e) {
+			}
+
+		case R.id.close:
+			super.finish();
+		}
+		return true;
+	}
+
+	// ----------------END MENU-------------------------
+
+	
+
+	private void beginDownloading(String link, String username,
+			String passwordmd5, String directory, int id) {
+		DownloaderHotFileThread mDownloaderHotFileThread = new DownloaderHotFileThread(
+				this, link, username, passwordmd5, directory, id);
+		// mDownloaderHotFileThread.start();
+		mDownloaderHotFileThread.run();
+		/*
+//		 * Intent intent = new Intent(this, DownloaderHotfile.class);
+		 * intent.putExtra("link", link); intent.putExtra("username", username);
+		 * intent.putExtra("password", passwordmd5);
+		 * intent.putExtra("directory", directory); intent.putExtra("id",
+		 * Integer.toString(id)); downloadingList.add(intent);
+		 * startService(intent);
+		 */
+
+	}
+	// ----------------PREFERENCES-------------------------
+	/*
+	 * Check if preferences are set
+	 */
+	private void checkPreferences() {
+		username = preferences.getString("username", null);
+		password = preferences.getString("username", null);
+		password = "48e75f559cc5504c8992a47181fdf5ad";
+		directory = preferences.getString("chooseDir", null);
+		File dir;
+		if (directory != null) {
+			directory = directory.replace(" ", "");
+			dir = new File(directory);
+			// sd = new
+			// File(Environment.getExternalStorageDirectory().getPath());
+			// dir = new File(sd.getAbsolutePath()+"/downloads");
+		} else
+			dir = new File(Environment.getExternalStorageDirectory()
+					+ "/downloads");
+		if (!dir.mkdirs())
+			Log.e(LOG_TAG, "Create dir in local failed, maybe dir exists");
+		try {
+			Runtime.getRuntime().exec("chmod 765 " + dir.getPath());
+		} catch (Exception e) {
+			Log.e(LOG_TAG, e.toString());
+		}
+		// dir.setReadable(true);
+		if (username == null && password == null)
+			Toast.makeText(HotFile.this, "You have to fill preferences",
+					Toast.LENGTH_LONG).show();
+	}
+
 	public OnSharedPreferenceChangeListener prefListener = new OnSharedPreferenceChangeListener() {
 
 		@Override
@@ -473,12 +322,36 @@ public class HotFile extends Activity {
 
 		}
 	};
+	
+	
+	public Boolean checkPrecondition(long size, String link, String username,
+			String passwordmd5, String directory) {
+		try {
+			Boolean firstCond = false, secondCond = false;
+			if (!checkUsernamePasswordValid(username, passwordmd5)) {
 
-	public void showNotification(String notification) {
-		Toast.makeText(HotFile.this, notification, Toast.LENGTH_LONG).show();
+			} else
+				firstCond = true;
+			if (checkFreeSpace(directory) > size) {
+
+			} else
+				secondCond = true;
+			if (firstCond && secondCond)
+				return true;
+			else
+				return false;
+		} catch (ClientProtocolException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return false;
 	}
 
-	// ----------------ADDING FILES -------------------------
+	// ----------------END PREFERENCES -------------------------
+	
+	// ----------------ADDING DOWNLOADING ITEMS -------------------------
+	public static List<DownloadingFileItem> downList;
 
 	private OnClickListener buttontAddLinksFile = new OnClickListener() {
 		public void onClick(View v) {
@@ -511,19 +384,18 @@ public class HotFile extends Activity {
 					list.add(line);
 				}
 
-				addNewFiles(list); // passing the list of links to the method
+				addNewFiles(list); // passing the list of lines from file to the method
 			}
 		} catch (Exception e) {
 			Log.v(LOG_TAG, "error " + e.toString());
 			showNotification("Error occured when adding links from a file");
 		}
 	}
-
-	public static List<DownloadingFileItem> downList;
-
+	
 	private void addNewFiles(List<String> linksList)
 			throws ClientProtocolException, IOException {
-		downList = check.prepareFilesToDownload(linksList);
+		
+		downList = check.prepareFilesToDownload(getLinkFromText(linksList, "hotfile.com"));
 		int numberofAddedFiles = downList.size();
 
 		for (DownloadingFileItem listItem : downList) {
@@ -541,7 +413,7 @@ public class HotFile extends Activity {
 		showNotification(numberofAddedFiles + " files have been added");
 
 	}
-
+/*
 	private boolean removeFile(long id) {
 
 		for (DownloadingFileItem listItem : listOfDownloadingFiles)
@@ -552,9 +424,33 @@ public class HotFile extends Activity {
 			}
 		return false;
 
-	}
+	}*/
 
-	// ----------------END ADDING FILES---------------------
+	/*
+	 * Isolate links from a list of strings
+	 *  <param name="link">line of text</param>
+	 *  <param name="serviceName">name od the service from files could be downloaded</param>
+	 */
+	private List<String> getLinkFromText(List<String> links, String serviceName) {
+		List<String> resultList = new ArrayList<String>();
+		
+		for(String link: links){
+			String[] list = link.split("\\ ");
+			Pattern p = Pattern.compile("http://(www\\.)?" + serviceName + ".*");
+			
+			for (String s : list) {
+	
+				Matcher m = p.matcher(s);
+				if (m.matches())
+					resultList.add(s);
+			}
+		}
+
+		return resultList;
+	}
+	
+	
+	// ----------------END ADDING DOWNLOADING ITEMS---------------------
 
 	// ------------------DATABASE ---------------------------
 	DBAdapter db;
@@ -607,5 +503,93 @@ public class HotFile extends Activity {
 		}
 
 	};
+	
+	public void buttonOnClickShowdownloadlist(View view) {
+	//	int i = 0;
+		// addProgressBarToDownloadListBox(new TextProgressBar(this));
+
+	}
+
+	
+	/*
+	 * downloadLink has to be available and valid check downloadLink sooner
+	 */
+	private OnClickListener buttonOnClickDownload = new OnClickListener() {
+		public void onClick(View v) {
+			String aaa = Md5Create.generateMD5Hash("puyyut");
+			List<String> list = new LinkedList<String>();
+			list.add("http://hotfile.com/dl/81363200/ba7f841/Ostatnia-DVDRip.PL.part1.rar.html");
+			list.add("http://hotfile.com/dl/98588098/f5c4897/4.pdf.html"); // 2MB
+			list.add("http://hotfile.com/dl/98588065/ece61ef/1.pdf.html");// 4MB
+
+			list.add("http://hotfile.com/dl/92148167/7c86b14/fil.txt.html");
+			list.add("http://hotfile.com/dl/92539498/131dad0/Gamee.Of.Death.DVDRip.XviD-VoMiT.m90.part1.rar.html");
+
+			beginDownloading(list.get(3), username, aaa, directory, 1);
+		}
+	};
+	
+
+	private OnClickListener buttonAddLink = new OnClickListener() {
+		public void onClick(View v) {
+			//TODO - moim zdaniem ta metoda nie działa lub jest nieuzywana
+			try {
+				// buttonOnClickShowdownloadlist(v);
+				long id;
+				DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+				Uri uri = Uri
+						.parse("http://www.android-app-developer.co.uk/android-app-development-docs/android-writing-zippy-android-apps.pdf");
+				DownloadManager.Request request = new DownloadManager.Request(
+						uri);
+
+				request.setTitle("aaa");
+				List<String> pathSegments = uri.getPathSegments();
+				request.setDestinationInExternalPublicDir(
+						Environment.DIRECTORY_DOWNLOADS,
+						pathSegments.get(pathSegments.size() - 1) + "9");
+				Environment.getExternalStoragePublicDirectory(
+						Environment.DIRECTORY_DOWNLOADS).mkdirs();
+				id = downloadManager.enqueue(request);
+				Query query = new Query();
+				query.setFilterById(id);
+				Cursor cursor = downloadManager.query(query);
+				int idStatus = cursor
+						.getColumnIndex(DownloadManager.COLUMN_URI);
+				StringBuffer sb = new StringBuffer();
+				cursor.moveToFirst();
+				do {
+					sb.append(DownloadManager.COLUMN_URI + "=")
+							.append("newURI");
+				} while (cursor.moveToNext());
+				cursor.moveToFirst();
+				Log.d("DownloadManagerSample", cursor.getString(idStatus));
+
+			} catch (Exception e) {
+				Log.v(LOG_TAG, "Exception " + e.toString());
+			}
+		}
+	};
+	
+	/*
+	public void addLineToDownloadListBox(String line) {
+		LinearLayout ll = (LinearLayout) findViewById(R.id.mylayout);
+		LayoutInflater ly = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		View customView = ly.inflate(R.layout.downloadingitem, null);
+		customView.setId(0);
+		TextView tv = (TextView) customView.findViewById(R.id.TextView001);
+		if (line == "")
+			tv.setText("sa"); // tu ma byc czyszczenie text boxa, ale jeszcze
+								// nie ma
+		else
+			tv.setText(line);
+		ll.addView(customView);
+		int i = 0;
+		while (i < 100) {
+			TextProgressBar tx = new TextProgressBar(this);
+			tx.setProgress(i);
+			tx.setText(i + "%");
+			i += 10;
+		}
+	}*/
 
 }

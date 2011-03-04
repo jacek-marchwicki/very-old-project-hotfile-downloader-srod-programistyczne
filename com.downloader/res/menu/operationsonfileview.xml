@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<menu
-  xmlns:android="http://schemas.android.com/apk/res/android">
-  	<item android:id="@+id/o_start"	android:title="@string/start"  />
-    <item android:id="@+id/o_stop" 	android:title="@string/stop" />
-    <item android:id="@+id/o_pause" android:title="@string/pause" />
-    <item android:id="@+id/o_resume" android:title="@string/resume"/>
-    <item android:id="@+id/o_quit" android:title="@string/quit"/>
-</menu>

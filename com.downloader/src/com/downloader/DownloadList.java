@@ -61,8 +61,8 @@ public class DownloadList extends Activity{
 		@Override
 		public boolean onLongClick(View v) {
 			// TODO dlugi klik cos mial robic
-			showNotification("klikniete!" + v.getId());
 
+			//showNotification("klikniete!" + v.getId());
 			try {
 			//	Intent i = new Intent(DownloadList.this, MovieButtons.class);
 			//	startActivity(i);
@@ -75,6 +75,19 @@ public class DownloadList extends Activity{
 			return false;
 		}
 	};
+	
+	private void startDownloadingItem(){
+		
+	}
+	
+	private void deleteDownloadingItem(){
+		
+	}
+	
+	private void pauseDownloadingItem(){
+		
+	}
+	
 	
 	public void showNotification(String notification) {
 		Toast.makeText(DownloadList.this, notification, Toast.LENGTH_LONG).show();
@@ -102,7 +115,7 @@ public class DownloadList extends Activity{
 								}
 							})
 							
-//					.setNegativeButton("Restart",
+/*					.setNegativeButton("Restart",
 //							new DialogInterface.OnClickListener() {
 //
 //								@Override
@@ -110,7 +123,7 @@ public class DownloadList extends Activity{
 //										int which) {
 //									showNotification("Activity will continue");
 //								}
-//							})
+							})*/
 					.setNeutralButton("Pause",
 							new DialogInterface.OnClickListener() {
 								@Override
