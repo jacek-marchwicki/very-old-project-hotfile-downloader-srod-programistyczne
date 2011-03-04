@@ -22,12 +22,15 @@ import com.downloader.Widgets.TextProgressBar;
 
 public class DownloadList extends Activity{
 	
+	DownloadingFileItem chosenItem;
+	List<DownloadingFileItem> downloadList;
+	
 	@Override
 	public void onCreate(Bundle bundle){
 		super.onCreate(bundle);
 		setContentView(R.layout.download_list);
 		
-		List<DownloadingFileItem> downloadList = HotFile.listOfDownloadingFiles;
+		downloadList = HotFile.listOfDownloadingFiles;
 		
 		LinearLayout ll = (LinearLayout) findViewById(R.id.layoutDownloadItemList);
 		for (DownloadingFileItem d: downloadList){
@@ -55,13 +58,23 @@ public class DownloadList extends Activity{
 
 	}
 	
-	// called when the movie item is pressed -- details buttons
+	
+	private DownloadingFileItem findItem(int fileId){
+		for(DownloadingFileItem d: downloadList){
+			if (d.getId() == fileId)
+				return d;
+		}
+		return null;
+	}
+	
+	// called when the download item is pressed -- details buttons
 	private View.OnLongClickListener relativeLayoutListener = new View.OnLongClickListener() {
 
 		@Override
 		public boolean onLongClick(View v) {
 			// TODO dlugi klik cos mial robic
-
+			int chosenFileId = v.getId();
+			chosenItem = findItem(chosenFileId);
 			//showNotification("klikniete!" + v.getId());
 			try {
 			//	Intent i = new Intent(DownloadList.this, MovieButtons.class);
@@ -77,17 +90,19 @@ public class DownloadList extends Activity{
 	};
 	
 	private void startDownloadingItem(){
-		
+		chosenItem.startState();
 	}
 	
 	private void deleteDownloadingItem(){
-		
+	
 	}
 	
 	private void pauseDownloadingItem(){
-		
+		chosenItem.pauseState();
 	}
-	
+	public void finishedDownlodingItem(){
+		chosenItem.finishedState();	
+	}
 	
 	public void showNotification(String notification) {
 		Toast.makeText(DownloadList.this, notification, Toast.LENGTH_LONG).show();
@@ -103,7 +118,7 @@ public class DownloadList extends Activity{
 		case 10:
 			// Create our AlertDialog
 			Builder builder = new AlertDialog.Builder(this);
-			builder.setMessage("Choose an action")
+			builder.setMessage("Choose an action\nCurrent state: "+chosenItem.getFileState())
 					.setCancelable(true)
 					.setPositiveButton("Start",
 							new DialogInterface.OnClickListener() {
@@ -111,6 +126,7 @@ public class DownloadList extends Activity{
 								public void onClick(DialogInterface dialog,
 										int which) {
 									showNotification("Start");
+									startDownloadingItem();
 								//	ShowMyDialog.this.finish();
 								}
 							})
@@ -130,6 +146,7 @@ public class DownloadList extends Activity{
 								public void onClick(DialogInterface dialog,
 										int which) {
 									showNotification("Pause");
+									pauseDownloadingItem();
 								//	ShowMyDialog.this.finish();
 								}
 							})
@@ -139,6 +156,7 @@ public class DownloadList extends Activity{
 								public void onClick(DialogInterface dialog,
 										int which) {
 									showNotification("Delete");
+									deleteDownloadingItem();
 								//	ShowMyDialog.this.finish();
 								}
 							});

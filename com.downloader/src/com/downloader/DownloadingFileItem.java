@@ -28,14 +28,36 @@ public class DownloadingFileItem extends Activity{
 		this.name = name;
 		this.downloadLink = downloadLink;
 		this.size = size;
-		
+		this.fileState=0;	//0-nierozpoczete; 1-started; 2-finished; 3-paused
 	}
 	
-
+	private int fileState;
 	private long id;
 	private int linkID;
 	private Boolean status;
 	private String name, downloadLink;
+
+	
+	public void startState(){
+		fileState=1;
+	}
+	
+	public void pauseState(){
+		fileState=3;
+	}
+	
+	public void finishedState(){
+		fileState=2;
+	}
+	
+	/**
+	 * 0-not started
+	 * 1-started
+	 * 2-finished
+	 * 3-paused*/
+	public int getFileState(){
+		return fileState;
+	}
 	
 	/**
 	 * @return the downloadLink
