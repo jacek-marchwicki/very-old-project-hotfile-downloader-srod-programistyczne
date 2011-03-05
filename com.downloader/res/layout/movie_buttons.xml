@@ -6,31 +6,14 @@
     android:layout_height="fill_parent"
     android:id="@+id/movieButtons"
 >
+<TextView android:text="Write your link in the box:" android:id="@+id/TextView01" android:layout_width="wrap_content" android:layout_height="wrap_content"></TextView>
+<EditText android:text="http://hotfile.com/lb/" android:id="@+id/addLinkBox" android:layout_width="wrap_content" android:layout_height="wrap_content"></EditText>
+
     <Button 
-        android:id="@+id/button_start" 
-        android:text="Start"
+        android:id="@+id/button_addLink" 
+        android:text="ADD"
         android:layout_width="wrap_content" 
         android:layout_height="wrap_content" 
     />
-    
-    <Button 
-        android:id="@+id/button_restart" 
-        android:text="Restart"
-        android:layout_width="wrap_content" 
-        android:layout_height="wrap_content" 
-    />
-    <Button 
-        android:id="@+id/button_pause" 
-        android:text="Pause"
-        android:layout_width="wrap_content" 
-        android:layout_height="wrap_content" 
-    />
-    
-    <Button 
-        android:id="@+id/button_delete" 
-        android:text="Delete"
-        android:layout_width="wrap_content" 
-        android:layout_height="wrap_content" 
-    />
-    
+ 
 </LinearLayout>

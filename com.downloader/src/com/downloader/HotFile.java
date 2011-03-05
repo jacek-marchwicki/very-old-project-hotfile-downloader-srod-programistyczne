@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -35,6 +36,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.StatFs;
 import android.preference.PreferenceManager;
+import android.text.ClipboardManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -101,14 +103,14 @@ public class HotFile extends Activity {
 		/*
 		 * ADDING BUTTON CLICKS
 		 */
-		((Button) findViewById(R.id.Button_download))
-				.setOnClickListener(buttonOnClickDownload);
-		((Button) findViewById(R.id.Button_showdownloadlist))
-				.setOnClickListener(buttonOnClickShowdownloadlistListener);
-		((Button) findViewById(R.id.Button_addlinksfromfile))
-				.setOnClickListener(buttontAddLinksFile);
-		((Button) findViewById(R.id.Button_addlinkfromclipboard))
-				.setOnClickListener(buttonAddLink);
+		((Button) findViewById(R.id.Button_download)).setOnClickListener(buttonOnClickDownload);
+		
+		((Button) findViewById(R.id.Button_showdownloadlist)).setOnClickListener(buttonOnClickShowdownloadlistListener);
+		((Button) findViewById(R.id.Button_addlinksfromfile)).setOnClickListener(buttontAddLinksFile);
+		
+		((Button) findViewById(R.id.Button_addlinkfromclipboard)).setOnClickListener(buttonAddLinkFromClipboard);
+		((Button) findViewById(R.id.Button_addlink)).setOnClickListener(buttonAddLink);
+		
 		check = new prepareActions();
 		checkPreferences();
 		// comp
@@ -128,10 +130,11 @@ public class HotFile extends Activity {
 		registerReceiver(completeReceiver, completeFilter);
 	}
 
-	private static int CODE = 1;
+	private final int CODEAddLinksFile = 1;
+	private final int CODEAddLink = 2;
 
 
-	/*
+	/**
 	 * Check validity of username and password Example response ->
 	 * is_premium=1&premium_until
 	 * =2011-01-01T05:25:58-06:00&hotlink_traffic_kb=209715200 Only first we
@@ -150,7 +153,7 @@ public class HotFile extends Activity {
 				responseText.indexOf("="), responseText.indexOf("=") + 1));
 	}
 
-	/*
+	/**
 	 * Check if free space is available on sdcard
 	 */
 	public long checkFreeSpace(String directory) {
@@ -170,16 +173,26 @@ public class HotFile extends Activity {
 		Toast.makeText(HotFile.this, notification, Toast.LENGTH_LONG).show();
 	}
 
-
-	@Override //result of an activity. called automatically
+/**
+ 	* result of an activity. called automatically*/
+	@Override 
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		super.onActivityResult(requestCode, resultCode, data);
-		if (requestCode == CODE) { //called by OnClickListener buttontAddLinksFile 
+		super.onActivityResult(requestCode, resultCode, data); 
 			switch (resultCode) {
 			case RESULT_OK:
 				if (data != null)
 					try {
-						AddLinksFromFile(data.getAction());
+						
+						switch (requestCode){
+						case CODEAddLinksFile: //called by OnClickListener buttontAddLinksFile
+							AddLinksFromFile(data.getAction());
+							break;
+						case CODEAddLink: //called by OnClickListener buttontAddLink
+							List<String> tempList = new ArrayList<String>();
+							tempList.add(data.getAction());
+							addNewFiles(tempList);
+							break;
+						}
 						
 					} catch (IOException e) {
 						showNotification("Error occured " + e);
@@ -187,14 +200,12 @@ public class HotFile extends Activity {
 				break;
 			case RESULT_CANCELED:
 				break;
-
-			}
-		}
+			}		
 	}
 	
 
 	
-	// ----------------SHOW DOWNLOADED LIST -------------------------
+	/** ----------------SHOW DOWNLOADED LIST -------------------------*/
 	private OnClickListener buttonOnClickShowdownloadlistListener = new OnClickListener() {
 		public void onClick(View v) {
 			try {
@@ -206,9 +217,9 @@ public class HotFile extends Activity {
 			}			
 		}
 	};
-	// ----------------END SHOW DOWNLOADED LIST -------------------------
+	/** ----------------END SHOW DOWNLOADED LIST -------------------------*/
 	
-	// ----------------MENU-------------------------
+	/** ----------------MENU-------------------------*/
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
@@ -243,7 +254,7 @@ public class HotFile extends Activity {
 		return true;
 	}
 
-	// ----------------END MENU-------------------------
+	/** ----------------END MENU-------------------------*/
 
 	
 
@@ -263,8 +274,8 @@ public class HotFile extends Activity {
 		 */
 
 	}
-	// ----------------PREFERENCES-------------------------
-	/*
+	/** ----------------PREFERENCES-------------------------*/
+	/**
 	 * Check if preferences are set
 	 */
 	private void checkPreferences() {
@@ -348,9 +359,9 @@ public class HotFile extends Activity {
 		return false;
 	}
 
-	// ----------------END PREFERENCES -------------------------
+	/** ----------------END PREFERENCES -------------------------*/
 	
-	// ----------------ADDING DOWNLOADING ITEMS -------------------------
+	/** ----------------ADDING DOWNLOADING ITEMS -------------------------*/
 	public static List<DownloadingFileItem> downList;
 
 	private OnClickListener buttontAddLinksFile = new OnClickListener() {
@@ -358,7 +369,7 @@ public class HotFile extends Activity {
 
 			try {
 				Intent i = new Intent(HotFile.this, FileChooser.class);
-				startActivityForResult(i, CODE);
+				startActivityForResult(i, CODEAddLinksFile);
 
 			} catch (Exception e) {
 				Log.v(LOG_TAG, "Exception " + e.toString());
@@ -366,6 +377,7 @@ public class HotFile extends Activity {
 		}
 	};
 
+	
 	private void AddLinksFromFile(String filename) throws IOException {
 
 		File file = new File(filename);
@@ -392,26 +404,33 @@ public class HotFile extends Activity {
 		}
 	}
 	
+	/**
+	 * Common method to add files*/
 	private void addNewFiles(List<String> linksList)
 			throws ClientProtocolException, IOException {
 		
-		downList = check.prepareFilesToDownload(getLinkFromText(linksList, "hotfile.com"));
-		int numberofAddedFiles = downList.size();
-
-		for (DownloadingFileItem listItem : downList) {
-			long itemId = addItemToDatabase(listItem.getDownloadLink(),
-					listItem.getSize(), 0); // adding to database
-			if (itemId != (-1)) { // if the file has been added to database
-				listItem.setId(itemId);
-
-			//	listItem = addProgressBarToDownloadListBox(listItem);
-				listOfDownloadingFiles.add(listItem); // adding to list
-
-			} else
-				--numberofAddedFiles; // the item has not been added
+		List<String> preparedLinks = getLinkFromText(linksList, "hotfile.com");
+		if (preparedLinks.size() > 0){
+			//TODO ten prepare nie działa! sypie się w 78 linijce
+			downList = check.prepareFilesToDownload(preparedLinks);
+			int numberofAddedFiles = downList.size();
+	
+			for (DownloadingFileItem listItem : downList) {
+				long itemId = addItemToDatabase(listItem.getDownloadLink(),
+						listItem.getSize(), 0); // adding to database
+				if (itemId != (-1)) { // if the file has been added to database
+					listItem.setId(itemId);
+	
+				//	listItem = addProgressBarToDownloadListBox(listItem);
+					listOfDownloadingFiles.add(listItem); // adding to list
+	
+				} else
+					--numberofAddedFiles; // the item has not been added
+			}
+			showNotification(numberofAddedFiles + " files have been added");
 		}
-		showNotification(numberofAddedFiles + " files have been added");
-
+		else
+			showNotification("no file has been added");
 	}
 /*
 	private boolean removeFile(long id) {
@@ -426,10 +445,10 @@ public class HotFile extends Activity {
 
 	}*/
 
-	/*
+	/**
 	 * Isolate links from a list of strings
-	 *  <param name="link">line of text</param>
-	 *  <param name="serviceName">name od the service from files could be downloaded</param>
+	 *  @param  links -- list of line of text
+	 *  @param serviceName --  name of the service from files could be downloaded
 	 */
 	private List<String> getLinkFromText(List<String> links, String serviceName) {
 		List<String> resultList = new ArrayList<String>();
@@ -450,9 +469,84 @@ public class HotFile extends Activity {
 	}
 	
 	
+	/**
+	 * Adding new file by copying the clipboard**/
+	private OnClickListener buttonAddLinkFromClipboard = new OnClickListener() {
+		public void onClick(View v) {
+			//TODO -
+			try {
+				ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+				if (clipboard.hasText()){
+					String data = (String) clipboard.getText();
+					//showNotification("clipboard "+ data);
+					List<String> datas = new ArrayList<String>();
+					datas.add(data);
+					addNewFiles(datas);
+				}
+				else
+					showNotification("no data in clipboard");
+				
+			}
+			catch(Exception e){}
+		}
+	};
+		
+	
+	/**
+	 *Adding new link by clicking button ADD Link 
+	 * ***/	
+	private OnClickListener buttonAddLink = new OnClickListener() {
+		public void onClick(View v) {
+			//TODO -
+			try {
+				Intent i = new Intent(HotFile.this, MovieButtons.class);
+				startActivityForResult(i, CODEAddLink);
+				//LinearLayout ll = (LinearLayout) findViewById(R.id.movieButtons);
+			//	((Button)findViewById(R.id.button_addLink)).setOnClickListener(button_addLinkListener);
+				
+				
+				/* 
+				 * buttonOnClickShowdownloadlist(v);
+				long id;
+				DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+				Uri uri = Uri
+						.parse("http://www.android-app-developer.co.uk/android-app-development-docs/android-writing-zippy-android-apps.pdf");
+				DownloadManager.Request request = new DownloadManager.Request(
+						uri);
+
+				request.setTitle("aaa");
+				List<String> pathSegments = uri.getPathSegments();
+				request.setDestinationInExternalPublicDir(
+						Environment.DIRECTORY_DOWNLOADS,
+						pathSegments.get(pathSegments.size() - 1) + "9");
+				Environment.getExternalStoragePublicDirectory(
+						Environment.DIRECTORY_DOWNLOADS).mkdirs();
+				id = downloadManager.enqueue(request);
+				Query query = new Query();
+				query.setFilterById(id);
+				Cursor cursor = downloadManager.query(query);
+				int idStatus = cursor
+						.getColumnIndex(DownloadManager.COLUMN_URI);
+				StringBuffer sb = new StringBuffer();
+				cursor.moveToFirst();
+				do {
+					sb.append(DownloadManager.COLUMN_URI + "=")
+							.append("newURI");
+				} while (cursor.moveToNext());
+				cursor.moveToFirst();
+				Log.d("DownloadManagerSample", cursor.getString(idStatus));
+				*/
+
+			} catch (Exception e) {
+				Log.v(LOG_TAG, "Exception " + e.toString());
+			}
+		}
+	};
+	
+	
 	// ----------------END ADDING DOWNLOADING ITEMS---------------------
 
-	// ------------------DATABASE ---------------------------
+	/** ------------------DATABASE ---------------------------*/
 	DBAdapter db;
 
 	private long addItemToDatabase(String link, long l, int downloadedSize) {
@@ -493,7 +587,7 @@ public class HotFile extends Activity {
 		return db.updateItem(rowId, link, totalSize, downloadedSize);
 	}
 
-	// ------------------END DATABASE -----------------------
+	/** ------------------END DATABASE -----------------------*/
 
 	private BroadcastReceiver completeReceiver = new BroadcastReceiver() {
 
@@ -529,46 +623,6 @@ public class HotFile extends Activity {
 		}
 	};
 	
-
-	private OnClickListener buttonAddLink = new OnClickListener() {
-		public void onClick(View v) {
-			//TODO - moim zdaniem ta metoda nie działa lub jest nieuzywana
-			try {
-				// buttonOnClickShowdownloadlist(v);
-				long id;
-				DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
-				Uri uri = Uri
-						.parse("http://www.android-app-developer.co.uk/android-app-development-docs/android-writing-zippy-android-apps.pdf");
-				DownloadManager.Request request = new DownloadManager.Request(
-						uri);
-
-				request.setTitle("aaa");
-				List<String> pathSegments = uri.getPathSegments();
-				request.setDestinationInExternalPublicDir(
-						Environment.DIRECTORY_DOWNLOADS,
-						pathSegments.get(pathSegments.size() - 1) + "9");
-				Environment.getExternalStoragePublicDirectory(
-						Environment.DIRECTORY_DOWNLOADS).mkdirs();
-				id = downloadManager.enqueue(request);
-				Query query = new Query();
-				query.setFilterById(id);
-				Cursor cursor = downloadManager.query(query);
-				int idStatus = cursor
-						.getColumnIndex(DownloadManager.COLUMN_URI);
-				StringBuffer sb = new StringBuffer();
-				cursor.moveToFirst();
-				do {
-					sb.append(DownloadManager.COLUMN_URI + "=")
-							.append("newURI");
-				} while (cursor.moveToNext());
-				cursor.moveToFirst();
-				Log.d("DownloadManagerSample", cursor.getString(idStatus));
-
-			} catch (Exception e) {
-				Log.v(LOG_TAG, "Exception " + e.toString());
-			}
-		}
-	};
 	
 	/*
 	public void addLineToDownloadListBox(String line) {

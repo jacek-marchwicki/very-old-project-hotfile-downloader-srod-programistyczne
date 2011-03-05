@@ -79,7 +79,7 @@ public class FileChooser extends ListActivity {
     
     private void onFileClick(Option o)
     {
-    	Toast.makeText(this, "File Clicked: "+o.getName(), Toast.LENGTH_SHORT).show();
+    	//Toast.makeText(this, "File Clicked: "+o.getName(), Toast.LENGTH_SHORT).show();
     	setResult(RESULT_OK, (new Intent()).setAction(o.getPath()));
     	super.finish();
     

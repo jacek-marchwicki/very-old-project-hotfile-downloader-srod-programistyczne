@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -26,6 +27,8 @@ import android.widget.Toast;
 import com.downloader.R;
 import com.downloader.FileReading.FileArrayAdapter;
 import com.downloader.FileReading.Option;
+import com.downloader.R.id;
+import com.downloader.R.layout;
 import com.downloader.Widgets.TextProgressBar;
 
 
@@ -35,42 +38,24 @@ public class MovieButtons extends Activity{
 	public void onCreate(Bundle bundle){
 		super.onCreate(bundle);
 		setContentView(R.layout.movie_buttons);
-		((Button)findViewById(R.id.button_start)).setOnClickListener(button_startListener);
-		((Button)findViewById(R.id.button_restart)).setOnClickListener(button_restartListener);
-		((Button)findViewById(R.id.button_pause)).setOnClickListener(button_pauseListener);
-		((Button)findViewById(R.id.button_delete)).setOnClickListener(button_deleteListener);
+		((Button)findViewById(R.id.button_addLink)).setOnClickListener(button_addLinkListener);
+		
 	}
 	
-	private OnClickListener button_startListener = new OnClickListener() {
+	private OnClickListener button_addLinkListener = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
 			//TODO SOMETHING
-			Toast.makeText(MovieButtons.this, "test1", Toast.LENGTH_LONG).show();
+			EditText et = (EditText)findViewById(R.id.addLinkBox);
+			String text = et.getText().toString();
+			Toast.makeText(MovieButtons.this, "test1" + text, Toast.LENGTH_LONG).show();
+			finishing(text);
 		}
 	};
 	
-	private OnClickListener button_restartListener = new OnClickListener() {
-		@Override
-		public void onClick(View v) {
-			//TODO SOMETHING
-			Toast.makeText(MovieButtons.this, "test2", Toast.LENGTH_LONG).show();
-		}
-	};
-	
-	private OnClickListener button_pauseListener = new OnClickListener() {
-		@Override
-		public void onClick(View v) {
-			//TODO SOMETHING
-			Toast.makeText(MovieButtons.this, "test3", Toast.LENGTH_LONG).show();
-		}
-	};
-	
-	private OnClickListener button_deleteListener = new OnClickListener() {
-		@Override
-		public void onClick(View v) {
-			//TODO SOMETHING
-			Toast.makeText(MovieButtons.this, "test4", Toast.LENGTH_LONG).show();
-		}
-	};
+	public void finishing(String link){
+		setResult(RESULT_OK, (new Intent()).setAction(link));
+    	super.finish();
+	}
 	
 }
