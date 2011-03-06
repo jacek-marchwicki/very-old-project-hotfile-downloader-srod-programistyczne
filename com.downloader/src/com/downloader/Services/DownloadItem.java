@@ -1,0 +1,143 @@
+package com.downloader.Services;
+
+import java.io.FileOutputStream;
+
+import stroringdata.DBAdapter;
+
+import android.content.ContentResolver;
+import android.content.ContentUris;
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.CharArrayBuffer;
+import android.database.Cursor;
+
+public class DownloadItem {
+	public long id;
+	public String filename;
+	public String requestUri;
+	public String directUri;
+	public String requestApi; //request for direct link to api
+	public int status; //says if some wrong status with file
+	public int control;
+	public long contentSize;  //in bytes
+	public long currentSize; //in bytes;
+	public boolean wifiOnly = true; //file can be downloaded only via wifi connection
+	public volatile boolean mHasActiveThread;
+	public int stop = 0;
+	public boolean deleted = false;
+	
+	
+	private ExtraManaging extraManaging;
+	private Context context;
+	
+	private DownloadItem(Context context, ExtraManaging extraManaging) {
+		this.context = context;
+		this.extraManaging = extraManaging;
+	}
+	
+	
+	public static class Warehouse{
+		
+		private Cursor cursor;
+		private CharArrayBuffer oldChars, newChars;
+		
+		
+		public Warehouse(Cursor cursor) {
+			this.cursor = cursor;
+		}
+		
+		public DownloadItem addNewItem(Context context, ExtraManaging extraManaging){
+			DownloadItem downloadItem = new DownloadItem(context, extraManaging);
+			updateItemFromDatabase(downloadItem);
+			return downloadItem;
+		}
+		
+
+		
+		/** ------------------DATABASE ---------------------------*/
+
+		public String getStringItemFromDatabase(String oldValue, String columnName){
+			int index = cursor.getColumnIndexOrThrow(columnName);
+			if(oldValue == null)
+				return cursor.getString(index);
+			if(newChars == null)
+				newChars = new CharArrayBuffer(128);
+			cursor.copyStringToBuffer(index, newChars);
+			int length = newChars.sizeCopied;
+			if(length != oldValue.length())
+				return new String(newChars.data,0,length);
+			if(oldChars == null || oldChars.sizeCopied < length)
+				oldChars = new CharArrayBuffer(length);
+			char[] oldArray = oldChars.data;
+			char[] newArray = newChars.data;
+			oldValue.getChars(0, length, oldArray, 0);
+			for(int i = length-1;i>=0;--i)
+				if(oldArray[i] != newArray[i])
+					return new String(newArray, 0, length);
+			return oldValue;
+		}
+
+		private int getIntItemFromDatabase(String columnName) {
+			return cursor.getInt(cursor.getColumnIndexOrThrow(columnName));
+		}
+		
+		private long getLongItemFromDatabase(String columnName) {
+			return cursor.getLong(cursor.getColumnIndexOrThrow(columnName));
+		}
+
+		private void getAllItemsFromDatabase() {
+			Cursor c = db.getAllItems();
+			while (c.moveToNext()) {
+				long row = c.getLong(0);
+				String link = c.getString(1);
+				int size = c.getInt(2);
+				int downSize = c.getInt(3);
+			}
+		}
+		DBAdapter db;
+
+		private long addItemToDatabase(String link, long l, int downloadedSize) {
+			return db.addItem(link, l, downloadedSize);
+		}
+
+
+
+		public void updateItemFromDatabase(DownloadItem downloadItem) {
+			downloadItem.id = getLongItemFromDatabase(Variables.DB_KEY_ROWID);
+			
+			downloadItem.requestApi = "http://api.hotfile.com/?action=getdirectdownloadlink&link="+downloadItem.requestUri
+			+"&username="+DownloadService.UsernamePasswordMD5Storage.getUsername()
+			+"&passwordmd5="+DownloadService.UsernamePasswordMD5Storage.getPasswordMD5();
+			
+			downloadItem.requestUri = getStringItemFromDatabase(downloadItem.requestUri, Variables.DB_REQUESTURI);
+			downloadItem.directUri = getStringItemFromDatabase(downloadItem.directUri, Variables.DB_DIRECTURI);
+			//TODO CHECK IF DIRECT URI IS VALID
+			downloadItem.contentSize  =  getLongItemFromDatabase(Variables.DB_KEY_TOTALSIZE);
+			downloadItem.currentSize = getLongItemFromDatabase(Variables.DB_KEY_DOWNLOADEDSIZE);
+			downloadItem.filename = getStringItemFromDatabase(downloadItem.filename, Variables.DB_KEY_FILENAME);
+			
+			//TODO zmienna deleted do uzupelnienia?
+			
+		}
+
+		/** ------------------END DATABASE -----------------------*/
+		
+	
+		
+	}	
+	public void tryToStartDownload(){
+			if(mHasActiveThread || control == Variables.CONTROL_PAUSE)
+				return;
+			if(status == Variables.STATUS_RUNNING || status == Variables.STATUS_WAITING){
+				if(status != Variables.STATUS_RUNNING){
+					status = Variables.STATUS_RUNNING;
+					ContentValues contentValues = new ContentValues();
+					contentValues.put(Variables.DB_COLUMN_STATUS, status);
+					DBAdapter.updateDatabaseContentValues(this.id, contentValues);
+				}
+				DownloadingHotFileThread dwThread = new DownloadingHotFileThread(context, extraManaging, this);
+				mHasActiveThread = true;
+				extraManaging.startThread(dwThread);
+			}
+		}
+}

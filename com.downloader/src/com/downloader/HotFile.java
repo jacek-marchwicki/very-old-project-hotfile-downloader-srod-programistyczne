@@ -51,6 +51,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.downloader.Services.DownloadService;
 import com.downloader.Widgets.TextProgressBar;
 
 /*
@@ -134,24 +135,7 @@ public class HotFile extends Activity {
 	private final int CODEAddLink = 2;
 
 
-	/**
-	 * Check validity of username and password Example response ->
-	 * is_premium=1&premium_until
-	 * =2011-01-01T05:25:58-06:00&hotlink_traffic_kb=209715200 Only first we
-	 * checking already
-	 */
-	public Boolean checkUsernamePasswordValid(String username,
-			String passwordmd5) throws ClientProtocolException, IOException {
-		String request = "http://api.hotfile.com/?action=getuserinfo&username="
-				+ username + "&passwordmd5=" + passwordmd5;
-		DefaultHttpClient httpclient = new DefaultHttpClient();
-		HttpPost getDirectLink = new HttpPost(request);
-		HttpResponse response = httpclient.execute(getDirectLink);
-		HttpEntity entity = response.getEntity();
-		String responseText = EntityUtils.toString(entity);
-		return Boolean.parseBoolean(responseText.substring(
-				responseText.indexOf("="), responseText.indexOf("=") + 1));
-	}
+
 
 	/**
 	 * Check if free space is available on sdcard
@@ -279,9 +263,9 @@ public class HotFile extends Activity {
 	 * Check if preferences are set
 	 */
 	private void checkPreferences() {
-		username = preferences.getString("username", null);
-		password = preferences.getString("username", null);
-		password = "48e75f559cc5504c8992a47181fdf5ad";
+		DownloadService.UsernamePasswordMD5Storage.setUsernameAndPasswordMD5(preferences.getString("username", null), 
+				Md5Create.generateMD5Hash(preferences.getString("password", null)));
+		//TODO sprawdzic czy dobrze jest static class zrobione
 		directory = preferences.getString("chooseDir", null);
 		File dir;
 		if (directory != null) {
@@ -337,12 +321,8 @@ public class HotFile extends Activity {
 	
 	public Boolean checkPrecondition(long size, String link, String username,
 			String passwordmd5, String directory) {
-		try {
-			Boolean firstCond = false, secondCond = false;
-			if (!checkUsernamePasswordValid(username, passwordmd5)) {
 
-			} else
-				firstCond = true;
+			Boolean firstCond = false, secondCond = false;
 			if (checkFreeSpace(directory) > size) {
 
 			} else
@@ -351,12 +331,7 @@ public class HotFile extends Activity {
 				return true;
 			else
 				return false;
-		} catch (ClientProtocolException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return false;
+
 	}
 
 	/** ----------------END PREFERENCES -------------------------*/
@@ -546,48 +521,6 @@ public class HotFile extends Activity {
 	
 	// ----------------END ADDING DOWNLOADING ITEMS---------------------
 
-	/** ------------------DATABASE ---------------------------*/
-	DBAdapter db;
-
-	private long addItemToDatabase(String link, long l, int downloadedSize) {
-		return db.addItem(link, l, downloadedSize);
-	}
-
-	private boolean deleteItemFromDatabase(long id) {
-		return db.deleteItem(id);
-	}
-
-	private void getItemFromDatabase(long id) {
-		Cursor c = db.getItem(id);
-
-		while (c.moveToNext()) {
-			long row = c.getLong(0);
-			String link = c.getString(1);
-			int size = c.getInt(2);
-			int downSize = c.getInt(3);
-			showNotification("row: " + row + " link:" + link + " size:" + size
-					+ " dow:" + downSize);
-		}
-	}
-
-	private void getAllItemsFromDatabase() {
-		Cursor c = db.getAllItems();
-		while (c.moveToNext()) {
-			long row = c.getLong(0);
-			String link = c.getString(1);
-			int size = c.getInt(2);
-			int downSize = c.getInt(3);
-			showNotification("row: " + row + " link:" + link + " size:" + size
-					+ " dow:" + downSize);
-		}
-	}
-
-	private boolean updateItemInDatabase(long rowId, String link,
-			int totalSize, int downloadedSize) {
-		return db.updateItem(rowId, link, totalSize, downloadedSize);
-	}
-
-	/** ------------------END DATABASE -----------------------*/
 
 	private BroadcastReceiver completeReceiver = new BroadcastReceiver() {
 
