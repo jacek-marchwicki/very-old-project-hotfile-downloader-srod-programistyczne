@@ -13,6 +13,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 
+import com.downloader.Services.DownloadItem;
+
 import android.net.Uri;
 
 public class prepareActions {
@@ -21,7 +23,7 @@ public class prepareActions {
 	 * Check if file exists on server
 	 * http://api.hotfile.com/?c=checklinks
 	 */
-	public List<DownloadingFileItem> prepareFilesToDownload(List<String> downloadList) throws ClientProtocolException, IOException
+	public List<DownloadItem> prepareFilesToDownload(List<String> downloadList) throws ClientProtocolException, IOException
 	{
 		List<String> keysIds = cutKeysIdsFromLinks(downloadList);
 		String request = "http://api.hotfile.com/?action=checklinks&ids=";
@@ -44,24 +46,17 @@ public class prepareActions {
 		HttpEntity entity = response.getEntity();
 		String responseText = EntityUtils.toString(entity);
 		
-		List<DownloadingFileItem> list = new LinkedList<DownloadingFileItem>();
+		List<DownloadItem> list = new LinkedList<DownloadItem>();
 		BufferedReader reader = new BufferedReader(new StringReader(responseText));
 		String str;
-		int iterator = 0;
 		while((str = reader.readLine()) != null){
 			if(str.length()>0){
 				//DownloadingFileItem item = new DownloadingFileItem(
 				int firstcomma = str.indexOf(",");					//positions of comma's
 				int secondcomma = str.indexOf(",", firstcomma+1);
 				int thirdcomma = str.indexOf(",", secondcomma+1);
-				list.add(new DownloadingFileItem(0,
-						Integer.parseInt(str.substring(0, firstcomma)),
-						Boolean.parseBoolean(str.substring(firstcomma+1, secondcomma)),
-						downloadList.get(iterator),
-						str.substring(secondcomma+1, thirdcomma),
-						Integer.parseInt(str.substring(thirdcomma+1))
-						));
-				++iterator;
+				list.add(new DownloadItem(str.substring(secondcomma+1, thirdcomma),
+						Long.parseLong(str.substring(thirdcomma+1))));
 			}
 		}
 		return list;

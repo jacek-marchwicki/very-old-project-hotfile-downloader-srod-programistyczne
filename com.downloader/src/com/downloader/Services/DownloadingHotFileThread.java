@@ -123,13 +123,7 @@ public class DownloadingHotFileThread extends Thread {
 		while (!finished) {
 			// TODO CHECK IF DIRECT LINK IS STILL VALID
 			HttpPost getDirectLink = new HttpPost(state.requestApi);
-			getDirectLink = new HttpPost(
-					"http://api.hotfile.com/?action=getdirectdownloadlink&link="
-							+ state.requestUri + "&username=" + state.username
-							+ "&passwordmd5=" + state.passwordmd5);// TODO
-																	// ZASTAPIC
-																	// NOWYM ZE
-																	// STATE
+			getDirectLink = new HttpPost(state.requestApi);
 			try {
 				runDownload(state, httpclient, getDirectLink);
 				finished = true;
@@ -186,8 +180,7 @@ public class DownloadingHotFileThread extends Thread {
 					file.delete();
 					state.filename = null;
 				} else {
-					state.fileOutputStream = new FileOutputStream(
-							state.filename, true);
+					state.fileOutputStream = new FileOutputStream(state.filename, true);
 					innerState.bytesDownloaded = (int) bytesDownloaded;
 					// TODO UZUPELNIC GDY BEDZIE DOWNLOADINFO CLASS, moze
 					// wymagane dodanie e-tagow if=match
@@ -210,8 +203,8 @@ public class DownloadingHotFileThread extends Thread {
 			 */
 			HttpResponse response = defaultHttpClient.execute(apiDirectLink);
 			HttpEntity entity = response.getEntity();
-			String responseText = EntityUtils.toString(entity);
-			request = new HttpGet(responseText);
+			state.directUri = EntityUtils.toString(entity);
+			request = new HttpGet(state.directUri);
 			if (innerState.continuingDownload)
 				request.addHeader("Range", "bytes="
 						+ innerState.bytesDownloaded + "-");

@@ -52,6 +52,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.downloader.Services.DownloadService;
+import com.downloader.Services.Variables;
 import com.downloader.Widgets.TextProgressBar;
 
 /*
@@ -278,6 +279,7 @@ public class HotFile extends Activity {
 			Log.e(LOG_TAG, "Create dir in local failed, maybe dir exists");
 		try {
 			Runtime.getRuntime().exec("chmod 765 " + dir.getPath());
+			Variables.directory = dir.getPath();
 		} catch (Exception e) {
 			Log.e(LOG_TAG, e.toString());
 		}
@@ -385,6 +387,8 @@ public class HotFile extends Activity {
 		if (preparedLinks.size() > 0){
 			//TODO ten prepare nie dziala sypie w 78 linijce
 			downList = check.prepareFilesToDownload(preparedLinks);
+			
+			//TODO zrobic zmiany w prepareFiles i dodac item do bazy danych, potem wywolac service?
 			int numberofAddedFiles = downList.size();
 	
 			for (DownloadingFileItem listItem : downList) {

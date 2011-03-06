@@ -99,6 +99,8 @@ public final class Variables {
     public static final Uri URI_FOR_DOWNLOADS = Uri.parse("content://download");
     
     
+    public static String directory = "/sdcard/downloads/";
+    
     public static final int ITEM_DELETED = 1;
     public static final int ITEM_NOTDELETED = 0;
 }

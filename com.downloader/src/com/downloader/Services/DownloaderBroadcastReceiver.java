@@ -27,10 +27,16 @@ public class DownloaderBroadcastReceiver extends BroadcastReceiver{
 		String action = intent.getAction();
 		
 		Cursor cursor = DBAdapter.getItem(Long.parseLong(uri.toString()));
-	//	if(cursor != null && action.equals(Variables.ACTION_OPENLIST))
+		if(cursor != null && action.equals(Variables.ACTION_OPENLIST))
+			openDownloadListClickedIntent(intent, cursor);
 			
 	}
 	
+	private void openDownloadListClickedIntent(Intent intent, Cursor cursor) {
+		// TODO Auto-generated method stub
+		
+	}
+
 	private void startService(Context context){
 		context.startService(new Intent(context, DownloadService.class));
 	}

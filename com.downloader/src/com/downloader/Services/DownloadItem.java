@@ -10,6 +10,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.CharArrayBuffer;
 import android.database.Cursor;
+import android.net.Uri;
 
 public class DownloadItem {
 	public long id;
@@ -35,6 +36,15 @@ public class DownloadItem {
 		this.extraManaging = extraManaging;
 	}
 	
+	public DownloadItem(String requestUri, long contentSize){
+		this.filename = Variables.directory + Uri.parse(requestUri).getLastPathSegment();
+		this.requestUri = requestUri;
+		this.requestApi = "http://api.hotfile.com/?action=getdirectdownloadlink&link="
+				+ this.requestUri + 
+				"&username=" + DownloadService.UsernamePasswordMD5Storage.getUsername()
+				+ "&passwordmd5=" + DownloadService.UsernamePasswordMD5Storage.getPasswordMD5();
+		this.contentSize = contentSize;
+	}
 	
 	public static class Warehouse{
 		
