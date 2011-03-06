@@ -27,7 +27,7 @@ public class DownloaderBroadcastReceiver extends BroadcastReceiver{
 		String action = intent.getAction();
 		
 		Cursor cursor = DBAdapter.getItem(Long.parseLong(uri.toString()));
-		if(cursor != null && action.equals(Variables.ACTION_OPENLIST))
+	//	if(cursor != null && action.equals(Variables.ACTION_OPENLIST))
 			
 	}
 	

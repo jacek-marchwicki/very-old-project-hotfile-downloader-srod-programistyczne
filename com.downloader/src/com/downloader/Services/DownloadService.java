@@ -4,13 +4,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
-
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -172,9 +169,8 @@ public class DownloadService extends Service {
 				return;
 			}
 
-			Intent intent = new Intent(Variables.ACTIOR_RETRY);
-			intent.setClassName("com.android.providers.downloaderHotfile",
-					DownloaderBroadcastReceiver.class.getName());
+			Intent intent = new Intent(Variables.ACTION_RETRY);
+			intent.setClassName("com.android.providers.downloaderHotfile", DownloaderBroadcastReceiver.class.getName());
 			alarms.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()
 					+ wakeUp, PendingIntent.getBroadcast(DownloadService.this,
 					0, intent, PendingIntent.FLAG_ONE_SHOT));

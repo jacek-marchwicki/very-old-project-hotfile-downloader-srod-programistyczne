@@ -13,6 +13,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 
+import android.net.Uri;
+
 public class prepareActions {
 
 	/*
@@ -69,13 +71,17 @@ public class prepareActions {
 	
 	private List<String> cutKeysIdsFromLinks(List<String> downloadList)
 	{
+		//http://hotfile.com/dl/ID/KEY/filename.html
 		List<String> ids = new LinkedList<String>();
 		List<String> keys = new LinkedList<String>();
 		for(String link:downloadList)
 		{
-			if(link.lastIndexOf("/") == link.length()-1) link = link.substring(0, link.length()-1);
-			ids.add("i"+link.substring(link.indexOf("dl/")+3, link.indexOf("/", link.indexOf("dl/")+4)));
-			keys.add("k"+link.substring(link.indexOf("/", link.indexOf("dl/")+4)+1, link.lastIndexOf("/")));
+			Uri uri = Uri.parse(link);
+			ids.add(uri.getPathSegments().get(1));
+			keys.add(uri.getPathSegments().get(2));
+			//if(link.lastIndexOf("/") == link.length()-1) link = link.substring(0, link.length()-1);
+			//ids.add("i"+link.substring(link.indexOf("dl/")+3, link.indexOf("/", link.indexOf("dl/")+4)));
+			//keys.add("k"+link.substring(link.indexOf("/", link.indexOf("dl/")+4)+1, link.lastIndexOf("/")));
 		}
 		ids.addAll(keys);
 		return ids;

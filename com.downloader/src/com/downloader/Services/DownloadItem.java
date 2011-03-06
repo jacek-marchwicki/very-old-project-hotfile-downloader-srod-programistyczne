@@ -85,23 +85,6 @@ public class DownloadItem {
 			return cursor.getLong(cursor.getColumnIndexOrThrow(columnName));
 		}
 
-		private void getAllItemsFromDatabase() {
-			Cursor c = db.getAllItems();
-			while (c.moveToNext()) {
-				long row = c.getLong(0);
-				String link = c.getString(1);
-				int size = c.getInt(2);
-				int downSize = c.getInt(3);
-			}
-		}
-		DBAdapter db;
-
-		private long addItemToDatabase(String link, long l, int downloadedSize) {
-			return db.addItem(link, l, downloadedSize);
-		}
-
-
-
 		public void updateItemFromDatabase(DownloadItem downloadItem) {
 			downloadItem.id = getLongItemFromDatabase(Variables.DB_KEY_ROWID);
 			

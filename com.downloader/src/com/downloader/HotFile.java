@@ -118,9 +118,6 @@ public class HotFile extends Activity {
 		Log.v(LOG_TAG, "Running program...");
 		// this.startActivity(new Intent(this, DownloadList.class));
 
-		db = new DBAdapter(this);
-		db.open();
-
 	}
 
 	@Override
@@ -386,21 +383,21 @@ public class HotFile extends Activity {
 		
 		List<String> preparedLinks = getLinkFromText(linksList, "hotfile.com");
 		if (preparedLinks.size() > 0){
-			//TODO ten prepare nie działa! sypie się w 78 linijce
+			//TODO ten prepare nie dziala sypie w 78 linijce
 			downList = check.prepareFilesToDownload(preparedLinks);
 			int numberofAddedFiles = downList.size();
 	
 			for (DownloadingFileItem listItem : downList) {
-				long itemId = addItemToDatabase(listItem.getDownloadLink(),
-						listItem.getSize(), 0); // adding to database
-				if (itemId != (-1)) { // if the file has been added to database
-					listItem.setId(itemId);
+//				long itemId = addItemToDatabase(listItem.getDownloadLink(),
+//						listItem.getSize(), 0); // adding to database
+//				if (itemId != (-1)) { // if the file has been added to database
+//					listItem.setId(itemId);
 	
 				//	listItem = addProgressBarToDownloadListBox(listItem);
 					listOfDownloadingFiles.add(listItem); // adding to list
 	
-				} else
-					--numberofAddedFiles; // the item has not been added
+//				} else
+//					--numberofAddedFiles; // the item has not been added
 			}
 			showNotification(numberofAddedFiles + " files have been added");
 		}
