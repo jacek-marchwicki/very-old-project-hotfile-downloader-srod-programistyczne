@@ -11,15 +11,17 @@ import android.util.Log;
 
 public class DBAdapter 
 {
-  
-    
-
-
     private static final String DATABASE_CREATE =
         "create table "+Variables.DATABASE_TABLE+
-        " ("+Variables.DB_KEY_ROWID+" integer primary key autoincrement, ";
-      //  + KEY_LINK+" text not null, "+KEY_TOTALSIZE+" integer not null, "
-    //    + KEY_DOWNLOADEDSIZE+" integer not null);";
+        " ("+	Variables.DB_KEY_ROWID+" integer primary key autoincrement, "+
+        		Variables.DB_REQUESTURI + " text not null, " +
+        		Variables.DB_KEY_FILENAME +" text not null, "+
+        		Variables.DB_KEY_TOTALSIZE +" integer not null, "+
+        		Variables.DB_KEY_DOWNLOADEDSIZE +" integer, "+
+        		Variables.DB_KEY_WIFIONLY+" integer, "+
+        		Variables.DB_COLUMN_CONTROL+" integer, "+
+        		Variables.DB_COLUMN_STATUS +" integer, "+
+        		Variables.DB_DELETED +" integer)";
         
     private final Context context; 
     
@@ -49,45 +51,62 @@ public class DBAdapter
     }
     
     //---insert a title into the database---
-//    public long addItem(String link, long l, int downloadedSize) 
-//    {
-//        ContentValues initialValues = new ContentValues();
-//        initialValues.put(KEY_LINK, link);
-//        initialValues.put(KEY_TOTALSIZE, l);
-//        initialValues.put(KEY_DOWNLOADEDSIZE, downloadedSize);
-//        return db.insert(DATABASE_TABLE, null, initialValues);
-//    }
-//
-//    //---deletes a particular title---
-//    public boolean deleteItem(long rowId) 
-//    {
-//        return db.delete(DATABASE_TABLE, KEY_ROWID + "=" + rowId, null) > 0;
-//    }
-//
+    public long addItem(String link, String fileName, int totalSize, 
+    		boolean wifiOnly) 
+    {
+        ContentValues initialValues = new ContentValues();
+        
+        int wifiOnlyint=0;
+        if (wifiOnly)
+        	wifiOnlyint =1;
+        
+        initialValues.put(Variables.DB_REQUESTURI, link);
+        initialValues.put(Variables.DB_KEY_FILENAME, fileName);
+        initialValues.put(Variables.DB_KEY_TOTALSIZE, totalSize);
+        initialValues.put(Variables.DB_KEY_DOWNLOADEDSIZE, 0);
+        initialValues.put(Variables.DB_KEY_WIFIONLY, wifiOnlyint);
+        initialValues.put(Variables.DB_COLUMN_CONTROL, Variables.CONTROL_PAUSE);
+        initialValues.put(Variables.DB_COLUMN_STATUS,Variables.STATUS_WAITING);
+        initialValues.put(Variables.DB_DELETED, Variables.ITEM_NOTDELETED);
+        
+        
+        return db.insert(Variables.DATABASE_TABLE, null, initialValues);
+    }
+
+
     //---retrieves all the titles---
     public static Cursor getAllItems() 
     {
         return db.query(Variables.DATABASE_TABLE, new String[] {
         		Variables.DB_KEY_ROWID, 
-        		Variables.DB_KEY_ROWID,
+        		Variables.DB_REQUESTURI,
+        		Variables.DB_KEY_FILENAME,
+        		Variables.DB_KEY_TOTALSIZE,
         		Variables.DB_KEY_DOWNLOADEDSIZE,
-        		Variables.DB_KEY_WIFIONLY}, 
+        		Variables.DB_KEY_WIFIONLY,
+        		Variables.DB_COLUMN_CONTROL,
+        		Variables.DB_COLUMN_STATUS,
+        		Variables.DB_DELETED}, 
                 null, 
                 null, 
                 null, 
                 null, 
                 null);
     }
-//
 //    //---retrieves a particular title---
     public static Cursor getItem(long rowId) throws SQLException 
     {
         Cursor mCursor =
         	db.query(Variables.DATABASE_TABLE, new String[] {
-            		Variables.DB_KEY_ROWID, 
-            		Variables.DB_KEY_ROWID,
+        			Variables.DB_KEY_ROWID, 
+            		Variables.DB_REQUESTURI,
+            		Variables.DB_KEY_FILENAME,
+            		Variables.DB_KEY_TOTALSIZE,
             		Variables.DB_KEY_DOWNLOADEDSIZE,
-            		Variables.DB_KEY_WIFIONLY}, 
+            		Variables.DB_KEY_WIFIONLY,
+            		Variables.DB_COLUMN_CONTROL,
+            		Variables.DB_COLUMN_STATUS,
+            		Variables.DB_DELETED}, 
                 		Variables.DB_KEY_ROWID + "=" + rowId, 
                 		null,
                 		null, 
@@ -101,15 +120,29 @@ public class DBAdapter
     }
 //
 //    //---updates a title---
-//    public boolean updateItem(long rowId, String link, int totalSize, int downloadedSize) 
-//    {
-//        ContentValues args = new ContentValues();
-//        args.put(KEY_LINK, link);
-//        args.put(KEY_TOTALSIZE, totalSize);
-//        args.put(KEY_DOWNLOADEDSIZE, downloadedSize);
-//        return db.update(DATABASE_TABLE, args, 
-//                         KEY_ROWID + "=" + rowId, null) > 0;
-//    }
+    public static boolean updateItem(long rowId, int downloadedSize, boolean wifiOnly, int controlPause,
+    		int columnStatus, int deleted) 
+    {
+        int wifiOnlyint=0;
+        if (wifiOnly)
+        	wifiOnlyint =1;
+
+        ContentValues args = new ContentValues();
+    	args.put(Variables.DB_KEY_WIFIONLY, wifiOnlyint);
+    	
+        if (downloadedSize != Variables.DB_DONTCHANGE)
+        	args.put(Variables.DB_KEY_DOWNLOADEDSIZE, 0);        	
+        if (controlPause != Variables.DB_DONTCHANGE)
+        	args.put(Variables.DB_COLUMN_CONTROL, controlPause);
+        if ( columnStatus != Variables.DB_DONTCHANGE)
+        	args.put(Variables.DB_COLUMN_STATUS, columnStatus);
+        if (deleted != Variables.DB_DONTCHANGE)
+        	args.put(Variables.DB_DELETED, deleted);
+        
+        
+        return db.update(Variables.DATABASE_TABLE, args, 
+        		Variables.DB_KEY_ROWID + "=" + rowId, null) > 0;
+    }
     
 	public static void updateDatabase(long rowID, String filename, long totalsize) {
 		ContentValues contentValues = new ContentValues();
@@ -150,6 +183,10 @@ public class DBAdapter
 		//TODO FINISH LATER
 	}
 	
+	public static void startDownloading(long rowid){
+		updateItem(rowid, Variables.DB_DONTCHANGE,false, Variables.CONTROL_RUN,
+				Variables.STATUS_RUNNING, Variables.DB_DONTCHANGE);
+	}
 	
     private final class DatabaseHelper extends SQLiteOpenHelper 
     {

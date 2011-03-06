@@ -49,6 +49,9 @@ public final class Variables {
     public static final String DB_COLUMN_CONTROL = "control";
     public static final String DB_COLUMN_STATUS = "status";
     public static final String DB_DELETED = "deleted"; //if true downloaded was finished and row can be deleted from db
+    
+    public static final int DB_DONTCHANGE = -1;
+    
     /*******************************************************************/
     
     /**
@@ -94,4 +97,8 @@ public final class Variables {
     
     public static final String ACTION_OPENLIST = "android.intent.action.DownloaderHotfile_LIST";
     public static final Uri URI_FOR_DOWNLOADS = Uri.parse("content://download");
+    
+    
+    public static final int ITEM_DELETED = 1;
+    public static final int ITEM_NOTDELETED = 0;
 }
