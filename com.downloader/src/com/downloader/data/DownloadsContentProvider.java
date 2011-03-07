@@ -12,6 +12,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
+import android.sax.StartElementListener;
 import android.util.Log;
 
 import com.downloader.Services.Variables;
@@ -147,7 +148,8 @@ public class DownloadsContentProvider extends ContentProvider
 		int count;
 		switch (sUriMatcher.match(uri)) {
 		case DB_TABLE_ID:
-			count = db.update(Variables.DB_DATABASE_TABLE, values, where, whereArgs);
+			count = db.update(Variables.DB_DATABASE_TABLE, values, 
+					Variables.DB_KEY_ROWID + " = ? ", new String[] { String.valueOf(uri.getLastPathSegment())});
 			break;
 
 		default:

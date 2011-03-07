@@ -95,12 +95,10 @@ public class DownloadItem {
 
 		public void updateItemFromDatabase(DownloadItem downloadItem) {
 			downloadItem.id = getLongItemFromDatabase(Variables.DB_KEY_ROWID);
-
+			downloadItem.requestUri = getStringItemFromDatabase(downloadItem.requestUri, Variables.DB_REQUESTURI);
 			downloadItem.requestApi = "http://api.hotfile.com/?action=getdirectdownloadlink&link="+downloadItem.requestUri
 			+"&username="+DownloadService.UsernamePasswordMD5Storage.getUsername()
 			+"&passwordmd5="+DownloadService.UsernamePasswordMD5Storage.getPasswordMD5();
-
-			downloadItem.requestUri = getStringItemFromDatabase(downloadItem.requestUri, Variables.DB_REQUESTURI);
 			downloadItem.directUri = getStringItemFromDatabase(downloadItem.directUri, Variables.DB_DIRECTURI);
 			//TODO CHECK IF DIRECT URI IS VALID
 			downloadItem.contentSize  =  getLongItemFromDatabase(Variables.DB_KEY_TOTALSIZE);

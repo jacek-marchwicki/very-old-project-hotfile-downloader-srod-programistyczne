@@ -46,7 +46,8 @@ public class DownloadService extends Service {
 	public static class UsernamePasswordMD5Storage {
 		private static String username;
 		private static String passwordmd5;
-
+		private static String filePath;
+		
 		public static String getUsername() {
 			return username;
 		}
@@ -55,8 +56,12 @@ public class DownloadService extends Service {
 			return passwordmd5;
 		}
 
-		public static void setUsernameAndPasswordMD5(String mUsernameA,
-				String mPasswordmd5) {
+		public static String getDirectory(){
+			return filePath;
+		}
+		
+		public static void setUsernameAndPasswordMD5(final String mUsernameA,
+				final String mPasswordmd5) {
 			try {
 				if (checkUsernamePasswordValid(mUsernameA, mPasswordmd5)) {
 					username = mUsernameA;
@@ -70,6 +75,10 @@ public class DownloadService extends Service {
 				e.printStackTrace();
 			}
 		}
+		
+		public static void setDirectoryPath(final String directory) {
+			filePath  = directory;
+		}
 
 		/**
 		 * Check validity of username and password Example response ->
@@ -77,10 +86,10 @@ public class DownloadService extends Service {
 		 * =2011-01-01T05:25:58-06:00&hotlink_traffic_kb=209715200 Only first we
 		 * checking already
 		 */
-		private static Boolean checkUsernamePasswordValid(String username,
-				String passwordmd5) throws ClientProtocolException, IOException {
+		private static Boolean checkUsernamePasswordValid(final String mUsername,
+				final String mPasswordmd5) throws ClientProtocolException, IOException {
 			String request = "http://api.hotfile.com/?action=getuserinfo&username="
-				+ username + "&passwordmd5=" + passwordmd5;
+				+ mUsername + "&passwordmd5=" + mPasswordmd5;
 			DefaultHttpClient httpclient = new DefaultHttpClient();
 			HttpPost getDirectLink = new HttpPost(request);
 			HttpResponse response = httpclient.execute(getDirectLink);
@@ -89,8 +98,9 @@ public class DownloadService extends Service {
 			int indexOfEquationSign = responseText.indexOf("=");
 			if (indexOfEquationSign == -1)
 				return false;
-			return Boolean.parseBoolean(responseText.substring(
-					indexOfEquationSign, indexOfEquationSign + 1));
+			if (responseText.substring(indexOfEquationSign+1, indexOfEquationSign + 2).equals("1"))
+				return true;
+			return false;
 		}
 	}
 

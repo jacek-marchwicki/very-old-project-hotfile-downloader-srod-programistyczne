@@ -25,6 +25,7 @@ import android.app.PendingIntent;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.net.http.AndroidHttpClient;
 import android.os.PowerManager;
 import android.provider.SyncStateContract.Constants;
@@ -79,6 +80,7 @@ public class DownloadingHotFileThread extends Thread {
 
 		public State(DownloadItem downloadItem) {
 			// TODO FROM DOWNLOADTHREAD
+			downloadItem.filename = getFilename(Uri.parse(downloadItem.filename));
 			this.filename = downloadItem.filename;
 			this.requestUri = downloadItem.requestUri;
 			this.directUri = downloadItem.directUri;
@@ -88,8 +90,16 @@ public class DownloadingHotFileThread extends Thread {
 			this.passwordmd5 = DownloadService.UsernamePasswordMD5Storage
 					.getPasswordMD5();
 		}
+		private String getFilename(Uri uri) {
+			String fileName = uri.getLastPathSegment();
+			return fileName.contains(".html") ? fileName.substring(fileName.lastIndexOf('/') + 1, fileName.lastIndexOf(".html")) : 
+				fileName.substring(fileName.lastIndexOf('/') + 1);
+		}
 	}
 
+	
+	
+	
 	private class Error extends Throwable {
 		public Error(String message) {
 			super(message);
@@ -113,7 +123,6 @@ public class DownloadingHotFileThread extends Thread {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		PowerManager.WakeLock wakeLock = null;
 		// TODO SOMETHING STATIC VAR
-
 		PowerManager powerManager = (PowerManager) this.context
 				.getSystemService(Context.POWER_SERVICE);
 		wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
@@ -148,13 +157,6 @@ public class DownloadingHotFileThread extends Thread {
 		return size;
 	}
 
-	public String getUrl(URL url) {
-		String fileName = url.getFile();
-		return fileName.contains(".html") ? fileName.substring(
-				fileName.lastIndexOf('/') + 1, fileName.lastIndexOf(".html"))
-				: fileName.substring(fileName.lastIndexOf('/') + 1);
-	}
-
 	public float getProgress() {
 		return ((float) downloaded / size) * 100;
 	}
@@ -170,7 +172,7 @@ public class DownloadingHotFileThread extends Thread {
 			/**
 			 * Prepare file destination
 			 */
-			File file = new File(state.filename);
+			File file = new File(Variables.directory+"/"+state.filename);
 			if (file.exists()) {
 				long bytesDownloaded = file.length();
 				if (bytesDownloaded == 0) {
@@ -204,13 +206,13 @@ public class DownloadingHotFileThread extends Thread {
 			HttpResponse response = defaultHttpClient.execute(apiDirectLink);
 			HttpEntity entity = response.getEntity();
 			state.directUri = EntityUtils.toString(entity);
-			request = new HttpGet(state.directUri);
+			request = new HttpGet(state.directUri.trim());
 			if (innerState.continuingDownload)
 				request.addHeader("Range", "bytes="
 						+ innerState.bytesDownloaded + "-");
 			response = defaultHttpClient.execute(request);
 			if (response.getStatusLine().getStatusCode() / 100 != 2
-					|| innerState.contentSize < 1) // HTTP ERROR or WRONG SIZE
+					|| downloadItem.contentSize < 1) // HTTP ERROR or WRONG SIZE
 				throw new Error("DON't HAVE DIRECT LINK");
 			if (!innerState.continuingDownload) {
 				Header header = response.getFirstHeader("Content-Length");
@@ -223,8 +225,7 @@ public class DownloadingHotFileThread extends Thread {
 			// DOWNLOAD ONLY IF YOU KNOW SIZE OF FILE
 			if (innerState.contentSize > -1) {
 				// TODO filename + miejsce do zapisu
-				state.filename = "cos";
-				state.fileOutputStream = new FileOutputStream(state.filename);
+				state.fileOutputStream = new FileOutputStream(file.getAbsolutePath());
 				
 				ContentValues contentValues = new ContentValues();
 				contentValues.put(Variables.DB_KEY_FILENAME, state.filename);
@@ -256,6 +257,7 @@ public class DownloadingHotFileThread extends Thread {
 				}
 			}
 		} catch (Exception e) {
+			Log.v(Variables.TAG, "Error" + e.toString());
 		} finally {
 			try {
 				state.fileOutputStream.close();
@@ -299,6 +301,7 @@ public class DownloadingHotFileThread extends Thread {
 		}
 	}
 	
+
 	private void checkIfNeedToPause(State state) throws Error{
 		synchronized(downloadItem){
 			if(downloadItem.stop == Variables.DOWNLOAD_PAUSED)
