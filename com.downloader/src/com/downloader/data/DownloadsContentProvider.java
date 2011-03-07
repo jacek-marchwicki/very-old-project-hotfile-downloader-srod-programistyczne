@@ -22,7 +22,7 @@ public class DownloadsContentProvider extends ContentProvider
 
 	private static final String TAG = "DownloadFilesContentProvider";
 
-	private static final int DATABASE_VERSION = 3;
+	private static final int DATABASE_VERSION = 4;
 
 	private static final UriMatcher sUriMatcher;
 
@@ -35,8 +35,8 @@ public class DownloadsContentProvider extends ContentProvider
 			"create table "+Variables.DB_DATABASE_TABLE+
 			" ("+
 			Variables.DB_KEY_ROWID+" integer primary key autoincrement, "+
-			Variables.DB_REQUESTURI + " text, " +
-			Variables.DB_DIRECTURI + " text not null, " +
+			Variables.DB_REQUESTURI + " text not null, " +
+			Variables.DB_DIRECTURI + " text, " +
 			Variables.DB_KEY_FILENAME +" text not null, "+
 			Variables.DB_KEY_TOTALSIZE +" integer not null, "+
 			Variables.DB_KEY_DOWNLOADEDSIZE +" integer, "+
