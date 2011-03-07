@@ -24,8 +24,6 @@ public class DownloadsContentProvider extends ContentProvider
 
 	private static final int DATABASE_VERSION = 1;
 
-	public static final String AUTHORITY = "jason.wei.apps.notes.providers.DownloadFilesContentProvider";
-
 	private static final UriMatcher sUriMatcher;
 
 	private static final int DB_TABLE_ID = 1;
@@ -161,7 +159,7 @@ public class DownloadsContentProvider extends ContentProvider
 
 	static {
 		sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-		sUriMatcher.addURI(AUTHORITY, Variables.DB_DATABASE_TABLE, DB_TABLE_ID);
+		sUriMatcher.addURI(Variables.AUTHORITY, Variables.DB_DATABASE_TABLE, DB_TABLE_ID);
 
 		downloadProjectionMap = new HashMap<String, String>();
 		

@@ -3,9 +3,10 @@ package com.downloader.Services;
 import android.net.Uri;
 
 public final class Variables {
-
 	
-	public static final Uri CONTENT_URI = Uri.parse("content://hotfile_downloader/downloads");
+	public static final String AUTHORITY = "hotfile_downloader";
+	
+	public static final Uri CONTENT_URI = Uri.parse("content://"+AUTHORITY+"/downloads");
 	
 	/** DATABASE CONSTANS */
 	

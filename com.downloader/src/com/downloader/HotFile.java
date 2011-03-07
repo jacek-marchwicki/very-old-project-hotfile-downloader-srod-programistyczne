@@ -3,6 +3,7 @@ package com.downloader;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -340,30 +341,50 @@ public class HotFile extends Activity {
 	};
 
 
-	private void AddLinksFromFile(String filename) throws IOException {
+	private void AddLinksFromFile(String filename) {
 
 		File file = new File(filename);
+		InputStream instream;
 		try {
-			InputStream instream = new FileInputStream(file);
+			instream = new FileInputStream(file);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			Log.v(LOG_TAG, "error , could not open file" + e.toString());
+			return;
+		}
 
-			if (instream != null) {
-				// prepare the file for reading
-				InputStreamReader inputreader = new InputStreamReader(instream);
-				BufferedReader rd = new BufferedReader(inputreader);
-				String line;
-				List<String> list = new ArrayList<String>();
-				// read every line of the file into the line-variable, on line
-				// at the time
-				while ((line = rd.readLine()) != null) {
-					list.add(line);
-				}
-
-				addNewFiles(list); // passing the list of lines from file to the method
+		// prepare the file for reading
+		InputStreamReader inputreader = new InputStreamReader(instream);
+		BufferedReader rd = new BufferedReader(inputreader);
+		String line;
+		List<String> list = new ArrayList<String>();
+		// read every line of the file into the line-variable, on line
+		// at the time
+		try {
+			while ((line = rd.readLine()) != null) {
+				list.add(line);
 			}
-		} catch (Exception e) {
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			Log.v(LOG_TAG, "error could not read file" + e.toString());
+			return;
+		}
+
+		try {
+			addNewFiles(list);
+		} catch (ClientProtocolException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} // passing the list of lines from file to the method
+		/* catch (Exception e) {
 			Log.v(LOG_TAG, "error " + e.toString());
 			showNotification("Error occured when adding links from a file");
-		}
+		}*/
 	}
 
 	/**
