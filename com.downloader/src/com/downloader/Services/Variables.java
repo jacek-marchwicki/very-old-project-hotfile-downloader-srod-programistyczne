@@ -1,12 +1,14 @@
 package com.downloader.Services;
 
-import java.io.FileOutputStream;
-
 import android.net.Uri;
 
 public final class Variables {
 
+	
+	public static final String URI_CONTENT = "content://HOTFILE_DOWNLOADER/downloads";
+	
 	/** DATABASE CONSTANS */
+	
 	public static final String DATABASE_NAME = "HOTFILE_DOWNLOADER";
 	public static final String DATABASE_TABLE = "downloads";
 	public static final int DATABASE_VERSION = 1;

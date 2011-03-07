@@ -1,13 +1,14 @@
 package stroringdata;
-import com.downloader.Services.Variables;
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.net.Uri;
 import android.util.Log;
+
+import com.downloader.Services.Variables;
 
 public class DBAdapter 
 {
@@ -51,9 +52,10 @@ public class DBAdapter
     }
     
     //---insert a title into the database---
-    public long addItem(String link, String fileName, int totalSize, 
+    public static long addItem(String link, int totalSize, 
     		boolean wifiOnly) 
     {
+    	
         ContentValues initialValues = new ContentValues();
         
         int wifiOnlyint=0;
@@ -61,14 +63,13 @@ public class DBAdapter
         	wifiOnlyint =1;
         
         initialValues.put(Variables.DB_REQUESTURI, link);
-        initialValues.put(Variables.DB_KEY_FILENAME, fileName);
+        initialValues.put(Variables.DB_KEY_FILENAME, Uri.parse(link).getLastPathSegment());
         initialValues.put(Variables.DB_KEY_TOTALSIZE, totalSize);
         initialValues.put(Variables.DB_KEY_DOWNLOADEDSIZE, 0);
         initialValues.put(Variables.DB_KEY_WIFIONLY, wifiOnlyint);
         initialValues.put(Variables.DB_COLUMN_CONTROL, Variables.CONTROL_PAUSE);
         initialValues.put(Variables.DB_COLUMN_STATUS,Variables.STATUS_WAITING);
         initialValues.put(Variables.DB_DELETED, Variables.ITEM_NOTDELETED);
-        
         
         return db.insert(Variables.DATABASE_TABLE, null, initialValues);
     }

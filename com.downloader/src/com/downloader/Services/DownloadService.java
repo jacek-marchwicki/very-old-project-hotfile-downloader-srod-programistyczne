@@ -1,13 +1,11 @@
 package com.downloader.Services;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.RandomAccessFile;
-import java.net.HttpURLConnection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -16,7 +14,6 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 
 import stroringdata.DBAdapter;
-
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -26,6 +23,7 @@ import android.database.ContentObserver;
 import android.database.Cursor;
 import android.os.Handler;
 import android.os.IBinder;
+import android.util.Log;
 
 public class DownloadService extends Service {
 
@@ -97,6 +95,7 @@ public class DownloadService extends Service {
 		}
 
 		public void onChange(final boolean selfChange) {
+			Log.v(Variables.TAG, "onChangeContentObserver");
 			updateFromProvider();
 		}
 	}
@@ -227,7 +226,7 @@ public class DownloadService extends Service {
 		if (extraManaging == null)
 			extraManaging = new ExtraManaging(this);
 		downloadContentObserver = new DownloadContentObserver();
-		getContentResolver().registerContentObserver(null, true,
+		getContentResolver().registerContentObserver(Variables.URI_FOR_DOWNLOADS, true,
 				downloadContentObserver);
 		// TODO wymienic null'a na cos
 		updateFromProvider();

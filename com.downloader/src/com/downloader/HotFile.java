@@ -7,53 +7,38 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
 
-import stroringdata.DBAdapter;
 import android.app.Activity;
-import android.app.DownloadManager;
-import android.app.DownloadManager.Query;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.StatFs;
 import android.preference.PreferenceManager;
 import android.text.ClipboardManager;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
+import com.downloader.Services.DownloadItem;
+import com.downloader.Services.DownloadManager;
 import com.downloader.Services.DownloadService;
 import com.downloader.Services.Variables;
-import com.downloader.Widgets.TextProgressBar;
 
 /*
  * 1. sprawdzanie miejsca w pamieci do zapisu podczas downloadu
@@ -88,12 +73,14 @@ public class HotFile extends Activity {
 	public static final String LOG_TAG = "HotFileDownloader Information";
 	public static List<DownloadingFileItem> listOfDownloadingFiles;
 //	MovieButtons movieButtons;
+	DownloadManager downloadManager;
 	String username, password, directory;
 
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		downloadManager = new DownloadManager(this);
 		downloadingList = new ArrayList<Intent>();
 		setContentView(R.layout.main);
 		listOfDownloadingFiles = new ArrayList<DownloadingFileItem>();
@@ -124,10 +111,10 @@ public class HotFile extends Activity {
 	@Override
 	public void onResume() {
 		super.onResume();
-		IntentFilter completeFilter = new IntentFilter(
-				DownloadManager.ACTION_DOWNLOAD_COMPLETE);
-		registerReceiver(completeReceiver, completeFilter);
-	}
+//		IntentFilter completeFilter = new IntentFilter(
+//				DownloadManager.ACTION_DOWNLOAD_COMPLETE);
+//		registerReceiver(completeReceiver, completeFilter);
+}
 
 	private final int CODEAddLinksFile = 1;
 	private final int CODEAddLink = 2;
@@ -336,7 +323,7 @@ public class HotFile extends Activity {
 	/** ----------------END PREFERENCES -------------------------*/
 	
 	/** ----------------ADDING DOWNLOADING ITEMS -------------------------*/
-	public static List<DownloadingFileItem> downList;
+	public static List<DownloadItem> downList;
 
 	private OnClickListener buttontAddLinksFile = new OnClickListener() {
 		public void onClick(View v) {
@@ -387,22 +374,12 @@ public class HotFile extends Activity {
 		if (preparedLinks.size() > 0){
 			//TODO ten prepare nie dziala sypie w 78 linijce
 			downList = check.prepareFilesToDownload(preparedLinks);
+			String uri = downList.get(0).requestUri;
+			long size = downList.get(0).contentSize;
+			downloadManager.enqueue(uri, size);
 			
 			//TODO zrobic zmiany w prepareFiles i dodac item do bazy danych, potem wywolac service?
 			int numberofAddedFiles = downList.size();
-	
-			for (DownloadingFileItem listItem : downList) {
-//				long itemId = addItemToDatabase(listItem.getDownloadLink(),
-//						listItem.getSize(), 0); // adding to database
-//				if (itemId != (-1)) { // if the file has been added to database
-//					listItem.setId(itemId);
-	
-				//	listItem = addProgressBarToDownloadListBox(listItem);
-					listOfDownloadingFiles.add(listItem); // adding to list
-	
-//				} else
-//					--numberofAddedFiles; // the item has not been added
-			}
 			showNotification(numberofAddedFiles + " files have been added");
 		}
 		else
@@ -544,16 +521,17 @@ public class HotFile extends Activity {
 	 */
 	private OnClickListener buttonOnClickDownload = new OnClickListener() {
 		public void onClick(View v) {
-			String aaa = Md5Create.generateMD5Hash("puyyut");
-			List<String> list = new LinkedList<String>();
-			list.add("http://hotfile.com/dl/81363200/ba7f841/Ostatnia-DVDRip.PL.part1.rar.html");
-			list.add("http://hotfile.com/dl/98588098/f5c4897/4.pdf.html"); // 2MB
-			list.add("http://hotfile.com/dl/98588065/ece61ef/1.pdf.html");// 4MB
-
-			list.add("http://hotfile.com/dl/92148167/7c86b14/fil.txt.html");
-			list.add("http://hotfile.com/dl/92539498/131dad0/Gamee.Of.Death.DVDRip.XviD-VoMiT.m90.part1.rar.html");
-
-			beginDownloading(list.get(3), username, aaa, directory, 1);
+//			String aaa = Md5Create.generateMD5Hash("puyyut");
+//			List<String> list = new LinkedList<String>();
+//			list.add("http://hotfile.com/dl/81363200/ba7f841/Ostatnia-DVDRip.PL.part1.rar.html");
+//			list.add("http://hotfile.com/dl/98588098/f5c4897/4.pdf.html"); // 2MB
+//			list.add("http://hotfile.com/dl/98588065/ece61ef/1.pdf.html");// 4MB
+//
+//			list.add("ht			downList = check.prepareFilesToDownload(preparedLinks);tp://hotfile.com/dl/92148167/7c86b14/fil.txt.html");
+//			list.add("http://hotfile.com/dl/92539498/131dad0/Gamee.Of.Death.DVDRip.XviD-VoMiT.m90.part1.rar.html");
+//
+//			beginDownloading(list.get(3), username, aaa, directory, 1);
+			
 		}
 	};
 	

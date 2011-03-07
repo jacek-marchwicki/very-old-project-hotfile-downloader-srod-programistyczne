@@ -13,9 +13,9 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 
-import com.downloader.Services.DownloadItem;
-
 import android.net.Uri;
+
+import com.downloader.Services.DownloadItem;
 
 public class prepareActions {
 
@@ -49,14 +49,16 @@ public class prepareActions {
 		List<DownloadItem> list = new LinkedList<DownloadItem>();
 		BufferedReader reader = new BufferedReader(new StringReader(responseText));
 		String str;
+		int iterator = 0;
 		while((str = reader.readLine()) != null){
 			if(str.length()>0){
 				//DownloadingFileItem item = new DownloadingFileItem(
 				int firstcomma = str.indexOf(",");					//positions of comma's
 				int secondcomma = str.indexOf(",", firstcomma+1);
 				int thirdcomma = str.indexOf(",", secondcomma+1);
-				list.add(new DownloadItem(str.substring(secondcomma+1, thirdcomma),
+				list.add(new DownloadItem(downloadList.get(iterator),
 						Long.parseLong(str.substring(thirdcomma+1))));
+				++iterator;
 			}
 		}
 		return list;
@@ -72,8 +74,8 @@ public class prepareActions {
 		for(String link:downloadList)
 		{
 			Uri uri = Uri.parse(link);
-			ids.add(uri.getPathSegments().get(1));
-			keys.add(uri.getPathSegments().get(2));
+			ids.add("i"+uri.getPathSegments().get(1));
+			keys.add("k"+uri.getPathSegments().get(2));
 			//if(link.lastIndexOf("/") == link.length()-1) link = link.substring(0, link.length()-1);
 			//ids.add("i"+link.substring(link.indexOf("dl/")+3, link.indexOf("/", link.indexOf("dl/")+4)));
 			//keys.add("k"+link.substring(link.indexOf("/", link.indexOf("dl/")+4)+1, link.lastIndexOf("/")));
