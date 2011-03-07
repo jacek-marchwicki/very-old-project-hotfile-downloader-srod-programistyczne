@@ -19,7 +19,7 @@ public class DownloadManager {
         initialValues.put(Variables.DB_REQUESTURI, url);
         initialValues.put(Variables.DB_KEY_TOTALSIZE, contentSize);
         initialValues.put(Variables.DB_KEY_FILENAME, Uri.parse(url).getLastPathSegment());
-        contentResolver.insert(Variables.URI_FOR_DOWNLOADS, initialValues);
+        contentResolver.insert(Variables.CONTENT_URI, initialValues);
 		
 	}
 }

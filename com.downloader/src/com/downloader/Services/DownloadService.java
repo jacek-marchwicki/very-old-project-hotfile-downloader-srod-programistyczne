@@ -232,7 +232,7 @@ public class DownloadService extends Service {
 		if (extraManaging == null)
 			extraManaging = new ExtraManaging(this);
 		downloadContentObserver = new DownloadContentObserver();
-		getContentResolver().registerContentObserver(Variables.URI_FOR_DOWNLOADS, true,
+		getContentResolver().registerContentObserver(Variables.CONTENT_URI, true,
 				downloadContentObserver);
 		// TODO wymienic null'a na cos
 		updateFromProvider();

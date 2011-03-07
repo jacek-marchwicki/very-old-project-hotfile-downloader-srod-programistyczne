@@ -98,7 +98,6 @@ public final class Variables {
      */
     
     public static final String ACTION_OPENLIST = "android.intent.action.DownloaderHotfile_LIST";
-    public static final Uri URI_FOR_DOWNLOADS = Uri.parse("content://download");
     
     
     public static String directory = "/sdcard/downloads/";

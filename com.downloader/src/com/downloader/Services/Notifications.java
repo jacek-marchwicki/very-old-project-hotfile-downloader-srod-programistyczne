@@ -84,7 +84,7 @@ public class Notifications {
 			notification.contentView.setProgressBar(R.id.status_progress, (int)notificationItem.totalBytes, 
 					(int)notificationItem.currentBytes, notificationItem.totalBytes == -1);
 			Intent intent = new Intent("DOWNLOAD_LIST");
-			intent.setData(ContentUris.withAppendedId(Variables.URI_FOR_DOWNLOADS, notificationItem.id));
+			intent.setData(ContentUris.withAppendedId(Variables.CONTENT_URI, notificationItem.id));
 			intent.setClassName(context, DownloaderBroadcastReceiver.class.getName());
 			notification.contentIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
 			extraManaging.insertNotification(notificationItem.id, notification);
