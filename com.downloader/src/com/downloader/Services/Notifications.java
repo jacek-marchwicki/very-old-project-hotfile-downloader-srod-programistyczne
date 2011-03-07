@@ -5,9 +5,9 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.HashMap;
 
-import stroringdata.DBAdapter;
 
 import com.downloader.R;
+import com.downloader.data.DownloadsContentProvider;
 
 import android.app.Notification;
 import android.app.PendingIntent;

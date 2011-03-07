@@ -1,6 +1,7 @@
 package com.downloader.Services;
 
-import stroringdata.DBAdapter;
+import com.downloader.data.DownloadsContentProvider;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -24,9 +25,8 @@ public class DownloaderBroadcastReceiver extends BroadcastReceiver{
 
 	private void handleNotificationBroadcast(Context context, Intent intent){
 		Uri uri = intent.getData();
+		Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
 		String action = intent.getAction();
-		
-		Cursor cursor = DBAdapter.getItem(Long.parseLong(uri.toString()));
 		if(cursor != null && action.equals(Variables.ACTION_OPENLIST))
 			openDownloadListClickedIntent(intent, cursor);
 			

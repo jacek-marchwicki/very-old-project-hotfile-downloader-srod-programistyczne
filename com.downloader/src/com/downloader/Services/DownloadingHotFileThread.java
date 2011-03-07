@@ -17,7 +17,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 
-import stroringdata.DBAdapter;
 
 import android.app.Activity;
 import android.app.Notification;
@@ -36,6 +35,7 @@ import android.widget.ProgressBar;
 import android.widget.RemoteViews;
 
 import com.downloader.Widgets.TextProgressBar;
+import com.downloader.data.DownloadsContentProvider;
 
 public class DownloadingHotFileThread extends Thread {
 
@@ -225,21 +225,27 @@ public class DownloadingHotFileThread extends Thread {
 				// TODO filename + miejsce do zapisu
 				state.filename = "cos";
 				state.fileOutputStream = new FileOutputStream(state.filename);
-				DBAdapter.updateDatabase(downloadItem.id, state.filename,
-						downloadItem.contentSize);
+				
+				ContentValues contentValues = new ContentValues();
+				contentValues.put(Variables.DB_KEY_FILENAME, state.filename);
+				contentValues.put(Variables.DB_KEY_TOTALSIZE, downloadItem.contentSize);
+				context.getContentResolver().update(downloadItem.getMyDownloadUrl(), contentValues, null, null);
+				
 				InputStream entityStream = response.getEntity().getContent();
 				int bytesRead = 0;
 				while (true) {
 					try {
 						bytesRead = entityStream.read(data);
 					} catch (IOException e) {
-						DBAdapter.updateDatabaseCurrentBytes(downloadItem.id,
-								innerState.bytesDownloaded);
+						// TODO what author has in mind
+						contentValues.put(Variables.DB_KEY_TOTALSIZE, downloadItem.contentSize);
+						context.getContentResolver().update(downloadItem.getMyDownloadUrl(), contentValues, null, null);
+						break;
+							
 					}
 					if (bytesRead == -1) {
-						DBAdapter.updateDatabaseTotalCurrentBytes(
-								downloadItem.id, innerState.bytesDownloaded,
-								innerState.contentSize);
+						contentValues.put(Variables.DB_KEY_TOTALSIZE, downloadItem.contentSize);
+						context.getContentResolver().update(downloadItem.getMyDownloadUrl(), contentValues, null, null);
 						break;
 					}
 					state.gotData = true;
@@ -286,7 +292,8 @@ public class DownloadingHotFileThread extends Thread {
 		if(innerState.bytesDownloaded - innerState.bytesNotified > Variables.PROGRESS_UPDATE_WAIT
 				&& now - innerState.lastNotificationTime > Variables.DELAY_TIME)
 		{
-			DBAdapter.updateDatabaseCurrentBytes(downloadItem.id, innerState.bytesDownloaded);
+			// TODO update progess in ContentProvider
+			/*DownloadsContentProvider.updateDatabaseCurrentBytes(downloadItem.id, innerState.bytesDownloaded);*/
 			innerState.bytesNotified = innerState.bytesDownloaded;
 			innerState.lastNotificationTime = now;
 		}

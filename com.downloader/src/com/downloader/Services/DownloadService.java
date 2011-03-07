@@ -13,7 +13,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 
-import stroringdata.DBAdapter;
+import com.downloader.data.DownloadsContentProvider;
+
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -78,7 +79,7 @@ public class DownloadService extends Service {
 		private static Boolean checkUsernamePasswordValid(String username,
 				String passwordmd5) throws ClientProtocolException, IOException {
 			String request = "http://api.hotfile.com/?action=getuserinfo&username="
-					+ username + "&passwordmd5=" + passwordmd5;
+				+ username + "&passwordmd5=" + passwordmd5;
 			DefaultHttpClient httpclient = new DefaultHttpClient();
 			HttpPost getDirectLink = new HttpPost(request);
 			HttpResponse response = httpclient.execute(getDirectLink);
@@ -131,7 +132,7 @@ public class DownloadService extends Service {
 			keepServiceUp = false;
 			wakeUp = Long.MAX_VALUE;
 			Set<Long> idsNoLongerInDB = new HashSet<Long>(downloads.keySet());
-			Cursor cursor = DBAdapter.getAllItems();
+			Cursor cursor = getContentResolver().query(Variables.CONTENT_URI, null, null, null, null);
 			try{
 				DownloadItem.Warehouse reader = new DownloadItem.Warehouse(cursor);
 				int idColumn = cursor.getColumnIndexOrThrow(Variables.DB_KEY_ROWID);
@@ -146,20 +147,22 @@ public class DownloadService extends Service {
 						downloadItem = insertDownload(reader, now);
 					//TODO nie wiem co skopiowac z download service line 246
 				}while(cursor.moveToNext());
-				
+
 			}finally{
 				cursor.close();
 			}
-			
-		for(Long id : idsNoLongerInDB)
-			deleteDownload(id);
-		notifications.updateNotification(downloads.values());
-		
-		for(DownloadItem downloadItem : downloads.values()){
-			if(downloadItem.deleted)
-				DBAdapter.deleteItemFromDatabase(downloadItem.id);
-		}
-		
+
+			for(Long id : idsNoLongerInDB)
+				deleteDownload(id);
+			notifications.updateNotification(downloads.values());
+
+			for(DownloadItem downloadItem : downloads.values()){
+				if(downloadItem.deleted)
+					getContentResolver().delete(Variables.CONTENT_URI,
+							Variables.DB_KEY_ROWID + " = ? ",
+							new String[] { String.valueOf(downloadItem.id)});
+			}
+
 		}
 
 		private void scheduleAlarm(long wakeUp) {
@@ -172,12 +175,12 @@ public class DownloadService extends Service {
 			intent.setClassName("com.android.providers.downloaderHotfile", DownloaderBroadcastReceiver.class.getName());
 			alarms.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()
 					+ wakeUp, PendingIntent.getBroadcast(DownloadService.this,
-					0, intent, PendingIntent.FLAG_ONE_SHOT));
+							0, intent, PendingIntent.FLAG_ONE_SHOT));
 		}
 
-	
+
 	}
-	
+
 	private void deleteDownload(long id){
 		DownloadItem downloadItem = downloads.get(id);
 		if(downloadItem.status == Variables.STATUS_RUNNING)
@@ -190,23 +193,23 @@ public class DownloadService extends Service {
 		DownloadItem downloadItem = warehouse.addNewItem(this, extraManaging);
 		downloads.put(downloadItem.id, downloadItem);
 		synchronized(DownloadService.this){
-		if(downloadsRunning<3){			
+			if(downloadsRunning<3){			
 				downloadItem.tryToStartDownload();
 				++downloadsRunning;
+			}
+			return downloadItem;
 		}
-		return downloadItem;
-		}
-		
+
 	}
-	
+
 	private void updateDownload(DownloadItem.Warehouse warehouse, DownloadItem downloadItem) {
 		int oldStatus = downloadItem.status;
 		warehouse.updateItemFromDatabase(downloadItem);
 		downloadItem.tryToStartDownload();
 	}
-	
-	
-	
+
+
+
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		int returnValue = super.onStartCommand(intent, flags, startId);

@@ -2,7 +2,8 @@ package com.downloader.Services;
 
 import java.io.FileOutputStream;
 
-import stroringdata.DBAdapter;
+import com.downloader.data.DownloadsContentProvider;
+
 
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -86,10 +87,6 @@ public class DownloadItem {
 					return new String(newArray, 0, length);
 			return oldValue;
 		}
-
-		private int getIntItemFromDatabase(String columnName) {
-			return cursor.getInt(cursor.getColumnIndexOrThrow(columnName));
-		}
 		
 		private long getLongItemFromDatabase(String columnName) {
 			return cursor.getLong(cursor.getColumnIndexOrThrow(columnName));
@@ -126,11 +123,17 @@ public class DownloadItem {
 					status = Variables.STATUS_RUNNING;
 					ContentValues contentValues = new ContentValues();
 					contentValues.put(Variables.DB_COLUMN_STATUS, status);
-					DBAdapter.updateDatabaseContentValues(this.id, contentValues);
+					// TODO
+					context.getContentResolver().update(getMyDownloadUrl(), contentValues, null, 
+							null);
 				}
 				DownloadingHotFileThread dwThread = new DownloadingHotFileThread(context, extraManaging, this);
 				mHasActiveThread = true;
 				extraManaging.startThread(dwThread);
 			}
 		}
+
+	Uri getMyDownloadUrl() {
+		return ContentUris.withAppendedId(Variables.CONTENT_URI, id);
+	}
 }
