@@ -18,12 +18,20 @@ import android.net.Uri;
 import com.downloader.Services.DownloadItem;
 
 public class prepareActions {
+	public class ParseException extends Exception {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -490694738705509790L;
+		
+	}
 
 	/*
 	 * Check if file exists on server
 	 * http://api.hotfile.com/?c=checklinks
 	 */
-	public List<DownloadItem> prepareFilesToDownload(List<String> downloadList) throws ClientProtocolException, IOException
+	public List<DownloadItem> prepareFilesToDownload(List<String> downloadList) throws ClientProtocolException, IOException, ParseException
 	{
 		List<String> keysIds = cutKeysIdsFromLinks(downloadList);
 		String request = "http://api.hotfile.com/?action=checklinks&ids=";
@@ -54,10 +62,22 @@ public class prepareActions {
 			if(str.length()>0){
 				//DownloadingFileItem item = new DownloadingFileItem(
 				int firstcomma = str.indexOf(",");					//positions of comma's
+				if (firstcomma == -1)
+					throw new ParseException();
 				int secondcomma = str.indexOf(",", firstcomma+1);
+				if (secondcomma == -1)
+					throw new ParseException();
 				int thirdcomma = str.indexOf(",", secondcomma+1);
+				if (thirdcomma == -1)
+					throw new ParseException();
+				long size = 0;
+				try {
+					size = Long.parseLong(str.substring(thirdcomma+1));
+				} catch (NumberFormatException e) {
+					throw new ParseException();
+				}
 				list.add(new DownloadItem(downloadList.get(iterator),
-						Long.parseLong(str.substring(thirdcomma+1))));
+						size));
 				++iterator;
 			}
 		}

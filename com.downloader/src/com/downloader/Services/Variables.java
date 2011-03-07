@@ -5,13 +5,14 @@ import android.net.Uri;
 public final class Variables {
 	
 	public static final String AUTHORITY = "hotfile_downloader";
+	public static final String DB_DATABASE_TABLE = "downloads";
 	
-	public static final Uri CONTENT_URI = Uri.parse("content://"+AUTHORITY+"/downloads");
+	public static final Uri CONTENT_URI = Uri.parse("content://"+AUTHORITY+"/"+DB_DATABASE_TABLE);
 	
 	/** DATABASE CONSTANS */
 	
 	public static final String DB_DATABASE_NAME = "HOTFILE_DOWNLOADER";
-	public static final String DB_DATABASE_TABLE = "downloads";
+	
 	public static final int DB_DATABASE_VERSION = 1;
 	/**
 	 * ID IN DB

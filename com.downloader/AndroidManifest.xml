@@ -17,7 +17,9 @@
 		<activity android:name="MovieButtons" android:label="@layout/movie_buttons"></activity>
 		<service android:permission="android.permission.WRITE_EXTERNAL_STORAGE" android:name=".Services.DownloadService"></service>
 		<provider android:name=".data.DownloadsContentProvider"
-			android:authorities=".data.DownloadsContentProvider"></provider>
+			android:authorities="hotfile_downloader">
+			<grant-uri-permission android:pathPrefix="downloads"></grant-uri-permission>
+			</provider>
 	</application>
 	<uses-sdk android:minSdkVersion="9" android:targetSdkVersion="9" />
 

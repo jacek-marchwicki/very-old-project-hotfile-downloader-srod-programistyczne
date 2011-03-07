@@ -36,6 +36,7 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.downloader.prepareActions.ParseException;
 import com.downloader.Services.DownloadItem;
 import com.downloader.Services.DownloadManager;
 import com.downloader.Services.DownloadService;
@@ -167,9 +168,14 @@ public class HotFile extends Activity {
 					case CODEAddLink: // called by OnClickListener
 										// buttontAddLink
 						if (checkInternetAccess()) {
+							try {
 							List<String> tempList = new ArrayList<String>();
 							tempList.add(data.getAction());
-							addNewFiles(tempList);
+								addNewFiles(tempList);
+							} catch (ParseException e) {
+								// TODO return information to user
+								Log.v(LOG_TAG, "Error while parsing file");
+							}
 						}
 						break;
 					}
@@ -374,9 +380,10 @@ public class HotFile extends Activity {
 
 	/**
 	 * Common method to add files
+	 * @throws ParseException 
 	 */
 	private void addNewFiles(List<String> linksList)
-			throws ClientProtocolException, IOException {
+			throws ClientProtocolException, IOException, ParseException {
 
 		List<String> preparedLinks = getLinkFromText(linksList, "hotfile.com");
 		if (preparedLinks.size() > 0) {

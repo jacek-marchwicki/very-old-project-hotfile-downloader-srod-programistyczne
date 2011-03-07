@@ -22,7 +22,7 @@ public class DownloadsContentProvider extends ContentProvider
 
 	private static final String TAG = "DownloadFilesContentProvider";
 
-	private static final int DATABASE_VERSION = 1;
+	private static final int DATABASE_VERSION = 3;
 
 	private static final UriMatcher sUriMatcher;
 
@@ -35,7 +35,8 @@ public class DownloadsContentProvider extends ContentProvider
 			"create table "+Variables.DB_DATABASE_TABLE+
 			" ("+
 			Variables.DB_KEY_ROWID+" integer primary key autoincrement, "+
-			Variables.DB_REQUESTURI + " text not null, " +
+			Variables.DB_REQUESTURI + " text, " +
+			Variables.DB_DIRECTURI + " text not null, " +
 			Variables.DB_KEY_FILENAME +" text not null, "+
 			Variables.DB_KEY_TOTALSIZE +" integer not null, "+
 			Variables.DB_KEY_DOWNLOADEDSIZE +" integer, "+
@@ -93,7 +94,9 @@ public class DownloadsContentProvider extends ContentProvider
 	
 	@Override
 	public Uri insert(Uri uri, ContentValues initialValues) {
-		if (sUriMatcher.match(uri) != DB_TABLE_ID) { throw new IllegalArgumentException("Unknown URI " + uri); }
+		if (sUriMatcher.match(uri) != DB_TABLE_ID) {
+			throw new IllegalArgumentException("Unknown URI " + uri);
+			}
 
 		ContentValues values;
 		if (initialValues != null) {
