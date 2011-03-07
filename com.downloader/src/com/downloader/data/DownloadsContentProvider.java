@@ -22,7 +22,7 @@ public class DownloadsContentProvider extends ContentProvider
 
 	private static final String TAG = "DownloadFilesContentProvider";
 
-	private static final int DATABASE_VERSION = 4;
+	private static final int DATABASE_VERSION = 5;
 
 	private static final UriMatcher sUriMatcher;
 
@@ -41,7 +41,6 @@ public class DownloadsContentProvider extends ContentProvider
 			Variables.DB_KEY_TOTALSIZE +" integer not null, "+
 			Variables.DB_KEY_DOWNLOADEDSIZE +" integer, "+
 			Variables.DB_KEY_WIFIONLY+" integer, "+
-			Variables.DB_COLUMN_CONTROL+" integer, "+
 			Variables.DB_COLUMN_STATUS +" integer, "+
 			Variables.DB_DELETED +" integer)";
 		DatabaseHelper(Context context) {
@@ -91,12 +90,12 @@ public class DownloadsContentProvider extends ContentProvider
 			throw new IllegalArgumentException("Unknown URI " + uri);
 		}
 	}
-	
+
 	@Override
 	public Uri insert(Uri uri, ContentValues initialValues) {
 		if (sUriMatcher.match(uri) != DB_TABLE_ID) {
 			throw new IllegalArgumentException("Unknown URI " + uri);
-			}
+		}
 
 		ContentValues values;
 		if (initialValues != null) {
@@ -138,7 +137,6 @@ public class DownloadsContentProvider extends ContentProvider
 
 		SQLiteDatabase db = dbHelper.getReadableDatabase();
 		Cursor c = qb.query(db, projection, selection, selectionArgs, null, null, sortOrder);
-
 		c.setNotificationUri(getContext().getContentResolver(), uri);
 		return c;
 	}
@@ -166,17 +164,16 @@ public class DownloadsContentProvider extends ContentProvider
 		sUriMatcher.addURI(Variables.AUTHORITY, Variables.DB_DATABASE_TABLE+"/#", DB_TABLE_ID);
 
 		downloadProjectionMap = new HashMap<String, String>();
-		
+
 		downloadProjectionMap.put(Variables.DB_KEY_ROWID, Variables.DB_KEY_ROWID);
-        downloadProjectionMap.put(Variables.DB_REQUESTURI, Variables.DB_REQUESTURI);
-        downloadProjectionMap.put(Variables.DB_DIRECTURI, Variables.DB_DIRECTURI);
-        downloadProjectionMap.put(Variables.DB_KEY_FILENAME, Variables.DB_KEY_FILENAME);
-        downloadProjectionMap.put(Variables.DB_KEY_TOTALSIZE, Variables.DB_KEY_TOTALSIZE);
-        downloadProjectionMap.put(Variables.DB_KEY_DOWNLOADEDSIZE, Variables.DB_KEY_DOWNLOADEDSIZE);
-        downloadProjectionMap.put(Variables.DB_KEY_WIFIONLY, Variables.DB_KEY_WIFIONLY);
-        downloadProjectionMap.put(Variables.DB_COLUMN_CONTROL, Variables.DB_COLUMN_CONTROL);
-        downloadProjectionMap.put(Variables.DB_COLUMN_STATUS, Variables.DB_COLUMN_STATUS);
-        downloadProjectionMap.put(Variables.DB_DELETED, Variables.DB_DELETED);
+		downloadProjectionMap.put(Variables.DB_REQUESTURI, Variables.DB_REQUESTURI);
+		downloadProjectionMap.put(Variables.DB_DIRECTURI, Variables.DB_DIRECTURI);
+		downloadProjectionMap.put(Variables.DB_KEY_FILENAME, Variables.DB_KEY_FILENAME);
+		downloadProjectionMap.put(Variables.DB_KEY_TOTALSIZE, Variables.DB_KEY_TOTALSIZE);
+		downloadProjectionMap.put(Variables.DB_KEY_DOWNLOADEDSIZE, Variables.DB_KEY_DOWNLOADEDSIZE);
+		downloadProjectionMap.put(Variables.DB_KEY_WIFIONLY, Variables.DB_KEY_WIFIONLY);
+		downloadProjectionMap.put(Variables.DB_COLUMN_STATUS, Variables.DB_COLUMN_STATUS);
+		downloadProjectionMap.put(Variables.DB_DELETED, Variables.DB_DELETED);
 
 	}
 

@@ -23,6 +23,7 @@ public class DownloadManager {
         initialValues.put(Variables.DB_REQUESTURI, url);
         initialValues.put(Variables.DB_KEY_TOTALSIZE, contentSize);
         initialValues.put(Variables.DB_KEY_FILENAME, Uri.parse(url).getLastPathSegment());
+        initialValues.put(Variables.DB_COLUMN_STATUS, Variables.STATUS_WAITING);
         context.startService(new Intent(context, DownloadService.class));
         contentResolver.insert(Variables.CONTENT_URI, initialValues);
 		

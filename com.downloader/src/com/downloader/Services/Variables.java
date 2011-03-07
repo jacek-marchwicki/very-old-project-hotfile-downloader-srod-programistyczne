@@ -50,7 +50,6 @@ public final class Variables {
      */
     public static final String DB_KEY_WIFIONLY = "wifionly";
     
-    public static final String DB_COLUMN_CONTROL = "control";
     public static final String DB_COLUMN_STATUS = "status";
     public static final String DB_DELETED = "deleted"; //if true downloaded was finished and row can be deleted from db
     

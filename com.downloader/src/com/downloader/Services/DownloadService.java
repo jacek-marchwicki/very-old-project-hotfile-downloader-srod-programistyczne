@@ -28,6 +28,7 @@ import android.util.Log;
 
 public class DownloadService extends Service {
 
+	private static final String LOG_TAG = "DownloadService";
 	/**
 	 * Observer of content changing
 	 */
@@ -105,6 +106,8 @@ public class DownloadService extends Service {
 	}
 
 	private class UpdateThread extends Thread {
+		private static final String LOG_TAG = "UpdateThread";
+
 		public UpdateThread() {
 			super("Hotfile downloader service");
 		}
@@ -149,17 +152,16 @@ public class DownloadService extends Service {
 					else
 						downloadItem = insertDownload(reader, now);
 					//TODO nie wiem co skopiowac z download service line 246
-				}while(cursor.moveToNext());
-
+				} while (cursor.moveToNext());
 			}finally{
 				cursor.close();
 			}
 
 			for(Long id : idsNoLongerInDB)
 				deleteDownload(id);
-			notifications.updateNotification(downloads.values());
+			// TODO notifications.updateNotification(downloads.values());
 
-			for(DownloadItem downloadItem : downloads.values()){
+			for(DownloadItem downloadItem : downloads.values()) {
 				if(downloadItem.deleted)
 					getContentResolver().delete(Variables.CONTENT_URI,
 							Variables.DB_KEY_ROWID + " = ? ",
@@ -195,6 +197,7 @@ public class DownloadService extends Service {
 	private DownloadItem insertDownload(DownloadItem.Warehouse warehouse, long now) {
 		DownloadItem downloadItem = warehouse.addNewItem(this, extraManaging);
 		downloads.put(downloadItem.id, downloadItem);
+		Log.v(LOG_TAG, "Downloading file: "+downloadItem.requestUri);
 		synchronized(DownloadService.this){
 			if(downloadsRunning<3){			
 				downloadItem.tryToStartDownload();
@@ -206,7 +209,6 @@ public class DownloadService extends Service {
 	}
 
 	private void updateDownload(DownloadItem.Warehouse warehouse, DownloadItem downloadItem) {
-		int oldStatus = downloadItem.status;
 		warehouse.updateItemFromDatabase(downloadItem);
 		downloadItem.tryToStartDownload();
 	}
