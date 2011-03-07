@@ -17,6 +17,7 @@ import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.net.ConnectivityManager;
@@ -79,7 +80,9 @@ public class HotFile extends Activity {
 	String username = "";
 	String password = "";
 	String directory = "";
-
+	
+	
+	
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -92,7 +95,8 @@ public class HotFile extends Activity {
 		myProgressBar = (ProgressBar) findViewById(R.id.ProgressBar01);
 		// movieButtons = new MovieButtons();
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
-
+		batteryState();
+		
 		/*
 		 * ADDING BUTTON CLICKS
 		 */
@@ -567,5 +571,43 @@ public class HotFile extends Activity {
 		if(!status) Log.v(Variables.TAG, "No internet connection");
 		return status;
 	}
+	
+/** ----------------BATTERY ------------------------- */
+	
+	//http://moonblink.googlecode.com/svn-history/r845/trunk/BatteryTracker/src/org/hermit/android/battrack/BatteryTracker.java
+	public void batteryState(){
+		
 
+        IntentFilter filter = new IntentFilter();
+       // filter.addAction(Intent.ACTION_BATTERY_CHANGED);
+        filter.addAction(Intent.ACTION_BATTERY_LOW);
+        filter.addAction(Intent.ACTION_BATTERY_OKAY);
+        filter.addAction(Intent.ACTION_POWER_CONNECTED);
+        filter.addAction(Intent.ACTION_POWER_DISCONNECTED);
+        registerReceiver(mIntentReceiver, filter);
+        
+	}
+	
+
+	// ******************************************************************** //
+    // Update Handling.
+    // ******************************************************************** //
+
+    private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+           if (action.equals(Intent.ACTION_BATTERY_LOW))
+            		showNotification("Battery level is low. Plug your phone");
+           else if (action.equals(Intent.ACTION_POWER_CONNECTED))
+        	   showNotification("Your phone has been pluged in");
+           else if (action.equals(Intent.ACTION_POWER_DISCONNECTED))
+        	   showNotification("Your phone is no longer plug in");
+           else if (action.equals(Intent.ACTION_POWER_DISCONNECTED))
+        	   showNotification("Your phone is happy :)");
+           
+        }
+    };
+    /** ----------------END BATTERY ------------------------- */
+	
 }
