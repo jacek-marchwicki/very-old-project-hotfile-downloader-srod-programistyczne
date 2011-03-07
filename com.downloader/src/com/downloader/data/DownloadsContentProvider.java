@@ -163,11 +163,13 @@ public class DownloadsContentProvider extends ContentProvider
 	static {
 		sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 		sUriMatcher.addURI(Variables.AUTHORITY, Variables.DB_DATABASE_TABLE, DB_TABLE_ID);
+		sUriMatcher.addURI(Variables.AUTHORITY, Variables.DB_DATABASE_TABLE+"/#", DB_TABLE_ID);
 
 		downloadProjectionMap = new HashMap<String, String>();
 		
 		downloadProjectionMap.put(Variables.DB_KEY_ROWID, Variables.DB_KEY_ROWID);
         downloadProjectionMap.put(Variables.DB_REQUESTURI, Variables.DB_REQUESTURI);
+        downloadProjectionMap.put(Variables.DB_DIRECTURI, Variables.DB_DIRECTURI);
         downloadProjectionMap.put(Variables.DB_KEY_FILENAME, Variables.DB_KEY_FILENAME);
         downloadProjectionMap.put(Variables.DB_KEY_TOTALSIZE, Variables.DB_KEY_TOTALSIZE);
         downloadProjectionMap.put(Variables.DB_KEY_DOWNLOADEDSIZE, Variables.DB_KEY_DOWNLOADEDSIZE);
