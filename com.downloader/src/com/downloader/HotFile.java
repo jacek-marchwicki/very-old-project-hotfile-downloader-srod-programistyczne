@@ -72,9 +72,11 @@ public class HotFile extends Activity {
 	List<Intent> downloadingList;
 	public static final String LOG_TAG = "HotFileDownloader Information";
 	public static List<DownloadingFileItem> listOfDownloadingFiles;
-//	MovieButtons movieButtons;
+	//	MovieButtons movieButtons;
 	DownloadManager downloadManager;
-	String username, password, directory;
+	String username = "";
+	String password = "";
+	String directory = "";
 
 	/** Called when the activity is first created. */
 	@Override
@@ -86,20 +88,20 @@ public class HotFile extends Activity {
 		listOfDownloadingFiles = new ArrayList<DownloadingFileItem>();
 		listview = (ListView) findViewById(R.id.ListView01);
 		myProgressBar = (ProgressBar) findViewById(R.id.ProgressBar01);
-	//	movieButtons = new MovieButtons();
+		//	movieButtons = new MovieButtons();
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
 		/*
 		 * ADDING BUTTON CLICKS
 		 */
 		((Button) findViewById(R.id.Button_download)).setOnClickListener(buttonOnClickDownload);
-		
+
 		((Button) findViewById(R.id.Button_showdownloadlist)).setOnClickListener(buttonOnClickShowdownloadlistListener);
 		((Button) findViewById(R.id.Button_addlinksfromfile)).setOnClickListener(buttontAddLinksFile);
-		
+
 		((Button) findViewById(R.id.Button_addlinkfromclipboard)).setOnClickListener(buttonAddLinkFromClipboard);
 		((Button) findViewById(R.id.Button_addlink)).setOnClickListener(buttonAddLink);
-		
+
 		check = new prepareActions();
 		checkPreferences();
 		// comp
@@ -111,10 +113,10 @@ public class HotFile extends Activity {
 	@Override
 	public void onResume() {
 		super.onResume();
-//		IntentFilter completeFilter = new IntentFilter(
-//				DownloadManager.ACTION_DOWNLOAD_COMPLETE);
-//		registerReceiver(completeReceiver, completeFilter);
-}
+		//		IntentFilter completeFilter = new IntentFilter(
+		//				DownloadManager.ACTION_DOWNLOAD_COMPLETE);
+		//		registerReceiver(completeReceiver, completeFilter);
+	}
 
 	private final int CODEAddLinksFile = 1;
 	private final int CODEAddLink = 2;
@@ -129,7 +131,7 @@ public class HotFile extends Activity {
 		try {
 			StatFs stat = new StatFs(directory);
 			long bytesAvailable = (long) stat.getBlockSize()
-					* (long) stat.getBlockCount();
+			* (long) stat.getBlockCount();
 			long megAvailable = bytesAvailable / 1048576;
 			return megAvailable;
 		} catch (Exception e) {
@@ -142,38 +144,38 @@ public class HotFile extends Activity {
 		Toast.makeText(HotFile.this, notification, Toast.LENGTH_LONG).show();
 	}
 
-/**
- 	* result of an activity. called automatically*/
+	/**
+	 * result of an activity. called automatically*/
 	@Override 
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data); 
-			switch (resultCode) {
-			case RESULT_OK:
-				if (data != null)
-					try {
-						
-						switch (requestCode){
-						case CODEAddLinksFile: //called by OnClickListener buttontAddLinksFile
-							AddLinksFromFile(data.getAction());
-							break;
-						case CODEAddLink: //called by OnClickListener buttontAddLink
-							List<String> tempList = new ArrayList<String>();
-							tempList.add(data.getAction());
-							addNewFiles(tempList);
-							break;
-						}
-						
-					} catch (IOException e) {
-						showNotification("Error occured " + e);
-					}
-				break;
-			case RESULT_CANCELED:
-				break;
-			}		
-	}
-	
+		switch (resultCode) {
+		case RESULT_OK:
+			if (data != null)
+				try {
 
-	
+					switch (requestCode){
+					case CODEAddLinksFile: //called by OnClickListener buttontAddLinksFile
+						AddLinksFromFile(data.getAction());
+						break;
+					case CODEAddLink: //called by OnClickListener buttontAddLink
+						List<String> tempList = new ArrayList<String>();
+						tempList.add(data.getAction());
+						addNewFiles(tempList);
+						break;
+					}
+
+				} catch (IOException e) {
+					showNotification("Error occured " + e);
+				}
+				break;
+		case RESULT_CANCELED:
+			break;
+		}		
+	}
+
+
+
 	/** ----------------SHOW DOWNLOADED LIST -------------------------*/
 	private OnClickListener buttonOnClickShowdownloadlistListener = new OnClickListener() {
 		public void onClick(View v) {
@@ -187,7 +189,7 @@ public class HotFile extends Activity {
 		}
 	};
 	/** ----------------END SHOW DOWNLOADED LIST -------------------------*/
-	
+
 	/** ----------------MENU-------------------------*/
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -212,7 +214,7 @@ public class HotFile extends Activity {
 						"Here you can maintain your user credentials.",
 						Toast.LENGTH_LONG).show();
 				preferences
-						.registerOnSharedPreferenceChangeListener(prefListener);
+				.registerOnSharedPreferenceChangeListener(prefListener);
 				break;
 			} catch (Exception e) {
 			}
@@ -225,7 +227,7 @@ public class HotFile extends Activity {
 
 	/** ----------------END MENU-------------------------*/
 
-	
+
 
 	private void beginDownloading(String link, String username,
 			String passwordmd5, String directory, int id) {
@@ -248,8 +250,9 @@ public class HotFile extends Activity {
 	 * Check if preferences are set
 	 */
 	private void checkPreferences() {
-		DownloadService.UsernamePasswordMD5Storage.setUsernameAndPasswordMD5(preferences.getString("username", null), 
-				Md5Create.generateMD5Hash(preferences.getString("password", null)));
+		DownloadService.UsernamePasswordMD5Storage.setUsernameAndPasswordMD5(
+				preferences.getString("username", ""), 
+				Md5Create.generateMD5Hash(preferences.getString("password", "")));
 		//TODO sprawdzic czy dobrze jest static class zrobione
 		directory = preferences.getString("chooseDir", null);
 		File dir;
@@ -282,46 +285,44 @@ public class HotFile extends Activity {
 		public void onSharedPreferenceChanged(
 				SharedPreferences sharedPreferences, String key) {
 			if (key.equals("password")
-					&& !password
-							.equals(preferences.getString("username", null))) {
-				password = preferences.getString("password", null);
+					&& !password.equals(preferences.getString("password", ""))) {
+				password = preferences.getString("password", "");
 				Toast.makeText(HotFile.this, "The password has been changed",
 						Toast.LENGTH_LONG).show();
 			} else if (key.equals("username")
-					&& !username
-							.equals(preferences.getString("username", null))) {
-				username = preferences.getString("username", null);
+					&& !username.equals(preferences.getString("username", ""))) {
+				username = preferences.getString("username", "");
 				Toast.makeText(HotFile.this, "The username has been changed",
 						Toast.LENGTH_LONG).show();
 			} else if (key.equals("chooseDir")
 					&& !directory.equals(preferences.getString("chooseDir",
-							null))) {
-				directory = preferences.getString("chooseDir", null);
+					""))) {
+				directory = preferences.getString("chooseDir", "");
 				Toast.makeText(HotFile.this, "The directory has been changed",
 						Toast.LENGTH_LONG).show();
 			}
 
 		}
 	};
-	
-	
+
+
 	public Boolean checkPrecondition(long size, String link, String username,
 			String passwordmd5, String directory) {
 
-			Boolean firstCond = false, secondCond = false;
-			if (checkFreeSpace(directory) > size) {
+		Boolean firstCond = false, secondCond = false;
+		if (checkFreeSpace(directory) > size) {
 
-			} else
-				secondCond = true;
-			if (firstCond && secondCond)
-				return true;
-			else
-				return false;
+		} else
+			secondCond = true;
+		if (firstCond && secondCond)
+			return true;
+		else
+			return false;
 
 	}
 
 	/** ----------------END PREFERENCES -------------------------*/
-	
+
 	/** ----------------ADDING DOWNLOADING ITEMS -------------------------*/
 	public static List<DownloadItem> downList;
 
@@ -338,7 +339,7 @@ public class HotFile extends Activity {
 		}
 	};
 
-	
+
 	private void AddLinksFromFile(String filename) throws IOException {
 
 		File file = new File(filename);
@@ -364,12 +365,12 @@ public class HotFile extends Activity {
 			showNotification("Error occured when adding links from a file");
 		}
 	}
-	
+
 	/**
 	 * Common method to add files*/
 	private void addNewFiles(List<String> linksList)
-			throws ClientProtocolException, IOException {
-		
+	throws ClientProtocolException, IOException {
+
 		List<String> preparedLinks = getLinkFromText(linksList, "hotfile.com");
 		if (preparedLinks.size() > 0){
 			//TODO ten prepare nie dziala sypie w 78 linijce
@@ -377,7 +378,7 @@ public class HotFile extends Activity {
 			String uri = downList.get(0).requestUri;
 			long size = downList.get(0).contentSize;
 			downloadManager.enqueue(uri, size);
-			
+
 			//TODO zrobic zmiany w prepareFiles i dodac item do bazy danych, potem wywolac service?
 			int numberofAddedFiles = downList.size();
 			showNotification(numberofAddedFiles + " files have been added");
@@ -385,7 +386,7 @@ public class HotFile extends Activity {
 		else
 			showNotification("no file has been added");
 	}
-/*
+	/*
 	private boolean removeFile(long id) {
 
 		for (DownloadingFileItem listItem : listOfDownloadingFiles)
@@ -405,13 +406,13 @@ public class HotFile extends Activity {
 	 */
 	private List<String> getLinkFromText(List<String> links, String serviceName) {
 		List<String> resultList = new ArrayList<String>();
-		
+
 		for(String link: links){
 			String[] list = link.split("\\ ");
 			Pattern p = Pattern.compile("http://(www\\.)?" + serviceName + ".*");
-			
+
 			for (String s : list) {
-	
+
 				Matcher m = p.matcher(s);
 				if (m.matches())
 					resultList.add(s);
@@ -420,8 +421,8 @@ public class HotFile extends Activity {
 
 		return resultList;
 	}
-	
-	
+
+
 	/**
 	 * Adding new file by copying the clipboard**/
 	private OnClickListener buttonAddLinkFromClipboard = new OnClickListener() {
@@ -438,13 +439,13 @@ public class HotFile extends Activity {
 				}
 				else
 					showNotification("no data in clipboard");
-				
+
 			}
 			catch(Exception e){}
 		}
 	};
-		
-	
+
+
 	/**
 	 *Adding new link by clicking button ADD Link 
 	 * ***/	
@@ -455,9 +456,9 @@ public class HotFile extends Activity {
 				Intent i = new Intent(HotFile.this, MovieButtons.class);
 				startActivityForResult(i, CODEAddLink);
 				//LinearLayout ll = (LinearLayout) findViewById(R.id.movieButtons);
-			//	((Button)findViewById(R.id.button_addLink)).setOnClickListener(button_addLinkListener);
-				
-				
+				//	((Button)findViewById(R.id.button_addLink)).setOnClickListener(button_addLinkListener);
+
+
 				/* 
 				 * buttonOnClickShowdownloadlist(v);
 				long id;
@@ -488,15 +489,15 @@ public class HotFile extends Activity {
 				} while (cursor.moveToNext());
 				cursor.moveToFirst();
 				Log.d("DownloadManagerSample", cursor.getString(idStatus));
-				*/
+				 */
 
 			} catch (Exception e) {
 				Log.v(LOG_TAG, "Exception " + e.toString());
 			}
 		}
 	};
-	
-	
+
+
 	// ----------------END ADDING DOWNLOADING ITEMS---------------------
 
 
@@ -508,34 +509,34 @@ public class HotFile extends Activity {
 		}
 
 	};
-	
+
 	public void buttonOnClickShowdownloadlist(View view) {
-	//	int i = 0;
+		//	int i = 0;
 		// addProgressBarToDownloadListBox(new TextProgressBar(this));
 
 	}
 
-	
+
 	/*
 	 * downloadLink has to be available and valid check downloadLink sooner
 	 */
 	private OnClickListener buttonOnClickDownload = new OnClickListener() {
 		public void onClick(View v) {
-//			String aaa = Md5Create.generateMD5Hash("puyyut");
-//			List<String> list = new LinkedList<String>();
-//			list.add("http://hotfile.com/dl/81363200/ba7f841/Ostatnia-DVDRip.PL.part1.rar.html");
-//			list.add("http://hotfile.com/dl/98588098/f5c4897/4.pdf.html"); // 2MB
-//			list.add("http://hotfile.com/dl/98588065/ece61ef/1.pdf.html");// 4MB
-//
-//			list.add("ht			downList = check.prepareFilesToDownload(preparedLinks);tp://hotfile.com/dl/92148167/7c86b14/fil.txt.html");
-//			list.add("http://hotfile.com/dl/92539498/131dad0/Gamee.Of.Death.DVDRip.XviD-VoMiT.m90.part1.rar.html");
-//
-//			beginDownloading(list.get(3), username, aaa, directory, 1);
-			
+			//			String aaa = Md5Create.generateMD5Hash("puyyut");
+			//			List<String> list = new LinkedList<String>();
+			//			list.add("http://hotfile.com/dl/81363200/ba7f841/Ostatnia-DVDRip.PL.part1.rar.html");
+			//			list.add("http://hotfile.com/dl/98588098/f5c4897/4.pdf.html"); // 2MB
+			//			list.add("http://hotfile.com/dl/98588065/ece61ef/1.pdf.html");// 4MB
+			//
+			//			list.add("ht			downList = check.prepareFilesToDownload(preparedLinks);tp://hotfile.com/dl/92148167/7c86b14/fil.txt.html");
+			//			list.add("http://hotfile.com/dl/92539498/131dad0/Gamee.Of.Death.DVDRip.XviD-VoMiT.m90.part1.rar.html");
+			//
+			//			beginDownloading(list.get(3), username, aaa, directory, 1);
+
 		}
 	};
-	
-	
+
+
 	/*
 	public void addLineToDownloadListBox(String line) {
 		LinearLayout ll = (LinearLayout) findViewById(R.id.mylayout);

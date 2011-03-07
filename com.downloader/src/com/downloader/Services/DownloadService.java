@@ -85,8 +85,11 @@ public class DownloadService extends Service {
 			HttpResponse response = httpclient.execute(getDirectLink);
 			HttpEntity entity = response.getEntity();
 			String responseText = EntityUtils.toString(entity);
+			int indexOfEquationSign = responseText.indexOf("=");
+			if (indexOfEquationSign == -1)
+				return false;
 			return Boolean.parseBoolean(responseText.substring(
-					responseText.indexOf("="), responseText.indexOf("=") + 1));
+					indexOfEquationSign, indexOfEquationSign + 1));
 		}
 	}
 
