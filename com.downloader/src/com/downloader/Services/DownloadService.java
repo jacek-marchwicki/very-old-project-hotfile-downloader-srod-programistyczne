@@ -31,7 +31,7 @@ public class DownloadService extends Service {
 	 * Observer of content changing
 	 */
 	private DownloadContentObserver downloadContentObserver;
-	private boolean isNeededToUpdate;
+	private boolean pendingUpdate;
 	private Map<Long, DownloadItem> downloads = new HashMap<Long, DownloadItem>();
 	ExtraManaging extraManaging;
 	private int downloadsRunning = 0;
@@ -133,18 +133,17 @@ public class DownloadService extends Service {
 					if (updateThread != this)
 						throw new IllegalStateException("multiple UpdateThreads in DownloadService");
 				}
-				if(!isNeededToUpdate){
+				if(!pendingUpdate){
 					updateThread = null;
 					if(!keepServiceUp)
 						stopSelf();
 					if(wakeUp != Long.MAX_VALUE)
 						scheduleAlarm(wakeUp);
-					break;
+					return;
 				}
-				isNeededToUpdate = false;
-			}
+				pendingUpdate = false;
 			long now = System.currentTimeMillis();
-			keepServiceUp = false;
+			keepServiceUp = true;
 			wakeUp = Long.MAX_VALUE;
 			Set<Long> idsNoLongerInDB = new HashSet<Long>(downloads.keySet());
 			Cursor cursor = getContentResolver().query(Variables.CONTENT_URI, null, null, null, null);
@@ -161,6 +160,7 @@ public class DownloadService extends Service {
 					else
 						downloadItem = insertDownload(reader, now);
 					//TODO nie wiem co skopiowac z download service line 246
+					
 				} while (cursor.moveToNext());
 			}finally{
 				cursor.close();
@@ -168,15 +168,16 @@ public class DownloadService extends Service {
 
 			for(Long id : idsNoLongerInDB)
 				deleteDownload(id);
-			// TODO notifications.updateNotification(downloads.values());
-
+			notifications.updateNotification(downloads.values());
+			if(downloads.isEmpty())
+				keepServiceUp = false;
 			for(DownloadItem downloadItem : downloads.values()) {
 				if(downloadItem.deleted)
 					getContentResolver().delete(Variables.CONTENT_URI,
 							Variables.DB_KEY_ROWID + " = ? ",
 							new String[] { String.valueOf(downloadItem.id)});
 			}
-
+			}
 		}
 
 		private void scheduleAlarm(long wakeUp) {
@@ -184,12 +185,9 @@ public class DownloadService extends Service {
 			if (alarms == null) {
 				return;
 			}
-
-			Intent intent = new Intent(Variables.ACTION_RETRY);
-			intent.setClassName("com.android.providers.downloaderHotfile", DownloaderBroadcastReceiver.class.getName());
 			alarms.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()
-					+ wakeUp, PendingIntent.getBroadcast(DownloadService.this,
-							0, intent, PendingIntent.FLAG_ONE_SHOT));
+					+ wakeUp, PendingIntent.getService(DownloadService.this, 0, 
+							new Intent(DownloadService.this, DownloadService.class), 0));
 		}
 
 
@@ -245,19 +243,23 @@ public class DownloadService extends Service {
 		downloadContentObserver = new DownloadContentObserver();
 		getContentResolver().registerContentObserver(Variables.CONTENT_URI, true,
 				downloadContentObserver);
-		// TODO wymienic null'a na cos
+		notifications = new Notifications(this, extraManaging);
+		extraManaging.removeAllNotification();
 		updateFromProvider();
 	}
+	
+	public static volatile boolean _isRunning = true;
 
 	@Override
 	public void onDestroy() {
+		_isRunning = false;
 		getContentResolver().unregisterContentObserver(downloadContentObserver);
 		super.onDestroy();
 	}
 
 	private void updateFromProvider() {
 		synchronized (this) {
-			isNeededToUpdate = true;
+			pendingUpdate = true;
 			if (updateThread == null) {
 				updateThread = new UpdateThread();
 				extraManaging.startThread(updateThread);

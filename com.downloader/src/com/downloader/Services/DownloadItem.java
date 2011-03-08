@@ -155,4 +155,8 @@ public class DownloadItem {
 	Uri getMyDownloadUrl() {
 		return ContentUris.withAppendedId(Variables.CONTENT_URI, id);
 	}
+	
+	public synchronized boolean isRunning(){
+		return DownloadService._isRunning;
+	}
 }

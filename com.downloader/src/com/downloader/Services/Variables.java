@@ -79,6 +79,7 @@ public final class Variables {
     public static int DOWNLOAD_PAUSED = 2;
     
     public static final String ACTION_RETRY = "android.intent.action.DOWNLOAD_HOTFILE_WAKEUP";
+    public static final String ACTION_NOTIFICATION = "com.downloader.action.DOWNLOAD_LIST";
     
     public static final int MAX_DB_SIZE = 1000;
     public static final String COLUMN_LAST_MODIFICATION = "lastmod";
@@ -93,6 +94,7 @@ public final class Variables {
     public static final int STATUS_RUNNING = 11;
     public static final int STATUS_ERROR = 12;
     public static final int STATUS_CANCEL = 13;
+    public static final int STATUS_PAUSE = 14;
     
     /**
      * INTENT ACTIONS

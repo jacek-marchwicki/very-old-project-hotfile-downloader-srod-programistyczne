@@ -87,12 +87,12 @@ public class DownloadList extends Activity{
 		//cursorObserver.moveToFirst()
 		
 		
-		for(cursorObserver.moveToFirst(); cursorObserver.isAfterLast(); 
-		cursorObserver.moveToNext())
+		cursorObserver.moveToFirst(); 
+		do
 		{
 			long contentSize = cursorObserver.getLong(totalSize);
 			String rUri = cursorObserver.getString(requestUri);
-			if(!downloadItems.isEmpty())
+			if(downloadItems.isEmpty())
 			if(contentSize > 0)
 				downloadItems.add(addProgressBarToDownloadListBox
 						(new DownloadItem(
@@ -100,7 +100,7 @@ public class DownloadList extends Activity{
 						cursorObserver.getString(fileName),
 					contentSize,
 					cursorObserver.getLong(currentSize), rUri), ll));
-		}
+		}while(cursorObserver.moveToNext());
 	}
 
 	public DownloadItem addProgressBarToDownloadListBox(

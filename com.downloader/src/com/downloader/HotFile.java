@@ -15,6 +15,7 @@ import org.apache.http.client.ClientProtocolException;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -80,7 +81,7 @@ public class HotFile extends Activity {
 	String username = "";
 	String password = "";
 	String directory = "";
-	
+	Button startDownload;
 	
 	
 	/** Called when the activity is first created. */
@@ -100,8 +101,8 @@ public class HotFile extends Activity {
 		/*
 		 * ADDING BUTTON CLICKS
 		 */
-		((Button) findViewById(R.id.Button_download))
-				.setOnClickListener(buttonOnClickDownload);
+		startDownload = ((Button) findViewById(R.id.Button_download));
+		startDownload.setOnClickListener(buttonOnClickDownload);
 
 		((Button) findViewById(R.id.Button_showdownloadlist))
 				.setOnClickListener(buttonOnClickShowdownloadlistListener);
@@ -533,8 +534,14 @@ public class HotFile extends Activity {
 	 */
 	private OnClickListener buttonOnClickDownload = new OnClickListener() {
 		public void onClick(View v) {
-			if(checkInternetAccess()){
+			if(checkInternetAccess() && startDownload.getText().equals("Start download")){
+				startDownload.setText("Stop download");
 				downloadManager.startService();
+			}
+			else
+			{
+				startDownload.setText("Start download");
+				downloadManager.stopService();
 			}
 			// String aaa = Md5Create.generateMD5Hash("puyyut");
 			// List<String> list = new LinkedList<String>();

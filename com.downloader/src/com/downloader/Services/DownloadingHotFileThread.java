@@ -19,6 +19,7 @@ import android.net.Uri;
 import android.os.PowerManager;
 import android.util.Log;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 public class DownloadingHotFileThread extends Thread {
 
@@ -27,7 +28,6 @@ public class DownloadingHotFileThread extends Thread {
 	DownloadItem downloadItem;
 
 	ProgressBar progressBar;
-	private Thread mThread;
 	private static final int MAX_BUFFER_SIZE = 1024;
 
 	private int size; // size of download in bytes
@@ -39,7 +39,11 @@ public class DownloadingHotFileThread extends Thread {
 		this.extraManaging = extraManaging;
 		this.downloadItem = downloadItem;
 	}
-
+	
+	private synchronized boolean running(){
+		return downloadItem.isRunning();
+	}
+	
 	private static class State {
 		public String filename;
 		public FileOutputStream fileOutputStream;
@@ -105,7 +109,7 @@ public class DownloadingHotFileThread extends Thread {
 				Variables.TAG); // TODO SOME Tag from constans
 		wakeLock.acquire();
 		boolean finished = false;
-		while (!finished) {
+		while (!finished && running()) {
 			// TODO CHECK IF DIRECT LINK IS STILL VALID
 			HttpPost getDirectLink = new HttpPost(state.requestApi);
 			getDirectLink = new HttpPost(state.requestApi);
@@ -127,6 +131,7 @@ public class DownloadingHotFileThread extends Thread {
 				downloadItem.mHasActiveThread = false;
 			}
 		}
+		Toast.makeText(context, "Stop running", Toast.LENGTH_LONG);
 	}
 
 	public long getSize() {
@@ -284,9 +289,9 @@ public class DownloadingHotFileThread extends Thread {
 
 	private void checkIfNeedToPause(State state) throws Error{
 		synchronized(downloadItem){
-			if(downloadItem.stop == Variables.DOWNLOAD_PAUSED)
+			if(downloadItem.status == Variables.STATUS_PAUSE)
 				throw new Error("PAUSE download");
-			else if (downloadItem.status == Variables.DOWNLOAD_CANCELED)
+			if (downloadItem.status == Variables.STATUS_CANCEL)
 				throw new Error("stop download");
 		}
 	}

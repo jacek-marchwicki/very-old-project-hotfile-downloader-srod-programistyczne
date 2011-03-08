@@ -1,21 +1,15 @@
 package com.downloader.Services;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Collection;
 import java.util.HashMap;
 
-
-import com.downloader.R;
-import com.downloader.data.DownloadsContentProvider;
-
 import android.app.Notification;
 import android.app.PendingIntent;
-import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
-import android.view.View;
 import android.widget.RemoteViews;
+
+import com.downloader.R;
 
 public class Notifications {
 	Context context;
@@ -48,8 +42,9 @@ public class Notifications {
 	
 	public void updateNotification(Collection<DownloadItem> downloads){
 		updateActive(downloads);
-		
 	}
+	
+	
 	
 	private void updateActive(Collection<DownloadItem> downloads){
 		notifications.clear();
@@ -69,27 +64,21 @@ public class Notifications {
 				notificationItem.id = (int)id;
 				notificationItem.title = name;
 				notificationItem.addItem(name, progress, max);
+				notifications.put(downloadItem.requestUri, notificationItem);
 			}
 		}
 		for(NotificationItem notificationItem : notifications.values()){
-			Notification notification = new Notification();
-			notification.flags = notification.flags | Notification.FLAG_ONGOING_EVENT;
-			notification.contentView = new RemoteViews(context.getPackageName(), R.layout.download_progress_up);
-			notification.contentView.setImageViewResource(R.id.status_icon, R.drawable.ic_menu_save);
-			try {
-				notification.contentView.setTextViewText(R.id.status_text, new URL(notificationItem.title).getFile());
-			} catch (MalformedURLException e) {
-				e.printStackTrace();
-			}
-			notification.contentView.setProgressBar(R.id.status_progress, (int)notificationItem.totalBytes, 
+			Notification notification = new Notification(R.drawable.icon, "", System.currentTimeMillis());
+			notification.flags = notification.flags | Notification.FLAG_AUTO_CANCEL;
+			RemoteViews  remoteViews = new RemoteViews(context.getPackageName(), R.layout.download_progress_up);
+			remoteViews.setImageViewResource(R.id.status_icon, R.drawable.ic_menu_save);
+			remoteViews.setTextViewText(R.id.status_text, notificationItem.title);
+			remoteViews.setProgressBar(R.id.status_progress, (int)notificationItem.totalBytes, 
 					(int)notificationItem.currentBytes, notificationItem.totalBytes == -1);
-			Intent intent = new Intent("DOWNLOAD_LIST");
-			intent.setData(ContentUris.withAppendedId(Variables.CONTENT_URI, notificationItem.id));
-			intent.setClassName(context, DownloaderBroadcastReceiver.class.getName());
-			notification.contentIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
+			notification.contentView = remoteViews;
+			PendingIntent pendingIntent = PendingIntent.getService(context, 0, new Intent(context, DownloadService.class), 0);
+			notification.contentIntent = pendingIntent;
 			extraManaging.insertNotification(notificationItem.id, notification);
 		}
-	}
-	
-	
+	}	
 }

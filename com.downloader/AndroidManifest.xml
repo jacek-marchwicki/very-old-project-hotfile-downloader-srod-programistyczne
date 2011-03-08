@@ -21,6 +21,7 @@
 			android:authorities="hotfile_downloader">
 			<grant-uri-permission android:pathPrefix="downloads"></grant-uri-permission>
 			</provider>
+		<receiver android:name=".Services.DownloaderBroadcastReceiver" android:exported="false"></receiver>
 	</application>
 	<uses-sdk android:minSdkVersion="9" android:targetSdkVersion="9" />
 

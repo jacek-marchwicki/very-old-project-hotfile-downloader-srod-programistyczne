@@ -147,8 +147,15 @@ public class DownloadsContentProvider extends ContentProvider
 		int count;
 		switch (sUriMatcher.match(uri)) {
 		case DB_TABLE_ID:
-			count = db.update(Variables.DB_DATABASE_TABLE, values, 
-					Variables.DB_KEY_ROWID + " = ? ", new String[] { String.valueOf(uri.getLastPathSegment())});
+			try{
+				long lastParam = Long.parseLong(uri.getLastPathSegment());
+				count = db.update(Variables.DB_DATABASE_TABLE, values, 
+						Variables.DB_KEY_ROWID + " = ? ", new String[] { String.valueOf(uri.getLastPathSegment())});
+			}
+			catch (NumberFormatException e){
+				count = db.update(Variables.DB_DATABASE_TABLE, values, 
+						null, null);
+			}
 			break;
 
 		default:

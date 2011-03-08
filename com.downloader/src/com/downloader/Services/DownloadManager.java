@@ -24,12 +24,21 @@ public class DownloadManager {
         initialValues.put(Variables.DB_KEY_TOTALSIZE, contentSize);
         initialValues.put(Variables.DB_KEY_FILENAME, Uri.parse(url).getLastPathSegment());
         initialValues.put(Variables.DB_COLUMN_STATUS, Variables.STATUS_WAITING);//FIXME status powinien byc na stop i dopiero przy start download zmieniac sie na waiting
-       startService();
         contentResolver.insert(Variables.CONTENT_URI, initialValues);
 		
 	}
 	
 	public void startService(){
-		 context.startService(new Intent(context, DownloadService.class));
+		ContentValues contentValues = new ContentValues();
+		contentValues.put(Variables.DB_COLUMN_STATUS, Variables.STATUS_WAITING);
+		context.getContentResolver().update(Variables.CONTENT_URI, contentValues, null, null);
+		context.startService(new Intent(context, DownloadService.class));
+	}
+	
+	public void stopService(){
+		ContentValues contentValues = new ContentValues();
+		contentValues.put(Variables.DB_COLUMN_STATUS, Variables.STATUS_PAUSE);
+		context.getContentResolver().update(Variables.CONTENT_URI, contentValues, null, null);
+		context.stopService(new Intent(context, DownloadService.class));
 	}
 }
