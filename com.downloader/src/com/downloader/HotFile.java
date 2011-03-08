@@ -534,7 +534,7 @@ public class HotFile extends Activity {
 	private OnClickListener buttonOnClickDownload = new OnClickListener() {
 		public void onClick(View v) {
 			if(checkInternetAccess()){
-				
+				downloadManager.startService();
 			}
 			// String aaa = Md5Create.generateMD5Hash("puyyut");
 			// List<String> list = new LinkedList<String>();

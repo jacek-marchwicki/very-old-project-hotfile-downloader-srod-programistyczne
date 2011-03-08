@@ -37,6 +37,20 @@ public class DownloadItem {
 		this.context = context;
 		this.extraManaging = extraManaging;
 	}
+	
+	/**
+	 * DownloadItem for download List
+	 * @param id
+	 * @param filename
+	 * @param contentSize
+	 * @param currentSize
+	 */
+	public DownloadItem(long id, String filename, long contentSize,long currentSize){
+		this.id = id;
+		this.filename = filename;
+		this.contentSize = contentSize;
+		this.currentSize = currentSize;
+	}
 
 	public DownloadItem(String requestUri, long contentSize){
 		this.filename = Variables.directory + Uri.parse(requestUri).getLastPathSegment();
@@ -92,6 +106,12 @@ public class DownloadItem {
 		private long getLongItemFromDatabase(String columnName) {
 			return cursor.getLong(cursor.getColumnIndexOrThrow(columnName));
 		}
+		
+		private boolean getBooleanItemFromDatabase(String columnName) {
+			int i = cursor.getInt(cursor.getColumnIndexOrThrow(columnName));
+			if (i==1) return true;
+			else return false;
+		}
 
 		public void updateItemFromDatabase(DownloadItem downloadItem) {
 			downloadItem.id = getLongItemFromDatabase(Variables.DB_KEY_ROWID);
@@ -105,6 +125,7 @@ public class DownloadItem {
 			downloadItem.currentSize = getLongItemFromDatabase(Variables.DB_KEY_DOWNLOADEDSIZE);
 			downloadItem.filename = getStringItemFromDatabase(downloadItem.filename, Variables.DB_KEY_FILENAME);
 			downloadItem.status = getLongItemFromDatabase(Variables.DB_COLUMN_STATUS);
+			downloadItem.deleted = getBooleanItemFromDatabase(Variables.DB_DELETED);
 			//TODO zmienna deleted do uzupelnienia?
 
 		}
@@ -128,12 +149,12 @@ public class DownloadItem {
 			// TODO
 			context.getContentResolver().update(getMyDownloadUrl(), contentValues, null, 
 					null);
-			DownloadingHotFileThread dwThread = new DownloadingHotFileThread(context, extraManaging, this);
-			mHasActiveThread = true;
-			extraManaging.startThread(dwThread);
-		} else {
-			Log.v(LOG_TAG,"File already downloading: "+requestUri);
-		}
+			
+		} 
+		//dzieki temu mozna wznowic pobieranie
+		DownloadingHotFileThread dwThread = new DownloadingHotFileThread(context, extraManaging, this);
+		mHasActiveThread = true;
+		extraManaging.startThread(dwThread);
 	}
 
 	Uri getMyDownloadUrl() {

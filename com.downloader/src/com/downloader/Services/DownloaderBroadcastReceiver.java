@@ -19,7 +19,6 @@ public class DownloaderBroadcastReceiver extends BroadcastReceiver{
 		if(action.equals(Variables.ACTION_OPENLIST)){
 			
 		}
-		else startService(context);
 		
 	}
 
@@ -35,10 +34,6 @@ public class DownloaderBroadcastReceiver extends BroadcastReceiver{
 	private void openDownloadListClickedIntent(Intent intent, Cursor cursor) {
 		// TODO Auto-generated method stub
 		
-	}
-
-	private void startService(Context context){
-		context.startService(new Intent(context, DownloadService.class));
 	}
 	
 	

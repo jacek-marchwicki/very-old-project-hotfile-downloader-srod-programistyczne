@@ -182,7 +182,7 @@ public class DownloadingHotFileThread extends Thread {
 					file.delete();
 					state.filename = null;
 				} else {
-					state.fileOutputStream = new FileOutputStream(state.filename, true);
+					state.fileOutputStream = new FileOutputStream(Variables.directory+"/"+state.filename, true);
 					innerState.bytesDownloaded = (int) bytesDownloaded;
 					// TODO UZUPELNIC GDY BEDZIE DOWNLOADINFO CLASS, moze
 					// wymagane dodanie e-tagow if=match
@@ -246,6 +246,7 @@ public class DownloadingHotFileThread extends Thread {
 					}
 					if (bytesRead == -1) {
 						contentValues.put(Variables.DB_KEY_TOTALSIZE, downloadItem.contentSize);
+						contentValues.put(Variables.DB_DELETED, true);
 						context.getContentResolver().update(downloadItem.getMyDownloadUrl(), contentValues, null, null);
 						break;
 					}
@@ -296,6 +297,9 @@ public class DownloadingHotFileThread extends Thread {
 		{
 			// TODO update progess in ContentProvider
 			/*DownloadsContentProvider.updateDatabaseCurrentBytes(downloadItem.id, innerState.bytesDownloaded);*/
+			ContentValues contentValues = new ContentValues();
+			contentValues.put(Variables.DB_KEY_DOWNLOADEDSIZE, innerState.bytesDownloaded);
+			context.getContentResolver().update(downloadItem.getMyDownloadUrl(), contentValues, null, null);
 			innerState.bytesNotified = innerState.bytesDownloaded;
 			innerState.lastNotificationTime = now;
 		}

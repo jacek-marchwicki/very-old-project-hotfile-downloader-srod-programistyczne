@@ -16,10 +16,10 @@ public final class Variables {
 	public static final int DB_DATABASE_VERSION = 1;
 	/**
 	 * ID IN DB
-	 */
+	 */ 
 	public static final String DB_KEY_ROWID = "_id";
 	
-	/**
+	/**  
 	 * REQUEST URI  / INPUT BY USER
 	 */
 	public static final String DB_REQUESTURI  = "ruri";
