@@ -192,7 +192,6 @@ final Notification notification = new Notification(R.drawable.icon, "Downloading
 			else{	//downloading smaller files
 				
 				averageSize = MAX_BUFFER_SIZE / averageSize;
-				
 				while((len1 = stream.read(data)) > 0){
 					file.write(data, 0, len1);
 					downloaded += len1;

@@ -1,30 +1,24 @@
 package com.downloader;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
 import android.app.Dialog;
+import android.app.AlertDialog.Builder;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.database.ContentObserver;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.view.View;
-import android.widget.Toast;
-
-import android.content.Context;
-import android.content.Intent;
-import android.database.ContentObserver;
-import android.database.Cursor;
 import android.view.LayoutInflater;
-import android.view.View.OnClickListener;
-import android.widget.Button;
+import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.downloader.Services.DownloadItem;
 import com.downloader.Services.Variables;
@@ -32,29 +26,35 @@ import com.downloader.Widgets.TextProgressBar;
 
 public class DownloadList extends Activity{
 	
-	DownloadingFileItem chosenItem;
+	List<DownloadItem> downloadItems;
 	Cursor cursorObserver;
 	LinearLayout ll;
-	int idColumn, fileName, currentSize, totalSize;
+	int idColumn, fileName, currentSize, totalSize, requestUri;
 	private ProgressObserver progressObserver = new ProgressObserver();
 	
 	@Override
 	public void onCreate(Bundle bundle){
 		super.onCreate(bundle);
 		setContentView(R.layout.download_list);
+		downloadItems = new ArrayList<DownloadItem>();
 		cursorObserver = getContentResolver().query(Variables.CONTENT_URI, new String[]{
 				Variables.DB_KEY_ROWID,
 				Variables.DB_KEY_FILENAME,
 				Variables.DB_KEY_DOWNLOADEDSIZE,
-				Variables.DB_KEY_TOTALSIZE}, null, null, null);
+				Variables.DB_KEY_TOTALSIZE,
+				Variables.DB_REQUESTURI}, null, null, null);
 		cursorObserver.registerContentObserver(progressObserver);
 		ll = (LinearLayout) findViewById(R.id.layoutDownloadItemList);
 		idColumn = cursorObserver.getColumnIndexOrThrow(Variables.DB_KEY_ROWID);
 		fileName = cursorObserver.getColumnIndexOrThrow(Variables.DB_KEY_FILENAME);
 		currentSize = cursorObserver.getColumnIndexOrThrow(Variables.DB_KEY_DOWNLOADEDSIZE);
 		totalSize = cursorObserver.getColumnIndexOrThrow(Variables.DB_KEY_TOTALSIZE);
+		requestUri = cursorObserver.getColumnIndexOrThrow(Variables.DB_REQUESTURI);
 		try{
-			handleDownloadChanged();
+			if(cursorObserver.getCount() > 0)
+				handleDownloadChanged();
+			else{}
+			//XXX zrobic return do main activity
 		}
 		catch (Exception e){
 			cursorObserver.close();
@@ -68,17 +68,21 @@ public class DownloadList extends Activity{
 		//Set<Long> allIds = new HashSet<Long>();
 		//cursorObserver.moveToFirst()
 		
-		List<DownloadItem> downloadItems = new ArrayList<DownloadItem>();
-		cursorObserver.moveToFirst();
-		do{
+		
+		for(cursorObserver.moveToFirst(); cursorObserver.isAfterLast(); 
+		cursorObserver.moveToNext())
+		{
 			long contentSize = cursorObserver.getLong(totalSize);
+			String rUri = cursorObserver.getString(requestUri);
+			if(!downloadItems.isEmpty())
 			if(contentSize > 0)
-				downloadItems.add(addProgressBarToDownloadListBox(new DownloadItem(
+				downloadItems.add(addProgressBarToDownloadListBox
+						(new DownloadItem(
 						cursorObserver.getLong(idColumn),
 						cursorObserver.getString(fileName),
 					contentSize,
-					cursorObserver.getLong(currentSize)), ll));
-		} while (cursorObserver.moveToNext());
+					cursorObserver.getLong(currentSize), rUri), ll));
+		}
 	}
 
 	public DownloadItem addProgressBarToDownloadListBox(
@@ -126,7 +130,7 @@ public class DownloadList extends Activity{
 	};
 	
 	private void startDownloadingItem(){
-		chosenItem.startState();
+//		chosenItem.startState();
 	}
 	
 	private void deleteDownloadingItem(){
@@ -134,10 +138,10 @@ public class DownloadList extends Activity{
 	}
 	
 	private void pauseDownloadingItem(){
-		chosenItem.pauseState();
+	//	chosenItem.pauseState();
 	}
 	public void finishedDownlodingItem(){
-		chosenItem.finishedState();	
+		//chosenItem.finishedState();	
 	}
 	
 	public void showNotification(String notification) {
@@ -154,7 +158,7 @@ public class DownloadList extends Activity{
 		case 10:
 			// Create our AlertDialog
 			Builder builder = new AlertDialog.Builder(this);
-			builder.setMessage("Choose an action\nCurrent state: "+chosenItem.getFileState())
+			builder.setMessage("Choose an action\nCurrent state: ")//+chosenItem.getFileState())
 					.setCancelable(true)
 					.setPositiveButton("Start",
 							new DialogInterface.OnClickListener() {

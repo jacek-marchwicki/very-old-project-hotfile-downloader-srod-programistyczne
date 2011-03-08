@@ -4,10 +4,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.RandomAccessFile;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -17,26 +13,12 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 
-
-import android.app.Activity;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.Intent;
 import android.net.Uri;
-import android.net.http.AndroidHttpClient;
 import android.os.PowerManager;
-import android.provider.SyncStateContract.Constants;
 import android.util.Log;
-import android.view.View;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.RemoteViews;
-
-import com.downloader.Widgets.TextProgressBar;
-import com.downloader.data.DownloadsContentProvider;
 
 public class DownloadingHotFileThread extends Thread {
 
@@ -44,18 +26,12 @@ public class DownloadingHotFileThread extends Thread {
 	ExtraManaging extraManaging;
 	DownloadItem downloadItem;
 
-	private static final int _MIN_PROCENT_DIFF = 5;
 	ProgressBar progressBar;
-	private int progress = 10;
-
 	private Thread mThread;
 	private static final int MAX_BUFFER_SIZE = 1024;
 
 	private int size; // size of download in bytes
 	private int downloaded; // number of bytes downloaded
-	private int status; // current status of download
-	private int id; // id in the downloading list for notification area
-	String link, username, passwordmd5, directory;
 
 	public DownloadingHotFileThread(Context context,
 			ExtraManaging extraManaging, DownloadItem downloadItem) {

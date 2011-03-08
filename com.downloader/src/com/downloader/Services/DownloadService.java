@@ -13,8 +13,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 
-import com.downloader.data.DownloadsContentProvider;
-
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
