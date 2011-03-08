@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
+<LinearLayout  xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:id="@+id/downListLayout">
+    
+    
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
 	android:orientation="vertical" android:layout_width="fill_parent"
 	android:layout_height="fill_parent" android:fillViewport="true">
@@ -8,4 +15,12 @@
 	    android:layout_width="fill_parent"
 	    android:layout_height="fill_parent"
 	    android:id="@+id/layoutDownloadItemList"/>
+	    
 </ScrollView>
+         <Button 
+        android:id="@+id/button_stopDownloading" 
+        android:text="Stop downloading!"
+        android:layout_width="wrap_content" 
+        android:layout_height="wrap_content" />
+
+</LinearLayout>

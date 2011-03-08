@@ -16,6 +16,9 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -36,6 +39,9 @@ public class DownloadList extends Activity{
 	public void onCreate(Bundle bundle){
 		super.onCreate(bundle);
 		setContentView(R.layout.download_list);
+		((Button)findViewById(R.id.button_stopDownloading)).setOnClickListener(button_stopDownloading);
+		
+		
 		downloadItems = new ArrayList<DownloadItem>();
 		cursorObserver = getContentResolver().query(Variables.CONTENT_URI, new String[]{
 				Variables.DB_KEY_ROWID,
@@ -53,8 +59,10 @@ public class DownloadList extends Activity{
 		try{
 			if(cursorObserver.getCount() > 0)
 				handleDownloadChanged();
-			else{}
-			//XXX zrobic return do main activity
+			else{
+				showNotification("Wracam do activity. Bye Stranger! ");
+				super.finish();
+			}
 		}
 		catch (Exception e){
 			cursorObserver.close();
@@ -63,6 +71,16 @@ public class DownloadList extends Activity{
 		finally{
 		}
 	}
+	
+	private OnClickListener button_stopDownloading = new OnClickListener() {
+		@Override
+		public void onClick(View v) {
+			//TODO SOMETHING
+			Toast.makeText(DownloadList.this, "Button clicked!!!!", Toast.LENGTH_LONG).show();
+		}
+	};
+	
+	
 
 	public void handleDownloadChanged() {
 		//Set<Long> allIds = new HashSet<Long>();
