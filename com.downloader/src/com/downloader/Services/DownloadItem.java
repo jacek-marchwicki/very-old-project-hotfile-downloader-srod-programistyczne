@@ -1,11 +1,5 @@
 package com.downloader.Services;
 
-import java.io.FileOutputStream;
-
-import com.downloader.data.DownloadsContentProvider;
-
-
-import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
@@ -45,11 +39,12 @@ public class DownloadItem {
 	 * @param contentSize
 	 * @param currentSize
 	 */
-	public DownloadItem(long id, String filename, long contentSize,long currentSize){
+	public DownloadItem(long id, String filename, long contentSize,long currentSize, String requestUri){
 		this.id = id;
 		this.filename = filename;
 		this.contentSize = contentSize;
 		this.currentSize = currentSize;
+		this.requestUri = requestUri;
 	}
 
 	public DownloadItem(String requestUri, long contentSize){
