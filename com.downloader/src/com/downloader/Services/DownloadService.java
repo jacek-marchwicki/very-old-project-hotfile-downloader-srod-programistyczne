@@ -41,12 +41,11 @@ public class DownloadService extends Service {
 	 */
 	private UpdateThread updateThread = null; // private CLASS
 
-	
 	public static class UsernamePasswordMD5Storage {
 		private static String username;
 		private static String passwordmd5;
 		private static String filePath;
-		
+
 		public static String getUsername() {
 			return username;
 		}
@@ -55,10 +54,10 @@ public class DownloadService extends Service {
 			return passwordmd5;
 		}
 
-		public static String getDirectory(){
+		public static String getDirectory() {
 			return filePath;
 		}
-		
+
 		public static void setUsernameAndPasswordMD5(final String mUsernameA,
 				final String mPasswordmd5) {
 			try {
@@ -74,9 +73,9 @@ public class DownloadService extends Service {
 				e.printStackTrace();
 			}
 		}
-		
+
 		public static void setDirectoryPath(final String directory) {
-			filePath  = directory;
+			filePath = directory;
 		}
 
 		/**
@@ -85,10 +84,11 @@ public class DownloadService extends Service {
 		 * =2011-01-01T05:25:58-06:00&hotlink_traffic_kb=209715200 Only first we
 		 * checking already
 		 */
-		private static Boolean checkUsernamePasswordValid(final String mUsername,
-				final String mPasswordmd5) throws ClientProtocolException, IOException {
+		private static Boolean checkUsernamePasswordValid(
+				final String mUsername, final String mPasswordmd5)
+				throws ClientProtocolException, IOException {
 			String request = "http://api.hotfile.com/?action=getuserinfo&username="
-				+ mUsername + "&passwordmd5=" + mPasswordmd5;
+					+ mUsername + "&passwordmd5=" + mPasswordmd5;
 			DefaultHttpClient httpclient = new DefaultHttpClient();
 			HttpPost getDirectLink = new HttpPost(request);
 			HttpResponse response = httpclient.execute(getDirectLink);
@@ -97,7 +97,8 @@ public class DownloadService extends Service {
 			int indexOfEquationSign = responseText.indexOf("=");
 			if (indexOfEquationSign == -1)
 				return false;
-			if (responseText.substring(indexOfEquationSign+1, indexOfEquationSign + 2).equals("1"))
+			if (responseText.substring(indexOfEquationSign + 1,
+					indexOfEquationSign + 2).equals("1"))
 				return true;
 			return false;
 		}
@@ -131,52 +132,63 @@ public class DownloadService extends Service {
 			while (true) {
 				synchronized (DownloadService.this) {
 					if (updateThread != this)
-						throw new IllegalStateException("multiple UpdateThreads in DownloadService");
+						throw new IllegalStateException(
+								"multiple UpdateThreads in DownloadService");
 				}
-				if(!pendingUpdate){
+				if (!pendingUpdate) {
 					updateThread = null;
-					if(!keepServiceUp)
+					if (!keepServiceUp)
 						stopSelf();
-					if(wakeUp != Long.MAX_VALUE)
+					if (wakeUp != Long.MAX_VALUE)
 						scheduleAlarm(wakeUp);
 					return;
 				}
 				pendingUpdate = false;
-			long now = System.currentTimeMillis();
-			keepServiceUp = true;
-			wakeUp = Long.MAX_VALUE;
-			Set<Long> idsNoLongerInDB = new HashSet<Long>(downloads.keySet());
-			Cursor cursor = getContentResolver().query(Variables.CONTENT_URI, null, null, null, null);
-			try{
-				DownloadItem.Warehouse reader = new DownloadItem.Warehouse(cursor);
-				int idColumn = cursor.getColumnIndexOrThrow(Variables.DB_KEY_ROWID);
-				cursor.moveToFirst();
-				do{
-					long id = cursor.getLong(idColumn);
-					idsNoLongerInDB.remove(id);
-					DownloadItem downloadItem = downloads.get(id);
-					if(downloadItem != null)
-						updateDownload(reader, downloadItem);
-					else
-						downloadItem = insertDownload(reader, now);
-					//TODO nie wiem co skopiowac z download service line 246
-					
-				} while (cursor.moveToNext());
-			}finally{
-				cursor.close();
-			}
+				long now = System.currentTimeMillis();
+				keepServiceUp = true;
+				wakeUp = Long.MAX_VALUE;
+				Set<Long> idsNoLongerInDB = new HashSet<Long>(downloads
+						.keySet());
+				Cursor cursor = getContentResolver().query(
+						Variables.CONTENT_URI, null, null, null, null);
+				try {
+					DownloadItem.Warehouse reader = new DownloadItem.Warehouse(
+							cursor);
+					int idColumn = cursor
+							.getColumnIndexOrThrow(Variables.DB_KEY_ROWID);
+					if (cursor.getCount() > 0) {
+						cursor.moveToFirst();
+						do {
+							long id = cursor.getLong(idColumn);
+							idsNoLongerInDB.remove(id);
+							DownloadItem downloadItem = downloads.get(id);
+							if (downloadItem != null)
+								updateDownload(reader, downloadItem);
+							else
+								downloadItem = insertDownload(reader, now);
+							// TODO nie wiem co skopiowac z download service
+							// line 246
 
-			for(Long id : idsNoLongerInDB)
-				deleteDownload(id);
-			notifications.updateNotification(downloads.values());
-			if(downloads.isEmpty())
-				keepServiceUp = false;
-			for(DownloadItem downloadItem : downloads.values()) {
-				if(downloadItem.deleted)
-					getContentResolver().delete(Variables.CONTENT_URI,
-							Variables.DB_KEY_ROWID + " = ? ",
-							new String[] { String.valueOf(downloadItem.id)});
-			}
+						} while (cursor.moveToNext());
+					}
+				} finally {
+					cursor.close();
+				}
+
+				for (Long id : idsNoLongerInDB)
+					deleteDownload(id);
+				notifications.updateNotification(downloads.values());
+				if (downloads.isEmpty())
+					keepServiceUp = false;
+				for (DownloadItem downloadItem : downloads.values()) {
+					if (downloadItem.deleted)
+						getContentResolver()
+								.delete(
+										Variables.CONTENT_URI,
+										Variables.DB_KEY_ROWID + " = ? ",
+										new String[] { String
+												.valueOf(downloadItem.id) });
+				}
 			}
 		}
 
@@ -185,28 +197,31 @@ public class DownloadService extends Service {
 			if (alarms == null) {
 				return;
 			}
-			alarms.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()
-					+ wakeUp, PendingIntent.getService(DownloadService.this, 0, 
-							new Intent(DownloadService.this, DownloadService.class), 0));
+			alarms
+					.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()
+							+ wakeUp, PendingIntent.getService(
+							DownloadService.this, 0,
+							new Intent(DownloadService.this,
+									DownloadService.class), 0));
 		}
-
 
 	}
 
-	private void deleteDownload(long id){
+	private void deleteDownload(long id) {
 		DownloadItem downloadItem = downloads.get(id);
-		if(downloadItem.status == Variables.STATUS_RUNNING)
+		if (downloadItem.status == Variables.STATUS_RUNNING)
 			downloadItem.status = Variables.STATUS_CANCEL;
 		extraManaging.cancelNotification(id);
 		downloads.remove(id);
 	}
 
-	private DownloadItem insertDownload(DownloadItem.Warehouse warehouse, long now) {
+	private DownloadItem insertDownload(DownloadItem.Warehouse warehouse,
+			long now) {
 		DownloadItem downloadItem = warehouse.addNewItem(this, extraManaging);
 		downloads.put(downloadItem.id, downloadItem);
-		Log.v(LOG_TAG, "Downloading file: "+downloadItem.requestUri);
-		synchronized(DownloadService.this){
-			if(downloadsRunning<3){			
+		Log.v(LOG_TAG, "Downloading file: " + downloadItem.requestUri);
+		synchronized (DownloadService.this) {
+			if (downloadsRunning < 3) {
 				downloadItem.tryToStartDownload();
 				++downloadsRunning;
 			}
@@ -215,12 +230,11 @@ public class DownloadService extends Service {
 
 	}
 
-	private void updateDownload(DownloadItem.Warehouse warehouse, DownloadItem downloadItem) {
+	private void updateDownload(DownloadItem.Warehouse warehouse,
+			DownloadItem downloadItem) {
 		warehouse.updateItemFromDatabase(downloadItem);
 		downloadItem.tryToStartDownload();
 	}
-
-
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
@@ -241,13 +255,13 @@ public class DownloadService extends Service {
 		if (extraManaging == null)
 			extraManaging = new ExtraManaging(this);
 		downloadContentObserver = new DownloadContentObserver();
-		getContentResolver().registerContentObserver(Variables.CONTENT_URI, true,
-				downloadContentObserver);
+		getContentResolver().registerContentObserver(Variables.CONTENT_URI,
+				true, downloadContentObserver);
 		notifications = new Notifications(this, extraManaging);
 		extraManaging.removeAllNotification();
 		updateFromProvider();
 	}
-	
+
 	public static volatile boolean _isRunning = true;
 
 	@Override

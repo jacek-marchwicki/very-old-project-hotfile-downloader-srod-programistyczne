@@ -15,7 +15,6 @@ import org.apache.http.client.ClientProtocolException;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -38,11 +37,11 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.downloader.prepareActions.ParseException;
 import com.downloader.Services.DownloadItem;
 import com.downloader.Services.DownloadManager;
 import com.downloader.Services.DownloadService;
 import com.downloader.Services.Variables;
+import com.downloader.prepareActions.ParseException;
 
 /*
  * 1. sprawdzanie miejsca w pamieci do zapisu podczas downloadu
@@ -76,7 +75,6 @@ public class HotFile extends Activity {
 	int progress = 0;
 	List<Intent> downloadingList;
 	public static final String LOG_TAG = "HotFileDownloader Information";
-	public static List<DownloadingFileItem> listOfDownloadingFiles;
 	// MovieButtons movieButtons;
 	DownloadManager downloadManager;
 	String username = "";
@@ -91,9 +89,7 @@ public class HotFile extends Activity {
 		super.onCreate(savedInstanceState);
 		downloadManager = new DownloadManager(this);
 		downloadingList = new ArrayList<Intent>();
-		setContentView(R.layout.main);
-		listOfDownloadingFiles = new ArrayList<DownloadingFileItem>();
-		listview = (ListView) findViewById(R.id.ListView01);
+		setContentView(R.layout.main);		
 		myProgressBar = (ProgressBar) findViewById(R.id.ProgressBar01);
 		// movieButtons = new MovieButtons();
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -107,8 +103,7 @@ public class HotFile extends Activity {
 
 		((Button) findViewById(R.id.Button_showdownloadlist))
 				.setOnClickListener(buttonOnClickShowdownloadlistListener);
-		((Button) findViewById(R.id.Button_addlinksfromfile))
-				.setOnClickListener(buttontAddLinksFile);
+		((Button) findViewById(R.id.Button_addlinksfromfile)).setOnClickListener(buttonAddLinksFile);
 
 		((Button) findViewById(R.id.Button_addlinkfromclipboard))
 				.setOnClickListener(buttonAddLinkFromClipboard);
@@ -345,7 +340,7 @@ public class HotFile extends Activity {
 	/** ----------------ADDING DOWNLOADING ITEMS ------------------------- */
 	public static List<DownloadItem> downList;
 
-	private OnClickListener buttontAddLinksFile = new OnClickListener() {
+	private OnClickListener buttonAddLinksFile = new OnClickListener() {
 		public void onClick(View v) {
 
 			try {
