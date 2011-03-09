@@ -461,22 +461,29 @@ public class HotFile extends Activity {
 	 */
 	private OnClickListener buttonOnClickDownload = new OnClickListener() {
 		public void onClick(View v) {
-			if(checkInternetAccess() && startDownload.getText().equals("Start download")){
-				startDownload.setText("Stop download");
-				downloadManager.startService();
-			}
+			if (username != "" && password != ""){
+				if(checkInternetAccess() && startDownload.getText().equals("Start download")){
+					startDownload.setText("Stop download");
+					downloadManager.startService();
+				}
+				else
+				{
+					startDownload.setText("Start download");
+					downloadManager.stopService();
+				}
+				// list.add("http://hotfile.com/dl/81363200/ba7f841/Ostatnia-DVDRip.PL.part1.rar.html");
+				// list.add("http://hotfile.com/dl/98588098/f5c4897/4.pdf.html"); //
+				// 2MB
+				// list.add("http://hotfile.com/dl/98588065/ece61ef/1.pdf.html");//
+				// 4MB
+				//
+				// list.add("ht			downList = check.prepareFilesToDownload(preparedLinks);tp://hotfile.com/dl/92148167/7c86b14/fil.txt.html");
+				}
 			else
 			{
-				startDownload.setText("Start download");
-				downloadManager.stopService();
+				Log.v(LOG_TAG,"password or username is empty");
+				showInformation("password or username is empty");
 			}
-			// list.add("http://hotfile.com/dl/81363200/ba7f841/Ostatnia-DVDRip.PL.part1.rar.html");
-			// list.add("http://hotfile.com/dl/98588098/f5c4897/4.pdf.html"); //
-			// 2MB
-			// list.add("http://hotfile.com/dl/98588065/ece61ef/1.pdf.html");//
-			// 4MB
-			//
-			// list.add("ht			downList = check.prepareFilesToDownload(preparedLinks);tp://hotfile.com/dl/92148167/7c86b14/fil.txt.html");
 		}
 	};
 
