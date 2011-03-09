@@ -1,6 +1,5 @@
 package com.downloader.Services;
 
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -18,8 +17,8 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.net.Uri;
 import android.os.PowerManager;
+import android.os.storage.StorageManager;
 import android.util.Log;
-import android.widget.Toast;
 
 public class DownloadingHotFileThread extends Thread {
 
@@ -33,7 +32,7 @@ public class DownloadingHotFileThread extends Thread {
 		this.extraManaging = extraManaging;
 		this.downloadItem = downloadItem;
 	}
-	
+
 	private static class State {
 		public String filename;
 		public FileOutputStream fileOutputStream;
@@ -45,11 +44,11 @@ public class DownloadingHotFileThread extends Thread {
 		public String username;
 		public String passwordmd5;
 		public String requestApi; // request for direct link to api
-		
 
 		public State(DownloadItem downloadItem) {
 			// TODO FROM DOWNLOADTHREAD
-			downloadItem.filename = getFilename(Uri.parse(downloadItem.filename));
+			downloadItem.filename = getFilename(Uri
+					.parse(downloadItem.filename));
 			this.filename = downloadItem.filename;
 			this.requestUri = downloadItem.requestUri;
 			this.directUri = downloadItem.directUri;
@@ -59,16 +58,16 @@ public class DownloadingHotFileThread extends Thread {
 			this.passwordmd5 = DownloadService.UsernamePasswordMD5Storage
 					.getPasswordMD5();
 		}
+
 		private String getFilename(Uri uri) {
 			String fileName = uri.getLastPathSegment();
-			return fileName.contains(".html") ? fileName.substring(fileName.lastIndexOf('/') + 1, fileName.lastIndexOf(".html")) : 
-				fileName.substring(fileName.lastIndexOf('/') + 1);
+			return fileName.contains(".html") ? fileName.substring(
+					fileName.lastIndexOf('/') + 1,
+					fileName.lastIndexOf(".html")) : fileName
+					.substring(fileName.lastIndexOf('/') + 1);
 		}
 	}
 
-	
-	
-	
 	private class Error extends Throwable {
 		public Error(String message) {
 			super(message);
@@ -77,6 +76,9 @@ public class DownloadingHotFileThread extends Thread {
 		public Error(String message, Throwable throwable) {
 			super(message, throwable);
 		}
+	}
+
+	private class RetryDownload extends Throwable {
 	}
 
 	private static class InnerState {
@@ -92,38 +94,50 @@ public class DownloadingHotFileThread extends Thread {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		PowerManager.WakeLock wakeLock = null;
 		// TODO SOMETHING STATIC VAR
-		PowerManager powerManager = (PowerManager) this.context
-				.getSystemService(Context.POWER_SERVICE);
-		wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-				Variables.TAG); // TODO SOME Tag from constans
-		wakeLock.acquire();
-		boolean finished = false;
-		while (!finished) {
-			// TODO CHECK IF DIRECT LINK IS STILL VALID
-			HttpPost getDirectLink = new HttpPost(state.requestApi);
-			getDirectLink = new HttpPost(state.requestApi);
-			try {
-				runDownload(state, httpclient, getDirectLink);
-				finished = true;
-			} catch (Throwable e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			finally{
-				if(wakeLock != null)
-				{	wakeLock.release();
-				wakeLock = null;}
-				if(httpclient != null){
-					httpclient = null;
+		try {
+			PowerManager powerManager = (PowerManager) this.context
+					.getSystemService(Context.POWER_SERVICE);
+			wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+					Variables.TAG); // TODO SOME Tag from constans
+			wakeLock.acquire();
+			boolean finished = false;
+			while (!finished) {
+				// TODO CHECK IF DIRECT LINK IS STILL VALID
+				HttpPost getDirectLink = new HttpPost(state.requestApi);
+				getDirectLink = new HttpPost(state.requestApi);
+				try {
+					runDownload(state, httpclient, getDirectLink);
+					finished = true;
+				} catch (RetryDownload e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}finally{
+					getDirectLink.abort();
+					getDirectLink = null;
 				}
-				//TODO notify download complete
-				downloadItem.mHasActiveThread = false;
+					// TODO notify download complete
+					downloadItem.mHasActiveThread = false;
+				}
+			}
+		catch (Error e) {
+			Log.v(Variables.TAG, e.toString());
+		}
+		catch(Throwable e){
+			Log.v(Variables.TAG, e.toString());
+		}
+		finally {
+				if (wakeLock != null) {
+					wakeLock.release();
+					wakeLock = null;
+				}
+				if (httpclient != null) {
+					httpclient = null;
 			}
 		}
 	}
 
 	public void runDownload(State state, DefaultHttpClient defaultHttpClient,
-			HttpPost apiDirectLink) throws Error {
+			HttpPost apiDirectLink) throws Error, RetryDownload {
 		android.os.Debug.waitForDebugger();
 		InnerState innerState = new InnerState();
 		byte data[] = new byte[Variables.MAX_BUFFER_SIZE];
@@ -133,7 +147,7 @@ public class DownloadingHotFileThread extends Thread {
 			/**
 			 * Prepare file destination
 			 */
-			File file = new File(Variables.directory+"/"+state.filename);
+			File file = new File(Variables.directory + "/" + state.filename);
 			if (file.exists()) {
 				long bytesDownloaded = file.length();
 				if (bytesDownloaded == 0) {
@@ -143,7 +157,8 @@ public class DownloadingHotFileThread extends Thread {
 					file.delete();
 					state.filename = null;
 				} else {
-					state.fileOutputStream = new FileOutputStream(Variables.directory+"/"+state.filename, true);
+					state.fileOutputStream = new FileOutputStream(
+							Variables.directory + "/" + state.filename, true);
 					innerState.bytesDownloaded = (int) bytesDownloaded;
 					// TODO UZUPELNIC GDY BEDZIE DOWNLOADINFO CLASS, moze
 					// wymagane dodanie e-tagow if=match
@@ -186,13 +201,17 @@ public class DownloadingHotFileThread extends Thread {
 			// DOWNLOAD ONLY IF YOU KNOW SIZE OF FILE
 			if (innerState.contentSize > -1) {
 				// TODO filename + miejsce do zapisu
-				state.fileOutputStream = new FileOutputStream(file.getAbsolutePath());
-				
+				state.fileOutputStream = new FileOutputStream(
+						file.getAbsolutePath());
+
 				ContentValues contentValues = new ContentValues();
 				contentValues.put(Variables.DB_KEY_FILENAME, state.filename);
-				contentValues.put(Variables.DB_KEY_TOTALSIZE, downloadItem.contentSize);
-				context.getContentResolver().update(downloadItem.getMyDownloadUrl(), contentValues, null, null);
-				
+				contentValues.put(Variables.DB_KEY_TOTALSIZE,
+						downloadItem.contentSize);
+				context.getContentResolver().update(
+						downloadItem.getMyDownloadUrl(), contentValues, null,
+						null);
+
 				InputStream entityStream = response.getEntity().getContent();
 				int bytesRead = 0;
 				while (true) {
@@ -200,15 +219,21 @@ public class DownloadingHotFileThread extends Thread {
 						bytesRead = entityStream.read(data);
 					} catch (IOException e) {
 						// TODO what author has in mind
-						contentValues.put(Variables.DB_KEY_TOTALSIZE, downloadItem.contentSize);
-						context.getContentResolver().update(downloadItem.getMyDownloadUrl(), contentValues, null, null);
+						contentValues.put(Variables.DB_KEY_TOTALSIZE,
+								downloadItem.contentSize);
+						context.getContentResolver().update(
+								downloadItem.getMyDownloadUrl(), contentValues,
+								null, null);
 						break;
-							
+
 					}
 					if (bytesRead == -1) {
-						contentValues.put(Variables.DB_KEY_TOTALSIZE, downloadItem.contentSize);
+						contentValues.put(Variables.DB_KEY_TOTALSIZE,
+								downloadItem.contentSize);
 						contentValues.put(Variables.DB_DELETED, true);
-						context.getContentResolver().update(downloadItem.getMyDownloadUrl(), contentValues, null, null);
+						context.getContentResolver().update(
+								downloadItem.getMyDownloadUrl(), contentValues,
+								null, null);
 						return;
 					}
 					writeDownloadedData(state, data, bytesRead);
@@ -218,14 +243,15 @@ public class DownloadingHotFileThread extends Thread {
 				}
 			}
 		} catch (Exception e) {
-			Log.v(Variables.TAG, "Error" + e.toString());
+			Log.v(Variables.TAG,
+					"Error" + e.getLocalizedMessage() + " " + e.toString());
 		} finally {
 			try {
 				state.fileOutputStream.close();
 				state.fileOutputStream = null;
-				if(request != null)
+				if (request != null)
 					request.abort();
-				
+
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -252,22 +278,22 @@ public class DownloadingHotFileThread extends Thread {
 	 */
 	private void updateProgress(State state, InnerState innerState) {
 		long now = System.currentTimeMillis();
-		if(innerState.bytesDownloaded - innerState.bytesNotified > Variables.PROGRESS_UPDATE_WAIT
-				&& now - innerState.lastNotificationTime > Variables.DELAY_TIME)
-		{
+		if (innerState.bytesDownloaded - innerState.bytesNotified > Variables.PROGRESS_UPDATE_WAIT
+				&& now - innerState.lastNotificationTime > Variables.DELAY_TIME) {
 			// TODO update progess in ContentProvider
 			ContentValues contentValues = new ContentValues();
-			contentValues.put(Variables.DB_KEY_DOWNLOADEDSIZE, innerState.bytesDownloaded);
-			context.getContentResolver().update(downloadItem.getMyDownloadUrl(), contentValues, null, null);
+			contentValues.put(Variables.DB_KEY_DOWNLOADEDSIZE,
+					innerState.bytesDownloaded);
+			context.getContentResolver().update(
+					downloadItem.getMyDownloadUrl(), contentValues, null, null);
 			innerState.bytesNotified = innerState.bytesDownloaded;
 			innerState.lastNotificationTime = now;
 		}
 	}
-	
 
-	private void checkIfNeedToPause(State state) throws Error{
-		synchronized(downloadItem){
-			if(downloadItem.status == Variables.STATUS_PAUSE)
+	private void checkIfNeedToPause(State state) throws Error {
+		synchronized (downloadItem) {
+			if (downloadItem.status == Variables.STATUS_PAUSE)
 				throw new Error("PAUSE download");
 			if (downloadItem.status == Variables.STATUS_CANCEL)
 				throw new Error("stop download");
