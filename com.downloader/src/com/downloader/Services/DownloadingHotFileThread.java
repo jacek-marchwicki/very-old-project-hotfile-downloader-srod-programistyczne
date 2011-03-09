@@ -120,7 +120,6 @@ public class DownloadingHotFileThread extends Thread {
 				downloadItem.mHasActiveThread = false;
 			}
 		}
-		Toast.makeText(context, "Stop running", Toast.LENGTH_LONG);
 	}
 
 	public void runDownload(State state, DefaultHttpClient defaultHttpClient,
