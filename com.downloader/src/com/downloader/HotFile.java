@@ -66,6 +66,7 @@ import com.downloader.Services.Variables;
  * 																							19. dodanie ikony programu
  */
 
+//FIXME W BAZIE DANYCH PO PAUZIE CZESTO SA ZLE DANE ZAPISYWANE.
 public class HotFile extends Activity {
 	ListView listview;
 	SharedPreferences preferences;

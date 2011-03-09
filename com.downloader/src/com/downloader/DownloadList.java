@@ -147,19 +147,24 @@ public class DownloadList extends Activity{
 		}
 	};
 	
-	private void startDownloadingItem(){
-//		chosenItem.startState();
+	@Override
+	protected void onPause(){
+		super.onPause();
+		if(haveCursor())
+			cursorObserver.unregisterContentObserver(progressObserver);
 	}
 	
-	private void deleteDownloadingItem(){
-	
+	@Override
+	protected void onResume(){
+		super.onResume();
+		if(haveCursor()){
+			cursorObserver.registerContentObserver(progressObserver);
+			cursorObserver.requery();
+		}
 	}
 	
-	private void pauseDownloadingItem(){
-	//	chosenItem.pauseState();
-	}
-	public void finishedDownlodingItem(){
-		//chosenItem.finishedState();	
+	private boolean haveCursor(){
+		return cursorObserver != null;
 	}
 	
 	public void showNotification(String notification) {
