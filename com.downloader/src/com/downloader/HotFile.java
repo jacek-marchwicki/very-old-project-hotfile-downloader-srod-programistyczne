@@ -244,10 +244,8 @@ public class HotFile extends Activity {
 
 	private void beginDownloading(String link, String username,
 			String passwordmd5, String directory, int id) {
-		DownloaderHotFileThread mDownloaderHotFileThread = new DownloaderHotFileThread(
-				this, link, username, passwordmd5, directory, id);
+
 		// mDownloaderHotFileThread.start();
-		mDownloaderHotFileThread.run();
 		/*
 		 * // * Intent intent = new Intent(this, DownloaderHotfile.class);
 		 * intent.putExtra("link", link); intent.putExtra("username", username);

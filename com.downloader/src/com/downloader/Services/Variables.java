@@ -83,7 +83,7 @@ public final class Variables {
     
     public static final int MAX_DB_SIZE = 1000;
     public static final String COLUMN_LAST_MODIFICATION = "lastmod";
-    
+    public static final int MAX_BUFFER_SIZE = 1024;
     
     /**
      * DOWNLOAD CONTROL

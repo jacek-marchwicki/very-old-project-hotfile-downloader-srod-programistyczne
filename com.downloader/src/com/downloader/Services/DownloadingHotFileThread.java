@@ -1,5 +1,6 @@
 package com.downloader.Services;
 
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -18,7 +19,6 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.PowerManager;
 import android.util.Log;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 public class DownloadingHotFileThread extends Thread {
@@ -27,21 +27,11 @@ public class DownloadingHotFileThread extends Thread {
 	ExtraManaging extraManaging;
 	DownloadItem downloadItem;
 
-	ProgressBar progressBar;
-	private static final int MAX_BUFFER_SIZE = 1024;
-
-	private int size; // size of download in bytes
-	private int downloaded; // number of bytes downloaded
-
 	public DownloadingHotFileThread(Context context,
 			ExtraManaging extraManaging, DownloadItem downloadItem) {
 		this.context = context;
 		this.extraManaging = extraManaging;
 		this.downloadItem = downloadItem;
-	}
-	
-	private synchronized boolean running(){
-		return downloadItem.isRunning();
 	}
 	
 	private static class State {
@@ -50,13 +40,12 @@ public class DownloadingHotFileThread extends Thread {
 		/**
 		 * Count how many tries to download file
 		 */
-		public boolean countRetry = false;
 		public String requestUri;
 		public String directUri;
 		public String username;
 		public String passwordmd5;
 		public String requestApi; // request for direct link to api
-		public boolean gotData = false;
+		
 
 		public State(DownloadItem downloadItem) {
 			// TODO FROM DOWNLOADTHREAD
@@ -109,7 +98,7 @@ public class DownloadingHotFileThread extends Thread {
 				Variables.TAG); // TODO SOME Tag from constans
 		wakeLock.acquire();
 		boolean finished = false;
-		while (!finished && running()) {
+		while (!finished) {
 			// TODO CHECK IF DIRECT LINK IS STILL VALID
 			HttpPost getDirectLink = new HttpPost(state.requestApi);
 			getDirectLink = new HttpPost(state.requestApi);
@@ -134,19 +123,11 @@ public class DownloadingHotFileThread extends Thread {
 		Toast.makeText(context, "Stop running", Toast.LENGTH_LONG);
 	}
 
-	public long getSize() {
-		return size;
-	}
-
-	public float getProgress() {
-		return ((float) downloaded / size) * 100;
-	}
-
 	public void runDownload(State state, DefaultHttpClient defaultHttpClient,
 			HttpPost apiDirectLink) throws Error {
 		android.os.Debug.waitForDebugger();
 		InnerState innerState = new InnerState();
-		byte data[] = new byte[MAX_BUFFER_SIZE];
+		byte data[] = new byte[Variables.MAX_BUFFER_SIZE];
 		HttpGet request = null;
 		try {
 			/*************************************/
@@ -229,9 +210,8 @@ public class DownloadingHotFileThread extends Thread {
 						contentValues.put(Variables.DB_KEY_TOTALSIZE, downloadItem.contentSize);
 						contentValues.put(Variables.DB_DELETED, true);
 						context.getContentResolver().update(downloadItem.getMyDownloadUrl(), contentValues, null, null);
-						break;
+						return;
 					}
-					state.gotData = true;
 					writeDownloadedData(state, data, bytesRead);
 					innerState.bytesDownloaded += bytesRead;
 					updateProgress(state, innerState);
@@ -277,7 +257,6 @@ public class DownloadingHotFileThread extends Thread {
 				&& now - innerState.lastNotificationTime > Variables.DELAY_TIME)
 		{
 			// TODO update progess in ContentProvider
-			/*DownloadsContentProvider.updateDatabaseCurrentBytes(downloadItem.id, innerState.bytesDownloaded);*/
 			ContentValues contentValues = new ContentValues();
 			contentValues.put(Variables.DB_KEY_DOWNLOADEDSIZE, innerState.bytesDownloaded);
 			context.getContentResolver().update(downloadItem.getMyDownloadUrl(), contentValues, null, null);
