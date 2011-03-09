@@ -46,14 +46,13 @@ public class DownloadAdapter extends CursorAdapter {
 		TextView textBoxUpper = (TextView) customView.findViewById(R.id.status_text);
 		TextProgressBar textBoxInProgress = (TextProgressBar) customView.findViewById(R.id.status_progress);
 		textBoxInProgress.setIndeterminate(contentSize == -1);
-		int percentLevel = ((int) cursor.getLong(currentSize) * 100 / (int) contentSize);
+		int percentLevel = (int)(cursor.getLong(currentSize)*100/cursor.getLong(totalSize));
 		textBoxInProgress.setProgress(percentLevel);
 		textBoxInProgress.setMax(100);
 		textBoxInProgress.setText(percentLevel + "%");
 		textBoxUpper.setText(cursor.getString(fileName));
 		customView.setId((int) cursor.getLong(idColumn));
 		//customView.setOnLongClickListener(relativeLayoutListener);
-//		ll.addView(customView);
 
 	}
 

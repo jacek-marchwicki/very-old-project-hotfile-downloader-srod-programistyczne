@@ -26,7 +26,6 @@ public class ExtraManaging {
 	}
 	
 	public void insertNotification(int id, Notification notification){
-		Log.v(Variables.TAG, "notify notification");
 		notificationManager.notify(id, notification);
 	}
 	

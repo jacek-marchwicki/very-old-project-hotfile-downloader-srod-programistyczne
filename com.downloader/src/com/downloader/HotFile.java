@@ -14,6 +14,8 @@ import java.util.regex.Pattern;
 import org.apache.http.client.ClientProtocolException;
 
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningServiceInfo;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -44,12 +46,12 @@ import com.downloader.Services.Variables;
 import com.downloader.prepareActions.ParseException;
 
 /*
- * 1. sprawdzanie miejsca w pamieci do zapisu podczas downloadu
+ * 																							1. sprawdzanie miejsca w pamieci do zapisu podczas downloadu
  * 																							2. pobieranie listy z pliku
  * 																							3. pobieranie kilku plikow naraz
  * 4. minimalny status baterii
  * 																							5. sprawdzanie waznosci username i password
- * 6. zapisywanie wielkosci poszczegolnych plikow w jakims cache
+ * 																							6. zapisywanie wielkosci poszczegolnych plikow w jakims cache
  * 																							7. przycisk close app
  * 																							8. dzialanie w tle
  * 																							9. ?status na pasku u gory
@@ -58,13 +60,13 @@ import com.downloader.prepareActions.ParseException;
  * 																							12. wczytanie opcji do klasy
  * 13. entry link
  * 																							14. sprawdzanie waznosci linkow
- * 15. wznawianie sciagania
+ * 																							15. wznawianie sciagania
  * 																							16. update preferencji w momencie wyj�cia z okna preferencji
  * 17. stop je�eli plik nie istnieje
- * 18. sprawdzenie czy android nie killuje programu
+ * 																							18. sprawdzenie czy android nie killuje programu
  * 																							19. dodanie ikony programu
  */
-
+//FIXME WCZESNIEJ WYCINAC .HTML
 //FIXME W BAZIE DANYCH PO PAUZIE CZESTO SA ZLE DANE ZAPISYWANE.
 public class HotFile extends Activity {
 	ListView listview;
@@ -110,20 +112,23 @@ public class HotFile extends Activity {
 		((Button) findViewById(R.id.Button_addlink))
 				.setOnClickListener(buttonAddLink);
 
+		
+		ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+		List<RunningServiceInfo> services = activityManager.getRunningServices(Integer.MAX_VALUE);
+		for(RunningServiceInfo runningServiceInfo: services)
+			if(runningServiceInfo.service.getPackageName().equals(getPackageName()))
+				if(runningServiceInfo.service.getClassName().equals("com.downloader.Services.DownloadService")){
+					startDownload.setText("Stop download");
+					break;
+				}
 		check = new prepareActions();
 		checkPreferences();
-		// comp
 		Log.v(LOG_TAG, "Running program...");
-		// this.startActivity(new Intent(this, DownloadList.class));
-
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
-		// IntentFilter completeFilter = new IntentFilter(
-		// DownloadManager.ACTION_DOWNLOAD_COMPLETE);
-		// registerReceiver(completeReceiver, completeFilter);
 	}
 
 	private final int CODEAddLinksFile = 1;
@@ -145,10 +150,6 @@ public class HotFile extends Activity {
 		}
 	}
 
-	public void showNotification(String notification) {
-		Toast.makeText(HotFile.this, notification, Toast.LENGTH_LONG).show();
-	}
-
 	/**
 	 * result of an activity. called automatically
 	 */
@@ -162,12 +163,10 @@ public class HotFile extends Activity {
 
 					switch (requestCode) {
 					case CODEAddLinksFile: // called by OnClickListener
-											// buttontAddLinksFile
 						if (checkInternetAccess())
 							AddLinksFromFile(data.getAction());
-						break;
+						return;
 					case CODEAddLink: // called by OnClickListener
-										// buttontAddLink
 						if (checkInternetAccess()) {
 							try {
 							List<String> tempList = new ArrayList<String>();
@@ -178,15 +177,15 @@ public class HotFile extends Activity {
 								Log.v(LOG_TAG, "Error while parsing file");
 							}
 						}
-						break;
+						return;
 					}
 
 				} catch (IOException e) {
-					showNotification("Error occured " + e);
+					showInformation("Error occured " + e);
 				}
-			break;
+			return;
 		case RESULT_CANCELED:
-			break;
+			return;
 		}
 	}
 
@@ -241,21 +240,6 @@ public class HotFile extends Activity {
 	}
 
 	/** ----------------END MENU------------------------- */
-
-	private void beginDownloading(String link, String username,
-			String passwordmd5, String directory, int id) {
-
-		// mDownloaderHotFileThread.start();
-		/*
-		 * // * Intent intent = new Intent(this, DownloaderHotfile.class);
-		 * intent.putExtra("link", link); intent.putExtra("username", username);
-		 * intent.putExtra("password", passwordmd5);
-		 * intent.putExtra("directory", directory); intent.putExtra("id",
-		 * Integer.toString(id)); downloadingList.add(intent);
-		 * startService(intent);
-		 */
-
-	}
 
 	/** ----------------PREFERENCES------------------------- */
 	/**
@@ -342,9 +326,12 @@ public class HotFile extends Activity {
 		public void onClick(View v) {
 
 			try {
+				if(checkInternetAccess()){
 				Intent i = new Intent(HotFile.this, FileChooser.class);
 				startActivityForResult(i, CODEAddLinksFile);
-
+				}
+				else
+					showInformation("No internet connection, you cannot add links");
 			} catch (Exception e) {
 				Log.v(LOG_TAG, "Exception " + e.toString());
 			}
@@ -373,7 +360,7 @@ public class HotFile extends Activity {
 			}
 		} catch (Exception e) {
 			Log.v(LOG_TAG, "error " + e.toString());
-			showNotification("Error occured when adding links from a file");
+			showInformation("Error occured when adding links from a file");
 		}
 	}
 
@@ -383,34 +370,18 @@ public class HotFile extends Activity {
 	 */
 	private void addNewFiles(List<String> linksList)
 			throws ClientProtocolException, IOException, ParseException {
-
 		List<String> preparedLinks = getLinkFromText(linksList, "hotfile.com");
 		if (preparedLinks.size() > 0) {
-			// TODO ten prepare nie dziala sypie w 78 linijce
 			downList = check.prepareFilesToDownload(preparedLinks);
-			String uri = downList.get(0).requestUri;
-			long size = downList.get(0).contentSize;
-			downloadManager.enqueue(uri, size);
-
-			// TODO zrobic zmiany w prepareFiles i dodac item do bazy danych,
-			// potem wywolac service?
-			int numberofAddedFiles = downList.size();
-			showNotification(numberofAddedFiles + " files have been added");
+			for(DownloadItem  downloadItem  : downList ){
+				downloadManager.enqueue(
+						downloadItem.requestUri,
+						downloadItem.contentSize);
+			}
+			showInformation(downList.size() + " files have been added");
 		} else
-			showNotification("no file has been added");
+			showInformation("no file has been added");
 	}
-
-	/*
-	 * private boolean removeFile(long id) {
-	 * 
-	 * for (DownloadingFileItem listItem : listOfDownloadingFiles) if
-	 * (listItem.getId() == id && db.deleteItem(id)) {
-	 * listOfDownloadingFiles.remove(listItem);
-	 * showNotification("The link has been removed"); return true; } return
-	 * false;
-	 * 
-	 * }
-	 */
 
 	/**
 	 * Isolate links from a list of strings
@@ -454,7 +425,7 @@ public class HotFile extends Activity {
 					datas.add(data);
 					addNewFiles(datas);
 				} else
-					showNotification("no data in clipboard");
+					showInformation("no data in clipboard");
 
 			} catch (Exception e) {
 			}
@@ -470,36 +441,6 @@ public class HotFile extends Activity {
 			try {
 				Intent i = new Intent(HotFile.this, MovieButtons.class);
 				startActivityForResult(i, CODEAddLink);
-				// LinearLayout ll = (LinearLayout)
-				// findViewById(R.id.movieButtons);
-				// ((Button)findViewById(R.id.button_addLink)).setOnClickListener(button_addLinkListener);
-
-				/*
-				 * buttonOnClickShowdownloadlist(v); long id; DownloadManager
-				 * downloadManager = (DownloadManager)
-				 * getSystemService(DOWNLOAD_SERVICE); Uri uri = Uri.parse(
-				 * "http://www.android-app-developer.co.uk/android-app-development-docs/android-writing-zippy-android-apps.pdf"
-				 * ); DownloadManager.Request request = new
-				 * DownloadManager.Request( uri);
-				 * 
-				 * request.setTitle("aaa"); List<String> pathSegments =
-				 * uri.getPathSegments();
-				 * request.setDestinationInExternalPublicDir(
-				 * Environment.DIRECTORY_DOWNLOADS,
-				 * pathSegments.get(pathSegments.size() - 1) + "9");
-				 * Environment.getExternalStoragePublicDirectory(
-				 * Environment.DIRECTORY_DOWNLOADS).mkdirs(); id =
-				 * downloadManager.enqueue(request); Query query = new Query();
-				 * query.setFilterById(id); Cursor cursor =
-				 * downloadManager.query(query); int idStatus = cursor
-				 * .getColumnIndex(DownloadManager.COLUMN_URI); StringBuffer sb
-				 * = new StringBuffer(); cursor.moveToFirst(); do {
-				 * sb.append(DownloadManager.COLUMN_URI + "=")
-				 * .append("newURI"); } while (cursor.moveToNext());
-				 * cursor.moveToFirst(); Log.d("DownloadManagerSample",
-				 * cursor.getString(idStatus));
-				 */
-
 			} catch (Exception e) {
 				Log.v(LOG_TAG, "Exception " + e.toString());
 			}
@@ -508,14 +449,6 @@ public class HotFile extends Activity {
 
 	// ----------------END ADDING DOWNLOADING ITEMS---------------------
 
-	private BroadcastReceiver completeReceiver = new BroadcastReceiver() {
-
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			// TODO cos trzeba odbierac
-		}
-
-	};
 
 	public void buttonOnClickShowdownloadlist(View view) {
 		// int i = 0;
@@ -537,8 +470,6 @@ public class HotFile extends Activity {
 				startDownload.setText("Start download");
 				downloadManager.stopService();
 			}
-			// String aaa = Md5Create.generateMD5Hash("puyyut");
-			// List<String> list = new LinkedList<String>();
 			// list.add("http://hotfile.com/dl/81363200/ba7f841/Ostatnia-DVDRip.PL.part1.rar.html");
 			// list.add("http://hotfile.com/dl/98588098/f5c4897/4.pdf.html"); //
 			// 2MB
@@ -546,39 +477,27 @@ public class HotFile extends Activity {
 			// 4MB
 			//
 			// list.add("ht			downList = check.prepareFilesToDownload(preparedLinks);tp://hotfile.com/dl/92148167/7c86b14/fil.txt.html");
-			// list.add("http://hotfile.com/dl/92539498/131dad0/Gamee.Of.Death.DVDRip.XviD-VoMiT.m90.part1.rar.html");
-			//
-			// beginDownloading(list.get(3), username, aaa, directory, 1);
-
 		}
 	};
 
-	/*
-	 * public void addLineToDownloadListBox(String line) { LinearLayout ll =
-	 * (LinearLayout) findViewById(R.id.mylayout); LayoutInflater ly =
-	 * (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE); View
-	 * customView = ly.inflate(R.layout.downloadingitem, null);
-	 * customView.setId(0); TextView tv = (TextView)
-	 * customView.findViewById(R.id.TextView001); if (line == "")
-	 * tv.setText("sa"); // tu ma byc czyszczenie text boxa, ale jeszcze // nie
-	 * ma else tv.setText(line); ll.addView(customView); int i = 0; while (i <
-	 * 100) { TextProgressBar tx = new TextProgressBar(this); tx.setProgress(i);
-	 * tx.setText(i + "%"); i += 10; } }
-	 */
-
 	private Boolean checkInternetAccess() {
 		ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-		Boolean status = cm.getActiveNetworkInfo().isConnectedOrConnecting();
-		if(!status) Log.v(Variables.TAG, "No internet connection");
-		return status;
+		try{
+		return cm.getActiveNetworkInfo().isConnectedOrConnecting();
+		}
+		catch(Exception e){Log.v(Variables.TAG, "No internet connection");}
+		showInformation("No internet connection");
+		return false;
+	}
+	
+	private void showInformation(String text){
+		Toast.makeText(this, text, Toast.LENGTH_LONG);
 	}
 	
 /** ----------------BATTERY ------------------------- */
 	
 	//http://moonblink.googlecode.com/svn-history/r845/trunk/BatteryTracker/src/org/hermit/android/battrack/BatteryTracker.java
 	public void batteryState(){
-		
-
         IntentFilter filter = new IntentFilter();
        // filter.addAction(Intent.ACTION_BATTERY_CHANGED);
         filter.addAction(Intent.ACTION_BATTERY_LOW);
@@ -586,7 +505,6 @@ public class HotFile extends Activity {
         filter.addAction(Intent.ACTION_POWER_CONNECTED);
         filter.addAction(Intent.ACTION_POWER_DISCONNECTED);
         registerReceiver(mIntentReceiver, filter);
-        
 	}
 	
 
@@ -599,13 +517,13 @@ public class HotFile extends Activity {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
            if (action.equals(Intent.ACTION_BATTERY_LOW))
-            		showNotification("Battery level is low. Plug your phone");
+        	   showInformation("Battery level is low. Plug your phone");
            else if (action.equals(Intent.ACTION_POWER_CONNECTED))
-        	   showNotification("Your phone has been pluged in");
+        	   showInformation("Your phone has been pluged in");
            else if (action.equals(Intent.ACTION_POWER_DISCONNECTED))
-        	   showNotification("Your phone is no longer plug in");
+        	   showInformation("Your phone is no longer plug in");
            else if (action.equals(Intent.ACTION_POWER_DISCONNECTED))
-        	   showNotification("Your phone is happy :)");
+        	   showInformation("Your phone is happy :)");
            
         }
     };

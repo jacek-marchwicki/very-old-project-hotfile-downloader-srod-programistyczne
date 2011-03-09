@@ -7,6 +7,7 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.view.View;
 import android.widget.RemoteViews;
 
 import com.downloader.R;
@@ -69,8 +70,9 @@ public class Notifications {
 		}
 		for(NotificationItem notificationItem : notifications.values()){
 			Notification notification = new Notification(R.drawable.icon, "", System.currentTimeMillis());
-			notification.flags = notification.flags | Notification.FLAG_AUTO_CANCEL;
+			notification.flags = notification.flags | Notification.FLAG_ONGOING_EVENT;
 			RemoteViews  remoteViews = new RemoteViews(context.getPackageName(), R.layout.download_progress_up);
+			//remoteViews.setViewVisibility(R.id.status_text, View.GONE);
 			remoteViews.setImageViewResource(R.id.status_icon, R.drawable.ic_menu_save);
 			remoteViews.setTextViewText(R.id.status_text, notificationItem.title);
 			remoteViews.setProgressBar(R.id.status_progress, (int)notificationItem.totalBytes, 

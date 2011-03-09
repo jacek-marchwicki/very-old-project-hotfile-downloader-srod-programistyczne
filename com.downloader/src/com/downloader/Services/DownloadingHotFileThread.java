@@ -17,7 +17,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.net.Uri;
 import android.os.PowerManager;
-import android.os.storage.StorageManager;
 import android.util.Log;
 
 public class DownloadingHotFileThread extends Thread {
