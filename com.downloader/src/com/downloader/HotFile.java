@@ -461,7 +461,8 @@ public class HotFile extends Activity {
 	 */
 	private OnClickListener buttonOnClickDownload = new OnClickListener() {
 		public void onClick(View v) {
-			if (username != "" && password != ""){
+			if (!(DownloadService.UsernamePasswordMD5Storage.getUsername().isEmpty() && 
+					DownloadService.UsernamePasswordMD5Storage.getPasswordMD5().isEmpty())){
 				if(checkInternetAccess() && startDownload.getText().equals("Start download")){
 					startDownload.setText("Stop download");
 					downloadManager.startService();
