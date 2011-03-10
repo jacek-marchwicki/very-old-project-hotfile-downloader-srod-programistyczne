@@ -36,6 +36,7 @@ public class DownloadList extends Activity {
 	int idColumn, fileName, currentSize, totalSize, requestUri;
 	private DownloadAdapter downloadAdapter;
 	private ProgressObserver progressObserver = new ProgressObserver();
+	private AlertDialog alertDialog;
 
 	@Override
 	public void onCreate(Bundle bundle) {
@@ -64,8 +65,10 @@ public class DownloadList extends Activity {
 		requestUri = cursorObserver
 				.getColumnIndexOrThrow(Variables.DB_REQUESTURI);
 		try {
-			if (cursorObserver.getCount() > 0)
-				handleDownloadChanged();
+			if (cursorObserver.getCount() > 0){
+				downloadAdapter = new DownloadAdapter(getApplicationContext(),
+						cursorObserver, ll);
+				listView.setAdapter(downloadAdapter);}
 			else {
 				showNotification("Wracam do activity. Bye Stranger! ");
 				super.finish();
@@ -94,17 +97,7 @@ public class DownloadList extends Activity {
 	public void handleDownloadChanged() {
 		// Set<Long> allIds = new HashSet<Long>();
 		// cursorObserver.moveToFirst()
-		downloadAdapter = new DownloadAdapter(getApplicationContext(),
-				cursorObserver, ll);
-		listView.setAdapter(downloadAdapter);
 
-		cursorObserver.moveToFirst();
-		do {
-			long contentSize = cursorObserver.getLong(totalSize);
-				if (contentSize > 0) {
-					
-				}
-		} while (cursorObserver.moveToNext());
 	}
 
 	public DownloadItem addProgressBarToDownloadListBox(DownloadItem item,
