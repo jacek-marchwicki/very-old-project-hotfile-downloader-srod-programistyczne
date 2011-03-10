@@ -4,8 +4,11 @@ import android.net.Uri;
 
 public final class Variables {
 	
+	public static final boolean VERBOSE = true;
+	
 	public static final String AUTHORITY = "hotfile_downloader";
 	public static final String DB_DATABASE_TABLE = "downloads";
+	
 	
 	public static final Uri CONTENT_URI = Uri.parse("content://"+AUTHORITY+"/"+DB_DATABASE_TABLE);
 	

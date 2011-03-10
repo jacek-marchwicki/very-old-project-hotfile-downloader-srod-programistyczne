@@ -14,8 +14,6 @@ import java.util.regex.Pattern;
 import org.apache.http.client.ClientProtocolException;
 
 import android.app.Activity;
-import android.app.ActivityManager;
-import android.app.ActivityManager.RunningServiceInfo;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -39,11 +37,11 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.downloader.prepareActions.ParseException;
 import com.downloader.Services.DownloadItem;
 import com.downloader.Services.DownloadManager;
 import com.downloader.Services.DownloadService;
 import com.downloader.Services.Variables;
-import com.downloader.prepareActions.ParseException;
 
 /*
  * 																							1. sprawdzanie miejsca w pamieci do zapisu podczas downloadu
@@ -110,18 +108,8 @@ public class HotFile extends Activity {
 				.setOnClickListener(buttonAddLinkFromClipboard);
 		((Button) findViewById(R.id.Button_addlink))
 				.setOnClickListener(buttonAddLink);
-
-		ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
-		List<RunningServiceInfo> services = activityManager
-				.getRunningServices(Integer.MAX_VALUE);
-		for (RunningServiceInfo runningServiceInfo : services)
-			if (runningServiceInfo.service.getPackageName().equals(
-					getPackageName()))
-				if (runningServiceInfo.service.getClassName().equals(
-						"com.downloader.Services.DownloadService")) {
-					startDownload.setText("Stop download");
-					break;
-				}
+		if(DownloadManager.isServiceRunning())
+			startDownload.setText("Stop download");
 		check = new prepareActions();
 		checkPreferences();
 		Log.v(LOG_TAG, "Running program...");
@@ -471,7 +459,7 @@ public class HotFile extends Activity {
 				if (checkInternetAccess()
 						&& startDownload.getText().equals("Start download")) {
 					startDownload.setText("Stop download");
-					downloadManager.startService();
+					downloadManager.startServiceForAllDownloads();
 				} else {
 					startDownload.setText("Start download");
 					downloadManager.stopService();

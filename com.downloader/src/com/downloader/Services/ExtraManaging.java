@@ -4,6 +4,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
 /**
  * METHODS TO MANAGE NOTIFICATION AND THREADS
@@ -24,7 +25,12 @@ public class ExtraManaging {
 	}
 	
 	public void insertNotification(int id, Notification notification){
+		try{
 		notificationManager.notify(id, notification);
+		}
+	catch(Exception e){ 
+		Log.v(Variables.TAG, e.toString());
+	}
 	}
 	
 	public void removeNotification(int id) {

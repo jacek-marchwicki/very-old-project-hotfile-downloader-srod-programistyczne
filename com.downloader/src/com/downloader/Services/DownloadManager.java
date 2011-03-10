@@ -1,5 +1,9 @@
 package com.downloader.Services;
 
+import java.util.List;
+
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningServiceInfo;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -9,10 +13,10 @@ import android.net.Uri;
 public class DownloadManager {
 
 	private ContentResolver contentResolver;
-	private Context context;
+	private static Context context = null;
 
 	public DownloadManager(Context context) {
-		this.context = context;
+		DownloadManager.context = context;
 		contentResolver = context.getContentResolver();
 	}
 
@@ -28,7 +32,7 @@ public class DownloadManager {
 		
 	}
 	
-	public void startService(){
+	public void startServiceForAllDownloads(){
 		ContentValues contentValues = new ContentValues();
 		contentValues.put(Variables.DB_COLUMN_STATUS, Variables.STATUS_WAITING);
 		context.getContentResolver().update(Variables.CONTENT_URI, contentValues, null, null);
@@ -41,4 +45,23 @@ public class DownloadManager {
 		context.getContentResolver().update(Variables.CONTENT_URI, contentValues, null, null);
 		context.stopService(new Intent(context, DownloadService.class));
 	}
+	
+	public static void startServiceOnly(){
+		context.startService(new Intent(context, DownloadService.class));
+	}
+	
+	public static boolean isServiceRunning(){
+	ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+	List<RunningServiceInfo> services = activityManager
+			.getRunningServices(Integer.MAX_VALUE);
+	for (RunningServiceInfo runningServiceInfo : services)
+		if (runningServiceInfo.service.getPackageName().equals(
+				context.getPackageName()))
+			if (runningServiceInfo.service.getClassName().equals(
+					"com.downloader.Services.DownloadService")) {
+				return true;
+			}
+	return false;
+	}
+	
 }

@@ -115,14 +115,11 @@ public class DownloadItem {
 			+"&username="+DownloadService.UsernamePasswordMD5Storage.getUsername()
 			+"&passwordmd5="+DownloadService.UsernamePasswordMD5Storage.getPasswordMD5();
 			downloadItem.directUri = getStringItemFromDatabase(downloadItem.directUri, Variables.DB_DIRECTURI);
-			//TODO CHECK IF DIRECT URI IS VALID
 			downloadItem.contentSize  =  getLongItemFromDatabase(Variables.DB_KEY_TOTALSIZE);
 			downloadItem.currentSize = getLongItemFromDatabase(Variables.DB_KEY_DOWNLOADEDSIZE);
 			downloadItem.filename = getStringItemFromDatabase(downloadItem.filename, Variables.DB_KEY_FILENAME);
 			downloadItem.status = getLongItemFromDatabase(Variables.DB_COLUMN_STATUS);
 			downloadItem.deleted = getBooleanItemFromDatabase(Variables.DB_DELETED);
-			//TODO zmienna deleted do uzupelnienia?
-
 		}
 
 		/** ------------------END DATABASE -----------------------*/
@@ -141,7 +138,6 @@ public class DownloadItem {
 			status = Variables.STATUS_RUNNING;
 			ContentValues contentValues = new ContentValues();
 			contentValues.put(Variables.DB_COLUMN_STATUS, status);
-			// TODO
 			context.getContentResolver().update(getMyDownloadUrl(), contentValues, null, 
 					null);
 			
@@ -159,4 +155,16 @@ public class DownloadItem {
 	public synchronized boolean isRunning(){
 		return DownloadService._isRunning;
 	}
+	
+	public long nextAction(long now){
+		if(deleted == true)
+			return -1;
+		if(status != Variables.STATUS_WAITING)
+			return 0;
+		long when = now + Variables.DELAY_TIME;
+		if(when <= now)
+			return 0;
+		return when - now;
+	}
+	
 }

@@ -66,10 +66,8 @@ public class DownloadService extends Service {
 					passwordmd5 = mPasswordmd5;
 				}
 			} catch (ClientProtocolException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -110,7 +108,7 @@ public class DownloadService extends Service {
 		}
 
 		public void onChange(final boolean selfChange) {
-			Log.v(Variables.TAG, "onChangeContentObserver");
+			if(Variables.VERBOSE) Log.v(Variables.TAG, "onChangeContentObserver");
 			updateFromProvider();
 		}
 	}
@@ -122,9 +120,6 @@ public class DownloadService extends Service {
 
 		@Override
 		public void run() {
-			// TODO FIRST SOME FUN WITH DATABASE
-			// TODO Tworzenie watkow do downloadu
-
 			boolean keepServiceUp = false;
 			long wakeUp = Long.MAX_VALUE;
 			while (true) {
@@ -164,9 +159,13 @@ public class DownloadService extends Service {
 								updateDownload(reader, downloadItem);
 							else
 								downloadItem = insertDownload(reader, now);
-							// TODO nie wiem co skopiowac z download service
-							// line 246
-
+							
+							//if(Variables.VERBOSE)
+							long next = downloadItem.nextAction(now);
+							if(next == 0)
+								keepServiceUp = true;
+							else if (next > 0 && next < wakeUp)
+								wakeUp = next;
 						} while (cursor.moveToNext());
 					}
 				} finally {
@@ -195,8 +194,7 @@ public class DownloadService extends Service {
 			if (alarms == null) {
 				return;
 			}
-			alarms
-					.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()
+			alarms.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()
 							+ wakeUp, PendingIntent.getService(
 							DownloadService.this, 0,
 							new Intent(DownloadService.this,

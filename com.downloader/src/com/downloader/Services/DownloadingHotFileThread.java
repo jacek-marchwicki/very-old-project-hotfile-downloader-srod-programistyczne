@@ -96,7 +96,7 @@ public class DownloadingHotFileThread extends Thread {
 			PowerManager powerManager = (PowerManager) this.context
 					.getSystemService(Context.POWER_SERVICE);
 			wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-					Variables.TAG); // TODO SOME Tag from constans
+					Variables.TAG);
 			wakeLock.acquire();
 			boolean finished = false;
 			while (!finished) {
@@ -107,7 +107,6 @@ public class DownloadingHotFileThread extends Thread {
 					runDownload(state, httpclient, getDirectLink);
 					finished = true;
 				} catch (RetryDownload e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}finally{
 					getDirectLink.abort();
@@ -157,7 +156,6 @@ public class DownloadingHotFileThread extends Thread {
 					state.fileOutputStream = new FileOutputStream(
 							Variables.directory + "/" + state.filename, true);
 					innerState.bytesDownloaded = (int) bytesDownloaded;
-					// TODO UZUPELNIC GDY BEDZIE DOWNLOADINFO CLASS, moze
 					// wymagane dodanie e-tagow if=match
 					if (downloadItem.contentSize != -1) {
 						innerState.contentSize = (int) downloadItem.contentSize;
@@ -301,8 +299,10 @@ public class DownloadingHotFileThread extends Thread {
 
 	private void checkIfNeedToPause(State state) throws Error {
 		synchronized (downloadItem) {
-			if (downloadItem.status == Variables.STATUS_PAUSE)
-				throw new Error("PAUSE download");
+			if (downloadItem.status == Variables.STATUS_PAUSE){
+				downloadItem.mHasActiveThread = false;
+				throw new Error("PAUSE download, id="+downloadItem.requestUri);
+			}
 			if (downloadItem.status == Variables.STATUS_CANCEL)
 				throw new Error("stop download");
 		}
