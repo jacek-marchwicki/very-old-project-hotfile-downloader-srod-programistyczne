@@ -156,14 +156,18 @@ public class DownloadList extends Activity {
 	@Override
 	protected Dialog onCreateDialog(final int id) {
 		int currentState = idStatusMap.get((long)id).intValue();
-		String start= (currentState==Variables.STATUS_PAUSE||
-				(currentState==Variables.STATUS_WAITING && !DownloadManager.isServiceRunning())?"Start":"");
-		String pause = (currentState==Variables.STATUS_RUNNING?"Pause":"");
+		boolean serviceRunning = DownloadManager.isServiceRunning();
+		boolean status = (currentState==Variables.STATUS_PAUSE||
+				(currentState==Variables.STATUS_WAITING && !serviceRunning)?true:false);
+		String start = status?"Start":"";
+		String pause = (currentState==Variables.STATUS_RUNNING && serviceRunning?"Pause":"");
 		String delete = "Delete";
+		if(pause.equals("") && start.equals(""))
+			start = "Start";
 			// Create our AlertDialog
 			Builder builder = new AlertDialog.Builder(this);
 			builder.setMessage("Choose an action\nCurrent state: "
-					+(currentState==Variables.STATUS_PAUSE?"paused":"running"))
+					+(status?"paused":"running"))
 					.setCancelable(true).setPositiveButton(start,
 							new DialogInterface.OnClickListener() {
 								@Override

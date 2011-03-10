@@ -238,7 +238,7 @@ public class DownloadingHotFileThread extends Thread {
 					writeDownloadedData(state, data, bytesRead);
 					innerState.bytesDownloaded += bytesRead;
 					updateProgress(state, innerState);
-					checkIfNeedToPause(state);
+					checkIfNeedToPause(state, innerState);
 				}
 			}
 		} catch (Exception e) {
@@ -297,10 +297,12 @@ public class DownloadingHotFileThread extends Thread {
 				downloadItem.getMyDownloadUrl(), contentValues, null, null);
 	}
 
-	private void checkIfNeedToPause(State state) throws Error {
+	private void checkIfNeedToPause(State state, InnerState innerState) throws Error {
 		synchronized (downloadItem) {
 			if (downloadItem.status == Variables.STATUS_PAUSE){
 				downloadItem.mHasActiveThread = false;
+				updateDownloadesSizeInContentResolver(innerState.bytesDownloaded);
+				innerState.bytesNotified = innerState.bytesDownloaded;
 				throw new Error("PAUSE download, id="+downloadItem.requestUri);
 			}
 			if (downloadItem.status == Variables.STATUS_CANCEL)

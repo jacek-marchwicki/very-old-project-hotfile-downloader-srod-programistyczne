@@ -119,6 +119,8 @@ public class HotFile extends Activity {
 	public void onResume() {
 		super.onResume();
 		batteryState();
+		if(DownloadManager.isServiceRunning())
+			startDownload.setText("Stop download");
 	}
 
 	private final int CODEAddLinksFile = 1;
@@ -453,9 +455,8 @@ public class HotFile extends Activity {
 	 */
 	private OnClickListener buttonOnClickDownload = new OnClickListener() {
 		public void onClick(View v) {
-			if (!(DownloadService.UsernamePasswordMD5Storage.getUsername()
-					.isEmpty() && DownloadService.UsernamePasswordMD5Storage
-					.getPasswordMD5().isEmpty())) {
+			if (!(DownloadService.UsernamePasswordMD5Storage.getUsername().equals("") && DownloadService.UsernamePasswordMD5Storage
+					.getPasswordMD5().equals(""))) {
 				if (checkInternetAccess()
 						&& startDownload.getText().equals("Start download")) {
 					startDownload.setText("Stop download");
