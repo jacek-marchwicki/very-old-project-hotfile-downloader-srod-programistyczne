@@ -11,7 +11,7 @@ public final class Variables {
 	
 	/** DATABASE CONSTANS */
 	
-	public static final String DB_DATABASE_NAME = "HOTFILE_DOWNLOADER";
+	public static final String DB_DATABASE_NAME = "hotfiledownloader";
 	
 	public static final int DB_DATABASE_VERSION = 1;
 	/**
