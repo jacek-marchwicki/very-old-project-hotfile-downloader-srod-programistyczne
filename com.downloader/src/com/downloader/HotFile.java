@@ -253,7 +253,7 @@ public class HotFile extends Activity {
 						.getString("username", ""), Md5Create
 						.generateMD5Hash(preferences.getString("password", "")));
 		// TODO sprawdzic czy dobrze jest static class zrobione
-		directory = preferences.getString("chooseDir", null);
+		directory = preferences.getString("chooseDir", "");
 		File dir;
 		if (directory != null) {
 			directory = directory.replace(" ", "");
@@ -262,8 +262,7 @@ public class HotFile extends Activity {
 			// File(Environment.getExternalStorageDirectory().getPath());
 			// dir = new File(sd.getAbsolutePath()+"/downloads");
 		} else
-			dir = new File(Environment.getExternalStorageDirectory()
-					+ "/downloads");	
+			dir = new File(Environment.getExternalStorageDirectory()+ "/downloads");	
 		if (dir.exists()) {
 			if (!dir.isDirectory()) {
 				Log.e(LOG_TAG, "There are directory named \"downloads\" in current directory");
@@ -288,25 +287,25 @@ public class HotFile extends Activity {
 
 		@Override
 		public void onSharedPreferenceChanged(
+				
 				SharedPreferences sharedPreferences, String key) {
-			if(preferences.contains("username") && preferences.contains("password") && preferences.contains("chooseDir"))
-			{
-				if (key.equals("password")
+				if (preferences.contains("password") && key.equals("password")
 						&& !password.equals(preferences.getString("password",
 								" "))) {
 					password = preferences.getString("password", "");
 					showInformation("The password has been changed");
-				} else if (key.equals("username")
+				} else if (preferences.contains("username") && key.equals("username")
 						&& !username.equals(preferences.getString("username",
 								" "))) {
 					username = preferences.getString("username", "");
 					showInformation("The username has been changed");
-				} else if (key.equals("chooseDir")
+				} else{
+					if (preferences.contains("chooseDir") && key.equals("chooseDir")
 						&& !directory.equals(preferences.getString("chooseDir"," "))) {
 					directory = preferences.getString("chooseDir", "");
 					showInformation("The directory has been changed");
 				}
-			}
+				}
 		}
 	};
 
