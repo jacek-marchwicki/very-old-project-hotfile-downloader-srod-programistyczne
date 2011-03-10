@@ -84,18 +84,16 @@ public class HotFile extends Activity {
 	String directory = "";
 	Button startDownload;
 
-
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		downloadManager = new DownloadManager(this);
 		downloadingList = new ArrayList<Intent>();
-		setContentView(R.layout.main);		
+		setContentView(R.layout.main);
 		myProgressBar = (ProgressBar) findViewById(R.id.ProgressBar01);
 		// movieButtons = new MovieButtons();
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
-
 
 		/*
 		 * ADDING BUTTON CLICKS
@@ -104,20 +102,23 @@ public class HotFile extends Activity {
 		startDownload.setOnClickListener(buttonOnClickDownload);
 
 		((Button) findViewById(R.id.Button_showdownloadlist))
-		.setOnClickListener(buttonOnClickShowdownloadlistListener);
-		((Button) findViewById(R.id.Button_addlinksfromfile)).setOnClickListener(buttonAddLinksFile);
+				.setOnClickListener(buttonOnClickShowdownloadlistListener);
+		((Button) findViewById(R.id.Button_addlinksfromfile))
+				.setOnClickListener(buttonAddLinksFile);
 
 		((Button) findViewById(R.id.Button_addlinkfromclipboard))
-		.setOnClickListener(buttonAddLinkFromClipboard);
+				.setOnClickListener(buttonAddLinkFromClipboard);
 		((Button) findViewById(R.id.Button_addlink))
-		.setOnClickListener(buttonAddLink);
-
+				.setOnClickListener(buttonAddLink);
 
 		ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
-		List<RunningServiceInfo> services = activityManager.getRunningServices(Integer.MAX_VALUE);
-		for(RunningServiceInfo runningServiceInfo: services)
-			if(runningServiceInfo.service.getPackageName().equals(getPackageName()))
-				if(runningServiceInfo.service.getClassName().equals("com.downloader.Services.DownloadService")){
+		List<RunningServiceInfo> services = activityManager
+				.getRunningServices(Integer.MAX_VALUE);
+		for (RunningServiceInfo runningServiceInfo : services)
+			if (runningServiceInfo.service.getPackageName().equals(
+					getPackageName()))
+				if (runningServiceInfo.service.getClassName().equals(
+						"com.downloader.Services.DownloadService")) {
 					startDownload.setText("Stop download");
 					break;
 				}
@@ -142,7 +143,7 @@ public class HotFile extends Activity {
 		try {
 			StatFs stat = new StatFs(directory);
 			long bytesAvailable = (long) stat.getBlockSize()
-			* (long) stat.getBlockCount();
+					* (long) stat.getBlockCount();
 			long megAvailable = bytesAvailable / 1048576;
 			return megAvailable;
 		} catch (Exception e) {
@@ -184,7 +185,7 @@ public class HotFile extends Activity {
 				} catch (IOException e) {
 					showInformation("Error occured " + e);
 				}
-				return;
+			return;
 		case RESULT_CANCELED:
 			return;
 		}
@@ -229,7 +230,7 @@ public class HotFile extends Activity {
 						"Here you can maintain your user credentials.",
 						Toast.LENGTH_LONG).show();
 				preferences
-				.registerOnSharedPreferenceChangeListener(prefListener);
+						.registerOnSharedPreferenceChangeListener(prefListener);
 				break;
 			} catch (Exception e) {
 			}
@@ -248,9 +249,9 @@ public class HotFile extends Activity {
 	 */
 	private void checkPreferences() {
 		DownloadService.UsernamePasswordMD5Storage
-		.setUsernameAndPasswordMD5(preferences
-				.getString("username", ""), Md5Create
-				.generateMD5Hash(preferences.getString("password", "")));
+				.setUsernameAndPasswordMD5(preferences
+						.getString("username", ""), Md5Create
+						.generateMD5Hash(preferences.getString("password", "")));
 		// TODO sprawdzic czy dobrze jest static class zrobione
 		directory = preferences.getString("chooseDir", null);
 		File dir;
@@ -260,13 +261,12 @@ public class HotFile extends Activity {
 			// sd = new
 			// File(Environment.getExternalStorageDirectory().getPath());
 			// dir = new File(sd.getAbsolutePath()+"/downloads");
-		} else {
+		} else
 			dir = new File(Environment.getExternalStorageDirectory()
 					+ "/downloads");	
-		}
 		if (dir.exists()) {
 			if (!dir.isDirectory()) {
-				Log.e(LOG_TAG, "There are file named \"downloads\" in current directory");
+				Log.e(LOG_TAG, "There are directory named \"downloads\" in current directory");
 			}
 		} else {
 			if (!dir.mkdirs())
@@ -284,30 +284,29 @@ public class HotFile extends Activity {
 					Toast.LENGTH_LONG).show();
 	}
 
-	public OnSharedPreferenceChangeListener prefListener =
-		new OnSharedPreferenceChangeListener() {
+	public OnSharedPreferenceChangeListener prefListener = new OnSharedPreferenceChangeListener() {
 
 		@Override
 		public void onSharedPreferenceChanged(
 				SharedPreferences sharedPreferences, String key) {
-			if (key.equals("password")
-					&& !password.equals(preferences.getString("password", ""))) {
-				password = preferences.getString("password", "");
-				Toast.makeText(HotFile.this, "The password has been changed",
-						Toast.LENGTH_LONG).show();
-			} else if (key.equals("username")
-					&& !username.equals(preferences.getString("username", ""))) {
-				username = preferences.getString("username", "");
-				Toast.makeText(HotFile.this, "The username has been changed",
-						Toast.LENGTH_LONG).show();
-			} else if (key.equals("chooseDir")
-					&& !directory
-					.equals(preferences.getString("chooseDir", ""))) {
-				directory = preferences.getString("chooseDir", "");
-				Toast.makeText(HotFile.this, "The directory has been changed",
-						Toast.LENGTH_LONG).show();
+			if(preferences.contains("username") && preferences.contains("password") && preferences.contains("chooseDir"))
+			{
+				if (key.equals("password")
+						&& !password.equals(preferences.getString("password",
+								" "))) {
+					password = preferences.getString("password", "");
+					showInformation("The password has been changed");
+				} else if (key.equals("username")
+						&& !username.equals(preferences.getString("username",
+								" "))) {
+					username = preferences.getString("username", "");
+					showInformation("The username has been changed");
+				} else if (key.equals("chooseDir")
+						&& !directory.equals(preferences.getString("chooseDir"," "))) {
+					directory = preferences.getString("chooseDir", "");
+					showInformation("The directory has been changed");
+				}
 			}
-
 		}
 	};
 
@@ -335,11 +334,10 @@ public class HotFile extends Activity {
 		public void onClick(View v) {
 
 			try {
-				if(checkInternetAccess()){
+				if (checkInternetAccess()) {
 					Intent i = new Intent(HotFile.this, FileChooser.class);
 					startActivityForResult(i, CODEAddLinksFile);
-				}
-				else
+				} else
 					showInformation("No internet connection, you cannot add links");
 			} catch (Exception e) {
 				Log.v(LOG_TAG, "Exception " + e.toString());
@@ -365,7 +363,7 @@ public class HotFile extends Activity {
 				}
 
 				addNewFiles(list); // passing the list of lines from file to the
-				// method
+									// method
 			}
 		} catch (Exception e) {
 			Log.v(LOG_TAG, "error " + e.toString());
@@ -375,16 +373,16 @@ public class HotFile extends Activity {
 
 	/**
 	 * Common method to add files
-	 * @throws ParseException 
+	 * 
+	 * @throws ParseException
 	 */
 	private void addNewFiles(List<String> linksList)
-	throws ClientProtocolException, IOException, ParseException {
+			throws ClientProtocolException, IOException, ParseException {
 		List<String> preparedLinks = getLinkFromText(linksList, "hotfile.com");
 		if (preparedLinks.size() > 0) {
 			downList = check.prepareFilesToDownload(preparedLinks);
-			for(DownloadItem  downloadItem  : downList ){
-				downloadManager.enqueue(
-						downloadItem.requestUri,
+			for (DownloadItem downloadItem : downList) {
+				downloadManager.enqueue(downloadItem.requestUri,
 						downloadItem.contentSize);
 			}
 			showInformation(downList.size() + " files have been added");
@@ -406,7 +404,7 @@ public class HotFile extends Activity {
 		for (String link : links) {
 			String[] list = link.split("\\ ");
 			Pattern p = Pattern
-			.compile("http://(www\\.)?" + serviceName + ".*");
+					.compile("http://(www\\.)?" + serviceName + ".*");
 
 			for (String s : list) {
 
@@ -442,7 +440,7 @@ public class HotFile extends Activity {
 	};
 
 	/**
-	 *Adding new link by clicking button ADD Link *
+	 * Adding new link by clicking button ADD Link *
 	 **/
 	private OnClickListener buttonAddLink = new OnClickListener() {
 		public void onClick(View v) {
@@ -458,7 +456,6 @@ public class HotFile extends Activity {
 
 	// ----------------END ADDING DOWNLOADING ITEMS---------------------
 
-
 	public void buttonOnClickShowdownloadlist(View view) {
 		// int i = 0;
 		// addProgressBarToDownloadListBox(new TextProgressBar(this));
@@ -470,28 +467,27 @@ public class HotFile extends Activity {
 	 */
 	private OnClickListener buttonOnClickDownload = new OnClickListener() {
 		public void onClick(View v) {
-			if (!(DownloadService.UsernamePasswordMD5Storage.getUsername().isEmpty() && 
-					DownloadService.UsernamePasswordMD5Storage.getPasswordMD5().isEmpty())){
-				if(checkInternetAccess() && startDownload.getText().equals("Start download")){
+			if (!(DownloadService.UsernamePasswordMD5Storage.getUsername()
+					.isEmpty() && DownloadService.UsernamePasswordMD5Storage
+					.getPasswordMD5().isEmpty())) {
+				if (checkInternetAccess()
+						&& startDownload.getText().equals("Start download")) {
 					startDownload.setText("Stop download");
 					downloadManager.startService();
-				}
-				else
-				{
+				} else {
 					startDownload.setText("Start download");
 					downloadManager.stopService();
 				}
 				// list.add("http://hotfile.com/dl/81363200/ba7f841/Ostatnia-DVDRip.PL.part1.rar.html");
-				// list.add("http://hotfile.com/dl/98588098/f5c4897/4.pdf.html"); //
+				// list.add("http://hotfile.com/dl/98588098/f5c4897/4.pdf.html");
+				// //
 				// 2MB
 				// list.add("http://hotfile.com/dl/98588065/ece61ef/1.pdf.html");//
 				// 4MB
 				//
 				// list.add("ht			downList = check.prepareFilesToDownload(preparedLinks);tp://hotfile.com/dl/92148167/7c86b14/fil.txt.html");
-			}
-			else
-			{
-				Log.v(LOG_TAG,"password or username is empty");
+			} else {
+				Log.v(LOG_TAG, "password or username is empty");
 				showInformation("password or username is empty");
 			}
 		}
@@ -499,22 +495,23 @@ public class HotFile extends Activity {
 
 	private Boolean checkInternetAccess() {
 		ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-		try{
+		try {
 			return cm.getActiveNetworkInfo().isConnectedOrConnecting();
+		} catch (Exception e) {
+			Log.v(Variables.TAG, "No internet connection");
 		}
-		catch(Exception e){Log.v(Variables.TAG, "No internet connection");}
 		showInformation("No internet connection");
 		return false;
 	}
 
-	private void showInformation(String text){
-		Toast.makeText(this, text, Toast.LENGTH_LONG);
+	private void showInformation(String text) {
+		Toast.makeText(this, text, Toast.LENGTH_LONG).show();
 	}
 
 	/** ----------------BATTERY ------------------------- */
 
-	//http://moonblink.googlecode.com/svn-history/r845/trunk/BatteryTracker/src/org/hermit/android/battrack/BatteryTracker.java
-	public void batteryState(){
+	// http://moonblink.googlecode.com/svn-history/r845/trunk/BatteryTracker/src/org/hermit/android/battrack/BatteryTracker.java
+	public void batteryState() {
 		IntentFilter filter = new IntentFilter();
 		// filter.addAction(Intent.ACTION_BATTERY_CHANGED);
 		filter.addAction(Intent.ACTION_BATTERY_LOW);
@@ -523,7 +520,6 @@ public class HotFile extends Activity {
 		filter.addAction(Intent.ACTION_POWER_DISCONNECTED);
 		registerReceiver(mIntentReceiver, filter);
 	}
-
 
 	// ******************************************************************** //
 	// Update Handling.
@@ -546,7 +542,7 @@ public class HotFile extends Activity {
 	};
 
 	@Override
-	protected void onPause(){
+	protected void onPause() {
 		super.onPause();
 		unregisterReceiver(mIntentReceiver);
 	}
