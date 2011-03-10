@@ -69,17 +69,28 @@ public class Notifications {
 				notifications.put(downloadItem.requestUri, notificationItem);
 			}
 		}
-		for(NotificationItem notificationItem : notifications.values()){
+		
+		if(notifications.size() > 0){
+			NotificationItem notificationItem = notifications.values().iterator().next();
 			Notification notification = new Notification(R.drawable.icon, "", System.currentTimeMillis());
 			notification.flags = notification.flags | Notification.FLAG_AUTO_CANCEL;
 			RemoteViews  remoteViews = new RemoteViews(context.getPackageName(), R.layout.download_progress_up);
-			remoteViews.setTextViewText(R.id.status_text, notificationItem.title);
+			if(notifications.size() > 1)
+				remoteViews.setTextViewText(R.id.status_text, notificationItem.title + "(other downloads: " + (notifications.size()-1)+")");
+			else
+				remoteViews.setTextViewText(R.id.status_text, notificationItem.title);
 			remoteViews.setProgressBar(R.id.status_progress, (int)notificationItem.totalBytes, 
 					(int)notificationItem.currentBytes, notificationItem.totalBytes == -1);
 			remoteViews.setViewVisibility(R.id.status_progress, View.VISIBLE);
 			remoteViews.setViewVisibility(R.id.status_text, View.VISIBLE);
 			notification.contentView = remoteViews;
-			PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, new Intent(context, DownloadList.class), 0); //<-- pewnie to niszczy wszystko.
+			Intent intent = new Intent(context, DownloadList.class);
+			if(notifications.size() > 1){
+				intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+	                    | Intent.FLAG_ACTIVITY_SINGLE_TOP
+	                    | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			}
+			PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0); //<-- pewnie to niszczy wszystko.
 			notification.contentIntent = pendingIntent;
 			extraManaging.insertNotification(notificationItem.id, notification);
 		}

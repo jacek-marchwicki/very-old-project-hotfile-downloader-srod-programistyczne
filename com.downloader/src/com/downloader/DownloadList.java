@@ -53,7 +53,8 @@ public class DownloadList extends Activity {
 						Variables.DB_KEY_FILENAME,
 						Variables.DB_KEY_DOWNLOADEDSIZE,
 						Variables.DB_KEY_TOTALSIZE, Variables.DB_REQUESTURI,
-						Variables.DB_COLUMN_STATUS},
+						Variables.DB_COLUMN_STATUS,
+						Variables.DB_DELETED},
 				null, null, null);
 		ll = (LinearLayout) findViewById(R.id.layoutDownloadItemList);
 		idColumn = cursorObserver.getColumnIndexOrThrow(Variables.DB_KEY_ROWID);
@@ -149,6 +150,7 @@ public class DownloadList extends Activity {
 		ContentValues contentValues = new ContentValues();
 		contentValues.put(Variables.DB_DELETED, true);
 		getContentResolver().update(ContentUris.withAppendedId(Variables.CONTENT_URI, id), contentValues, null, null);
+		cursorObserver.requery();
 	}
 	
 	@Override
@@ -211,7 +213,7 @@ public class DownloadList extends Activity {
 	public class DownloadAdapter extends CursorAdapter {
 		private Context context;
 		private Cursor cursor;
-		private int idColumn, fileName, currentSize, totalSize;
+		private int idColumn, fileName, currentSize, totalSize, deleted;
 		public DownloadAdapter(Context context, Cursor cursor, LinearLayout ll) {
 			super(context, cursor);
 			this.context = context;
@@ -223,6 +225,8 @@ public class DownloadList extends Activity {
 					.getColumnIndexOrThrow(Variables.DB_KEY_DOWNLOADEDSIZE);
 			totalSize = cursor.getColumnIndexOrThrow(Variables.DB_KEY_TOTALSIZE);
 			cursor.getColumnIndexOrThrow(Variables.DB_REQUESTURI);
+			totalSize = cursor.getColumnIndexOrThrow(Variables.DB_KEY_TOTALSIZE);
+			deleted = cursor.getColumnIndexOrThrow(Variables.DB_DELETED);
 		}
 
 		@Override
@@ -231,6 +235,7 @@ public class DownloadList extends Activity {
 		}
 
 		private void bindView(View customView) {
+			if(cursor.getInt(deleted)==0){
 			Long contentSize = cursor.getLong(totalSize);
 			long id = cursor.getLong(idColumn);
 			idStatusMap.put(id, cursor.getLong(statusColumn));
@@ -244,15 +249,19 @@ public class DownloadList extends Activity {
 			textBoxUpper.setText(cursor.getString(fileName));
 			customView.setId((int)id);
 			customView.setOnLongClickListener(relativeLayoutListener);
-
+			}
 		}
 
 		@Override
 		public View newView(Context arg0, Cursor arg1, ViewGroup arg2) {
+			if(cursor.getInt(deleted)==0){
 			LayoutInflater ly = (LayoutInflater) 
 				context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			View customView = ly.inflate(R.layout.download_progress_window, null);
 			return customView;
+			}
+			else
+			return new View(arg0);
 		}
 		
 		// called when the download item is pressed -- details buttons
