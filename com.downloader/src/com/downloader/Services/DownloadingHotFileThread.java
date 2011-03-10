@@ -138,7 +138,6 @@ public class DownloadingHotFileThread extends Thread {
 			HttpPost apiDirectLink) throws Error, RetryDownload {
 		android.os.Debug.waitForDebugger();
 		InnerState innerState = new InnerState();
-		byte data[] = new byte[Variables.MAX_BUFFER_SIZE];
 		HttpGet request = null;
 		try {
 			/*************************************/
@@ -211,11 +210,16 @@ public class DownloadingHotFileThread extends Thread {
 
 				InputStream entityStream = response.getEntity().getContent();
 				int bytesRead = 0;
+				byte data[] = new byte[Variables.MAX_BUFFER_SIZE];
 				while (true) {
 					try {
 						bytesRead = entityStream.read(data);
 					} catch (IOException e) {
-						// TODO what author has in mind
+						/*
+						 * TODO I thing that we should remember downloaded size
+						 * rather that already stored content size to restore
+						 * downloading after this crash
+						 */
 						contentValues.put(Variables.DB_KEY_TOTALSIZE,
 								downloadItem.contentSize);
 						context.getContentResolver().update(
@@ -275,17 +279,24 @@ public class DownloadingHotFileThread extends Thread {
 	 */
 	private void updateProgress(State state, InnerState innerState) {
 		long now = System.currentTimeMillis();
-		if (innerState.bytesDownloaded - innerState.bytesNotified > Variables.PROGRESS_UPDATE_WAIT
-				&& now - innerState.lastNotificationTime > Variables.DELAY_TIME) {
-			// TODO update progess in ContentProvider
-			ContentValues contentValues = new ContentValues();
-			contentValues.put(Variables.DB_KEY_DOWNLOADEDSIZE,
-					innerState.bytesDownloaded);
-			context.getContentResolver().update(
-					downloadItem.getMyDownloadUrl(), contentValues, null, null);
+		boolean longAgoUpdated = 
+			now - innerState.lastNotificationTime > Variables.DELAY_TIME;
+		boolean bigProgressChange = 
+			innerState.bytesDownloaded - innerState.bytesNotified
+			> Variables.PROGRESS_UPDATE_WAIT;
+		if ( bigProgressChange && longAgoUpdated) {
+			updateDownloadesSizeInContentResolver(innerState.bytesDownloaded);
 			innerState.bytesNotified = innerState.bytesDownloaded;
 			innerState.lastNotificationTime = now;
 		}
+	}
+
+	private void updateDownloadesSizeInContentResolver(long bytesDownloaded) {
+		ContentValues contentValues = new ContentValues();
+		contentValues.put(Variables.DB_KEY_DOWNLOADEDSIZE,
+				bytesDownloaded);
+		context.getContentResolver().update(
+				downloadItem.getMyDownloadUrl(), contentValues, null, null);
 	}
 
 	private void checkIfNeedToPause(State state) throws Error {
