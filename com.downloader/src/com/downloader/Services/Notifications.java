@@ -70,13 +70,14 @@ public class Notifications {
 		}
 		for(NotificationItem notificationItem : notifications.values()){
 			Notification notification = new Notification(R.drawable.icon, "", System.currentTimeMillis());
-			notification.flags = notification.flags | Notification.FLAG_ONGOING_EVENT;
+			notification.flags = notification.flags | Notification.FLAG_AUTO_CANCEL;
 			RemoteViews  remoteViews = new RemoteViews(context.getPackageName(), R.layout.download_progress_up);
-			//remoteViews.setViewVisibility(R.id.status_text, View.GONE);
 			remoteViews.setImageViewResource(R.id.status_icon, R.drawable.ic_menu_save);
 			remoteViews.setTextViewText(R.id.status_text, notificationItem.title);
 			remoteViews.setProgressBar(R.id.status_progress, (int)notificationItem.totalBytes, 
 					(int)notificationItem.currentBytes, notificationItem.totalBytes == -1);
+			remoteViews.setViewVisibility(R.id.status_progress, View.VISIBLE);
+			remoteViews.setViewVisibility(R.id.status_text, View.VISIBLE);
 			notification.contentView = remoteViews;
 			PendingIntent pendingIntent = PendingIntent.getService(context, 0, new Intent(context, DownloadService.class), 0);
 			notification.contentIntent = pendingIntent;
