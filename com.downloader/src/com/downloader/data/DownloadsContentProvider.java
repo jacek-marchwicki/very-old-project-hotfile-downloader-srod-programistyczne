@@ -73,6 +73,13 @@ public class DownloadsContentProvider extends ContentProvider
 		case DB_TABLE_ID:
 			count = db.delete(Variables.DB_DATABASE_TABLE, where, whereArgs);
 			break;
+		case DB_TABLE_ITEM_ID:
+
+			long itemId = Long.parseLong(uri.getLastPathSegment());
+			count = db.delete(Variables.DB_DATABASE_TABLE, 
+					Variables.DB_KEY_ROWID + " = ? ", new String[] { String.valueOf(itemId)});
+
+			break;
 
 		default:
 			throw new IllegalArgumentException("Unknown URI " + uri);
@@ -149,14 +156,15 @@ public class DownloadsContentProvider extends ContentProvider
 		int count;
 		switch (sUriMatcher.match(uri)) {
 		case DB_TABLE_ID:
-			try{
-				count = db.update(Variables.DB_DATABASE_TABLE, values, 
-						Variables.DB_KEY_ROWID + " = ? ", new String[] { String.valueOf(uri.getLastPathSegment())});
-			}
-			catch (NumberFormatException e){
-				count = db.update(Variables.DB_DATABASE_TABLE, values, 
-						null, null);
-			}
+			count = db.update(Variables.DB_DATABASE_TABLE, values, 
+					where, whereArgs);
+			break;
+		case DB_TABLE_ITEM_ID:
+
+			long itemId = Long.parseLong(uri.getLastPathSegment());
+			count = db.update(Variables.DB_DATABASE_TABLE, values, 
+					Variables.DB_KEY_ROWID + " = ? ", new String[] { String.valueOf(itemId)});
+
 			break;
 
 		default:

@@ -203,7 +203,6 @@ public class DownloadingHotFileThread extends Thread {
 						file.getAbsolutePath());
 
 				ContentValues contentValues = new ContentValues();
-				contentValues.put(Variables.DB_KEY_FILENAME, state.filename);
 				contentValues.put(Variables.DB_KEY_TOTALSIZE,
 						downloadItem.contentSize);
 				context.getContentResolver().update(
