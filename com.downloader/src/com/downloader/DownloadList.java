@@ -134,8 +134,6 @@ public class DownloadList extends Activity {
 
 		@Override
 		public boolean onLongClick(View v) {
-			// TODO dlugi klik cos mial robic
-			int chosenFileId = v.getId();
 			// chosenItem = findItem(chosenFileId);
 			// showNotification("klikniete!" + v.getId());
 			try {

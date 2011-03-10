@@ -116,8 +116,6 @@ public class DownloadService extends Service {
 	}
 
 	private class UpdateThread extends Thread {
-		private static final String LOG_TAG = "UpdateThread";
-
 		public UpdateThread() {
 			super("Hotfile downloader service");
 		}

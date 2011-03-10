@@ -1,8 +1,6 @@
 package old;
 
 import android.app.Activity;
-import android.view.Menu;
-import android.view.MenuItem;
 
 
 public class OperationsOnFile extends Activity{

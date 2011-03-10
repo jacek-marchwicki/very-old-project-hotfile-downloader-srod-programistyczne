@@ -35,13 +35,7 @@ public class DownloadingHotFileThread extends Thread {
 	private static class State {
 		public String filename;
 		public FileOutputStream fileOutputStream;
-		/**
-		 * Count how many tries to download file
-		 */
-		public String requestUri;
 		public String directUri;
-		public String username;
-		public String passwordmd5;
 		public String requestApi; // request for direct link to api
 
 		public State(DownloadItem downloadItem) {
@@ -49,12 +43,11 @@ public class DownloadingHotFileThread extends Thread {
 			downloadItem.filename = getFilename(Uri
 					.parse(downloadItem.filename));
 			this.filename = downloadItem.filename;
-			this.requestUri = downloadItem.requestUri;
 			this.directUri = downloadItem.directUri;
 			this.requestApi = downloadItem.requestApi;
-			this.username = DownloadService.UsernamePasswordMD5Storage
+			DownloadService.UsernamePasswordMD5Storage
 					.getUsername();
-			this.passwordmd5 = DownloadService.UsernamePasswordMD5Storage
+			DownloadService.UsernamePasswordMD5Storage
 					.getPasswordMD5();
 		}
 
@@ -68,16 +61,22 @@ public class DownloadingHotFileThread extends Thread {
 	}
 
 	private class Error extends Throwable {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -7844545551234278643L;
+
 		public Error(String message) {
 			super(message);
-		}
-
-		public Error(String message, Throwable throwable) {
-			super(message, throwable);
 		}
 	}
 
 	private class RetryDownload extends Throwable {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -8220000934082748365L;
 	}
 
 	private static class InnerState {

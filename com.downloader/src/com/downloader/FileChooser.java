@@ -10,9 +10,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ListView;
-import android.widget.Toast;
 
-import com.downloader.R;
 import com.downloader.FileReading.FileArrayAdapter;
 import com.downloader.FileReading.Option;
 

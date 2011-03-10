@@ -27,6 +27,8 @@ public class DownloadsContentProvider extends ContentProvider
 	private static final UriMatcher sUriMatcher;
 
 	private static final int DB_TABLE_ID = 1;
+	private static final int DB_TABLE_ITEM_ID = 2;
+
 
 	private static HashMap<String, String> downloadProjectionMap;
 
@@ -148,7 +150,6 @@ public class DownloadsContentProvider extends ContentProvider
 		switch (sUriMatcher.match(uri)) {
 		case DB_TABLE_ID:
 			try{
-				long lastParam = Long.parseLong(uri.getLastPathSegment());
 				count = db.update(Variables.DB_DATABASE_TABLE, values, 
 						Variables.DB_KEY_ROWID + " = ? ", new String[] { String.valueOf(uri.getLastPathSegment())});
 			}
@@ -169,7 +170,7 @@ public class DownloadsContentProvider extends ContentProvider
 	static {
 		sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 		sUriMatcher.addURI(Variables.AUTHORITY, Variables.DB_DATABASE_TABLE, DB_TABLE_ID);
-		sUriMatcher.addURI(Variables.AUTHORITY, Variables.DB_DATABASE_TABLE+"/#", DB_TABLE_ID);
+		sUriMatcher.addURI(Variables.AUTHORITY, Variables.DB_DATABASE_TABLE+"/#", DB_TABLE_ITEM_ID);
 
 		downloadProjectionMap = new HashMap<String, String>();
 

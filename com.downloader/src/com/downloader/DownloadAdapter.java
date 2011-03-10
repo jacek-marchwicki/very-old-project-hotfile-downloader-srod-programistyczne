@@ -1,7 +1,6 @@
 package com.downloader;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,22 +15,18 @@ import com.downloader.Widgets.TextProgressBar;
 public class DownloadAdapter extends CursorAdapter {
 	private Context context;
 	private Cursor cursor;
-	private Resources resources;
-	private int idColumn, fileName, currentSize, totalSize, requestUri;
-	private LinearLayout ll;
-
+	private int idColumn, fileName, currentSize, totalSize;
 	public DownloadAdapter(Context context, Cursor cursor, LinearLayout ll) {
 		super(context, cursor);
-		this.ll = ll;
 		this.context = context;
 		this.cursor = cursor;
-		this.resources = context.getResources();
+		context.getResources();
 		idColumn = cursor.getColumnIndexOrThrow(Variables.DB_KEY_ROWID);
 		fileName = cursor.getColumnIndexOrThrow(Variables.DB_KEY_FILENAME);
 		currentSize = cursor
 				.getColumnIndexOrThrow(Variables.DB_KEY_DOWNLOADEDSIZE);
 		totalSize = cursor.getColumnIndexOrThrow(Variables.DB_KEY_TOTALSIZE);
-		requestUri = cursor.getColumnIndexOrThrow(Variables.DB_REQUESTURI);
+		cursor.getColumnIndexOrThrow(Variables.DB_REQUESTURI);
 	}
 
 	@Override
