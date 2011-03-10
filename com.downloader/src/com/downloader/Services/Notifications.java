@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.view.View;
 import android.widget.RemoteViews;
 
+import com.downloader.DownloadList;
 import com.downloader.R;
 
 public class Notifications {
@@ -79,7 +80,7 @@ public class Notifications {
 			remoteViews.setViewVisibility(R.id.status_progress, View.VISIBLE);
 			remoteViews.setViewVisibility(R.id.status_text, View.VISIBLE);
 			notification.contentView = remoteViews;
-			PendingIntent pendingIntent = PendingIntent.getService(context, 0, new Intent(context, DownloadService.class), 0);
+			PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, new Intent(context, DownloadList.class), 0); //<-- pewnie to niszczy wszystko.
 			notification.contentIntent = pendingIntent;
 			extraManaging.insertNotification(notificationItem.id, notification);
 		}
