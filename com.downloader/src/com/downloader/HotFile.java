@@ -289,16 +289,14 @@ public class HotFile extends Activity {
 		public void onSharedPreferenceChanged(
 				
 				SharedPreferences sharedPreferences, String key) {
-				if (preferences.contains("password") && key.equals("password")
-						&& !password.equals(preferences.getString("password",
-								" "))) {
-					password = preferences.getString("password", "");
-					showInformation("The password has been changed");
-				} else if (preferences.contains("username") && key.equals("username")
-						&& !username.equals(preferences.getString("username",
-								" "))) {
-					username = preferences.getString("username", "");
-					showInformation("The username has been changed");
+				if (preferences.contains("password") && 
+						(key.equals("password") || key.equals("username"))&&  
+						!password.equals(preferences.getString("password"," "))&&
+						preferences.contains("username") &&
+						!username.equals(preferences.getString("username"," "))) {
+					DownloadService.UsernamePasswordMD5Storage.setUsernameAndPasswordMD5(preferences.getString("username", ""), 
+							preferences.getString("password", ""));
+					showInformation("The username/password has been changed");
 				} else{
 					if (preferences.contains("chooseDir") && key.equals("chooseDir")
 						&& !directory.equals(preferences.getString("chooseDir"," "))) {
@@ -306,6 +304,7 @@ public class HotFile extends Activity {
 					showInformation("The directory has been changed");
 				}
 				}
+				checkPreferences();
 		}
 	};
 

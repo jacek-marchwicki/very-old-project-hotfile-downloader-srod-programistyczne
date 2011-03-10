@@ -42,9 +42,9 @@ public class DownloadService extends Service {
 	private UpdateThread updateThread = null; // private CLASS
 
 	public static class UsernamePasswordMD5Storage {
-		private static String username;
-		private static String passwordmd5;
-		private static String filePath;
+		private static String username ="";
+		private static String passwordmd5="";
+		private static String filePath = "";
 
 		public static String getUsername() {
 			return username;

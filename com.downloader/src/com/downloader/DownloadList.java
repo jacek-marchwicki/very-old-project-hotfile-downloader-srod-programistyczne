@@ -16,8 +16,10 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.CursorAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -100,47 +102,10 @@ public class DownloadList extends Activity {
 
 	}
 
-	public DownloadItem addProgressBarToDownloadListBox(DownloadItem item,
-			LinearLayout ll) {
-
-		LayoutInflater ly = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		View customView = ly.inflate(R.layout.download_progress_window, null);
-		TextView textBoxUpper = (TextView) customView
-				.findViewById(R.id.status_text);
-		TextProgressBar textBoxInProgress = (TextProgressBar) customView
-				.findViewById(R.id.status_progress);
-		textBoxInProgress.setIndeterminate(item.contentSize == -1);
-		int percentLevel = ((int) item.currentSize * 100 / (int) item.contentSize);
-		textBoxInProgress.setProgress(percentLevel);
-		textBoxInProgress.setMax(100);
-		textBoxInProgress.setText(percentLevel + "%");
-		textBoxUpper.setText(item.filename);
-		customView.setId((int) item.id);
-		customView.setOnLongClickListener(relativeLayoutListener);
-		ll.addView(customView);
-		return item;
-
+	public void showNotification(String notification) {
+		Toast.makeText(DownloadList.this, notification, Toast.LENGTH_LONG)
+				.show();
 	}
-
-	// called when the download item is pressed -- details buttons
-	private View.OnLongClickListener relativeLayoutListener = new View.OnLongClickListener() {
-
-		@Override
-		public boolean onLongClick(View v) {
-			// chosenItem = findItem(chosenFileId);
-			// showNotification("klikniete!" + v.getId());
-			try {
-				// Intent i = new Intent(DownloadList.this, MovieButtons.class);
-				// startActivity(i);
-				openMyDialog();
-
-			} catch (Exception e) {
-				showNotification("Exception " + e.toString());
-			}
-
-			return false;
-		}
-	};
 
 	@Override
 	protected void onPause() {
@@ -162,15 +127,10 @@ public class DownloadList extends Activity {
 		return cursorObserver != null;
 	}
 
-	public void showNotification(String notification) {
-		Toast.makeText(DownloadList.this, notification, Toast.LENGTH_LONG)
-				.show();
-	}
-
-	public void openMyDialog() {
+	public void openDialog(){
 		showDialog(10);
 	}
-
+	
 	@Override
 	protected Dialog onCreateDialog(int id) {
 		switch (id) {
@@ -220,7 +180,7 @@ public class DownloadList extends Activity {
 		}
 		return super.onCreateDialog(id);
 	}
-
+	
 	private class ProgressObserver extends ContentObserver {
 
 		public ProgressObserver() {
@@ -234,4 +194,83 @@ public class DownloadList extends Activity {
 
 	}
 
+	
+	public class DownloadAdapter extends CursorAdapter {
+		private Context context;
+		private Cursor cursor;
+		private int idColumn, fileName, currentSize, totalSize;
+		public DownloadAdapter(Context context, Cursor cursor, LinearLayout ll) {
+			super(context, cursor);
+			this.context = context;
+			this.cursor = cursor;
+			context.getResources();
+			idColumn = cursor.getColumnIndexOrThrow(Variables.DB_KEY_ROWID);
+			fileName = cursor.getColumnIndexOrThrow(Variables.DB_KEY_FILENAME);
+			currentSize = cursor
+					.getColumnIndexOrThrow(Variables.DB_KEY_DOWNLOADEDSIZE);
+			totalSize = cursor.getColumnIndexOrThrow(Variables.DB_KEY_TOTALSIZE);
+			cursor.getColumnIndexOrThrow(Variables.DB_REQUESTURI);
+		}
+
+		@Override
+		public void bindView(View customView, Context arg1, Cursor arg2) {
+			bindView(customView);
+		}
+
+		private void bindView(View customView) {
+			long contentSize = cursor.getLong(totalSize);
+		//	String rUri = cursor.getString(requestUri);
+			
+			TextView textBoxUpper = (TextView) customView.findViewById(R.id.status_text);
+			TextProgressBar textBoxInProgress = (TextProgressBar) customView.findViewById(R.id.status_progress);
+			textBoxInProgress.setIndeterminate(contentSize == -1);
+			int percentLevel = (int)(cursor.getLong(currentSize)*100/cursor.getLong(totalSize));
+			textBoxInProgress.setProgress(percentLevel);
+			textBoxInProgress.setMax(100);
+			textBoxInProgress.setText(percentLevel + "%");
+			textBoxUpper.setText(cursor.getString(fileName));
+			customView.setId((int) cursor.getLong(idColumn));
+			customView.setOnLongClickListener(relativeLayoutListener);
+
+		}
+
+		@Override
+		public View newView(Context arg0, Cursor arg1, ViewGroup arg2) {
+			LayoutInflater ly = (LayoutInflater) 
+				context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			View customView = ly.inflate(R.layout.download_progress_window, null);
+			return customView;
+		}
+		
+		// called when the download item is pressed -- details buttons
+		private View.OnLongClickListener relativeLayoutListener = new View.OnLongClickListener() {
+
+			@Override
+			public boolean onLongClick(View v) {
+				try {
+					openMyDialog();
+
+				} catch (Exception e) {
+					showNotification("Exception " + e.toString());
+				}
+
+				return false;
+			}
+		};
+		
+		public void showNotification(String notification) {
+			Toast.makeText(context, notification, Toast.LENGTH_LONG)
+					.show();
+		}
+		
+
+		public void openMyDialog() {
+			showDialog(10);
+		}
+
+		
+
+
+	}
+	
 }
