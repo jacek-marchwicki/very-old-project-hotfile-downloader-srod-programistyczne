@@ -72,7 +72,7 @@ public class Notifications {
 			Notification notification = new Notification(R.drawable.icon, "", System.currentTimeMillis());
 			notification.flags = notification.flags | Notification.FLAG_AUTO_CANCEL;
 			RemoteViews  remoteViews = new RemoteViews(context.getPackageName(), R.layout.download_progress_up);
-			remoteViews.setImageViewResource(R.id.status_icon, R.drawable.ic_menu_save);
+	//		remoteViews.setImageViewResource(R.id.status_icon, R.drawable.ic_menu_save);
 			remoteViews.setTextViewText(R.id.status_text, notificationItem.title);
 			remoteViews.setProgressBar(R.id.status_progress, (int)notificationItem.totalBytes, 
 					(int)notificationItem.currentBytes, notificationItem.totalBytes == -1);

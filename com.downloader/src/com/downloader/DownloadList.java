@@ -39,6 +39,7 @@ public class DownloadList extends Activity {
 	private DownloadAdapter downloadAdapter;
 	private ProgressObserver progressObserver = new ProgressObserver();
 	private AlertDialog alertDialog;
+	int chosenItemId;
 
 	@Override
 	public void onCreate(Bundle bundle) {
@@ -133,43 +134,50 @@ public class DownloadList extends Activity {
 	
 	@Override
 	protected Dialog onCreateDialog(int id) {
+
+		//chosenItemId <-- id wybranego obiektu - takie jak w bazie danych
+		
+		int currentState=0;	//<-- tu przypisać stan wybranego obiektu
+		
+		
+		String start= (currentState==Variables.STATUS_WAITING?"Start":"");
+		String pause = (currentState==Variables.STATUS_RUNNING?"Pause":"");
+		String delete = "Delete";
+		
+		
 		switch (id) {
 		case 10:
 			// Create our AlertDialog
 			Builder builder = new AlertDialog.Builder(this);
-			builder.setMessage("Choose an action\nCurrent state: ")// +chosenItem.getFileState())
-					.setCancelable(true).setPositiveButton("Start",
+			builder.setMessage("Choose an action\nCurrent state: "
+					+(currentState==Variables.STATUS_WAITING?"wating":"running"))
+					.setCancelable(true).setPositiveButton(start,
 							new DialogInterface.OnClickListener() {
 								@Override
 								public void onClick(DialogInterface dialog,
 										int which) {
-									showNotification("Start");
+									showNotification("Started");
 									// startDownloadingtem();
 									// ShowMyDialog.this.finish();
 								}
 							})
 
-					/*
-					 * .setNegativeButton("Restart", // new
-					 * DialogInterface.OnClickListener() { // // @Override //
-					 * public void onClick(DialogInterface dialog, // int which)
-					 * { // showNotification("Activity will continue"); // } })
-					 */
-					.setNeutralButton("Pause",
+					.setNeutralButton(pause,
 							new DialogInterface.OnClickListener() {
 								@Override
 								public void onClick(DialogInterface dialog,
 										int which) {
-									showNotification("Pause");
+									showNotification("Paused");
 									// pauseDownloadingItem();
 									// ShowMyDialog.this.finish();
 								}
-							}).setNegativeButton("Delete",
+							})
+				.setNegativeButton(delete,
 							new DialogInterface.OnClickListener() {
 								@Override
 								public void onClick(DialogInterface dialog,
 										int which) {
-									showNotification("Delete");
+									showNotification("Deleted");
 									// deleteDownloadingItem();
 									// ShowMyDialog.this.finish();
 								}
@@ -248,6 +256,9 @@ public class DownloadList extends Activity {
 			@Override
 			public boolean onLongClick(View v) {
 				try {
+					chosenItemId = v.getId();
+					
+					showNotification(Integer.toString(chosenItemId));
 					openMyDialog();
 
 				} catch (Exception e) {
