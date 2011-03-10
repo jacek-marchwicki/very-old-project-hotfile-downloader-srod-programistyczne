@@ -95,7 +95,7 @@ public class HotFile extends Activity {
 		myProgressBar = (ProgressBar) findViewById(R.id.ProgressBar01);
 		// movieButtons = new MovieButtons();
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
-		batteryState();
+		
 		
 		/*
 		 * ADDING BUTTON CLICKS
@@ -129,6 +129,7 @@ public class HotFile extends Activity {
 	@Override
 	public void onResume() {
 		super.onResume();
+		batteryState();
 	}
 
 	private final int CODEAddLinksFile = 1;
@@ -535,6 +536,12 @@ public class HotFile extends Activity {
            
         }
     };
+    
+    @Override
+    protected void onPause(){
+    	super.onPause();
+    	unregisterReceiver(mIntentReceiver);
+    }
     /** ----------------END BATTERY ------------------------- */
 	
 }
