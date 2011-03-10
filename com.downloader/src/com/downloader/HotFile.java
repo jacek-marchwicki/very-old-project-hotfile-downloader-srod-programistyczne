@@ -83,8 +83,8 @@ public class HotFile extends Activity {
 	String password = "";
 	String directory = "";
 	Button startDownload;
-	
-	
+
+
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -95,8 +95,8 @@ public class HotFile extends Activity {
 		myProgressBar = (ProgressBar) findViewById(R.id.ProgressBar01);
 		// movieButtons = new MovieButtons();
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
-		
-		
+
+
 		/*
 		 * ADDING BUTTON CLICKS
 		 */
@@ -104,15 +104,15 @@ public class HotFile extends Activity {
 		startDownload.setOnClickListener(buttonOnClickDownload);
 
 		((Button) findViewById(R.id.Button_showdownloadlist))
-				.setOnClickListener(buttonOnClickShowdownloadlistListener);
+		.setOnClickListener(buttonOnClickShowdownloadlistListener);
 		((Button) findViewById(R.id.Button_addlinksfromfile)).setOnClickListener(buttonAddLinksFile);
 
 		((Button) findViewById(R.id.Button_addlinkfromclipboard))
-				.setOnClickListener(buttonAddLinkFromClipboard);
+		.setOnClickListener(buttonAddLinkFromClipboard);
 		((Button) findViewById(R.id.Button_addlink))
-				.setOnClickListener(buttonAddLink);
+		.setOnClickListener(buttonAddLink);
 
-		
+
 		ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
 		List<RunningServiceInfo> services = activityManager.getRunningServices(Integer.MAX_VALUE);
 		for(RunningServiceInfo runningServiceInfo: services)
@@ -142,7 +142,7 @@ public class HotFile extends Activity {
 		try {
 			StatFs stat = new StatFs(directory);
 			long bytesAvailable = (long) stat.getBlockSize()
-					* (long) stat.getBlockCount();
+			* (long) stat.getBlockCount();
 			long megAvailable = bytesAvailable / 1048576;
 			return megAvailable;
 		} catch (Exception e) {
@@ -170,8 +170,8 @@ public class HotFile extends Activity {
 					case CODEAddLink: // called by OnClickListener
 						if (checkInternetAccess()) {
 							try {
-							List<String> tempList = new ArrayList<String>();
-							tempList.add(data.getAction());
+								List<String> tempList = new ArrayList<String>();
+								tempList.add(data.getAction());
 								addNewFiles(tempList);
 							} catch (ParseException e) {
 								// TODO return information to user
@@ -184,7 +184,7 @@ public class HotFile extends Activity {
 				} catch (IOException e) {
 					showInformation("Error occured " + e);
 				}
-			return;
+				return;
 		case RESULT_CANCELED:
 			return;
 		}
@@ -229,7 +229,7 @@ public class HotFile extends Activity {
 						"Here you can maintain your user credentials.",
 						Toast.LENGTH_LONG).show();
 				preferences
-						.registerOnSharedPreferenceChangeListener(prefListener);
+				.registerOnSharedPreferenceChangeListener(prefListener);
 				break;
 			} catch (Exception e) {
 			}
@@ -248,9 +248,9 @@ public class HotFile extends Activity {
 	 */
 	private void checkPreferences() {
 		DownloadService.UsernamePasswordMD5Storage
-				.setUsernameAndPasswordMD5(preferences
-						.getString("username", ""), Md5Create
-						.generateMD5Hash(preferences.getString("password", "")));
+		.setUsernameAndPasswordMD5(preferences
+				.getString("username", ""), Md5Create
+				.generateMD5Hash(preferences.getString("password", "")));
 		// TODO sprawdzic czy dobrze jest static class zrobione
 		directory = preferences.getString("chooseDir", null);
 		File dir;
@@ -260,11 +260,18 @@ public class HotFile extends Activity {
 			// sd = new
 			// File(Environment.getExternalStorageDirectory().getPath());
 			// dir = new File(sd.getAbsolutePath()+"/downloads");
-		} else
+		} else {
 			dir = new File(Environment.getExternalStorageDirectory()
-					+ "/downloads");
-		if (!dir.mkdirs())
-			Log.e(LOG_TAG, "Create dir in local failed, maybe dir exists");
+					+ "/downloads");	
+		}
+		if (dir.exists()) {
+			if (!dir.isDirectory()) {
+				Log.e(LOG_TAG, "There are file named \"downloads\" in current directory");
+			}
+		} else {
+			if (!dir.mkdirs())
+				Log.e(LOG_TAG, "Could not create directory");
+		}
 		try {
 			Runtime.getRuntime().exec("chmod 765 " + dir.getPath());
 			Variables.directory = dir.getPath();
@@ -277,7 +284,8 @@ public class HotFile extends Activity {
 					Toast.LENGTH_LONG).show();
 	}
 
-	public OnSharedPreferenceChangeListener prefListener = new OnSharedPreferenceChangeListener() {
+	public OnSharedPreferenceChangeListener prefListener =
+		new OnSharedPreferenceChangeListener() {
 
 		@Override
 		public void onSharedPreferenceChanged(
@@ -294,7 +302,7 @@ public class HotFile extends Activity {
 						Toast.LENGTH_LONG).show();
 			} else if (key.equals("chooseDir")
 					&& !directory
-							.equals(preferences.getString("chooseDir", ""))) {
+					.equals(preferences.getString("chooseDir", ""))) {
 				directory = preferences.getString("chooseDir", "");
 				Toast.makeText(HotFile.this, "The directory has been changed",
 						Toast.LENGTH_LONG).show();
@@ -328,8 +336,8 @@ public class HotFile extends Activity {
 
 			try {
 				if(checkInternetAccess()){
-				Intent i = new Intent(HotFile.this, FileChooser.class);
-				startActivityForResult(i, CODEAddLinksFile);
+					Intent i = new Intent(HotFile.this, FileChooser.class);
+					startActivityForResult(i, CODEAddLinksFile);
 				}
 				else
 					showInformation("No internet connection, you cannot add links");
@@ -357,7 +365,7 @@ public class HotFile extends Activity {
 				}
 
 				addNewFiles(list); // passing the list of lines from file to the
-									// method
+				// method
 			}
 		} catch (Exception e) {
 			Log.v(LOG_TAG, "error " + e.toString());
@@ -370,7 +378,7 @@ public class HotFile extends Activity {
 	 * @throws ParseException 
 	 */
 	private void addNewFiles(List<String> linksList)
-			throws ClientProtocolException, IOException, ParseException {
+	throws ClientProtocolException, IOException, ParseException {
 		List<String> preparedLinks = getLinkFromText(linksList, "hotfile.com");
 		if (preparedLinks.size() > 0) {
 			downList = check.prepareFilesToDownload(preparedLinks);
@@ -398,7 +406,7 @@ public class HotFile extends Activity {
 		for (String link : links) {
 			String[] list = link.split("\\ ");
 			Pattern p = Pattern
-					.compile("http://(www\\.)?" + serviceName + ".*");
+			.compile("http://(www\\.)?" + serviceName + ".*");
 
 			for (String s : list) {
 
@@ -480,7 +488,7 @@ public class HotFile extends Activity {
 				// 4MB
 				//
 				// list.add("ht			downList = check.prepareFilesToDownload(preparedLinks);tp://hotfile.com/dl/92148167/7c86b14/fil.txt.html");
-				}
+			}
 			else
 			{
 				Log.v(LOG_TAG,"password or username is empty");
@@ -492,56 +500,56 @@ public class HotFile extends Activity {
 	private Boolean checkInternetAccess() {
 		ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 		try{
-		return cm.getActiveNetworkInfo().isConnectedOrConnecting();
+			return cm.getActiveNetworkInfo().isConnectedOrConnecting();
 		}
 		catch(Exception e){Log.v(Variables.TAG, "No internet connection");}
 		showInformation("No internet connection");
 		return false;
 	}
-	
+
 	private void showInformation(String text){
 		Toast.makeText(this, text, Toast.LENGTH_LONG);
 	}
-	
-/** ----------------BATTERY ------------------------- */
-	
+
+	/** ----------------BATTERY ------------------------- */
+
 	//http://moonblink.googlecode.com/svn-history/r845/trunk/BatteryTracker/src/org/hermit/android/battrack/BatteryTracker.java
 	public void batteryState(){
-        IntentFilter filter = new IntentFilter();
-       // filter.addAction(Intent.ACTION_BATTERY_CHANGED);
-        filter.addAction(Intent.ACTION_BATTERY_LOW);
-        filter.addAction(Intent.ACTION_BATTERY_OKAY);
-        filter.addAction(Intent.ACTION_POWER_CONNECTED);
-        filter.addAction(Intent.ACTION_POWER_DISCONNECTED);
-        registerReceiver(mIntentReceiver, filter);
+		IntentFilter filter = new IntentFilter();
+		// filter.addAction(Intent.ACTION_BATTERY_CHANGED);
+		filter.addAction(Intent.ACTION_BATTERY_LOW);
+		filter.addAction(Intent.ACTION_BATTERY_OKAY);
+		filter.addAction(Intent.ACTION_POWER_CONNECTED);
+		filter.addAction(Intent.ACTION_POWER_DISCONNECTED);
+		registerReceiver(mIntentReceiver, filter);
 	}
-	
+
 
 	// ******************************************************************** //
-    // Update Handling.
-    // ******************************************************************** //
+	// Update Handling.
+	// ******************************************************************** //
 
-    private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-           if (action.equals(Intent.ACTION_BATTERY_LOW))
-        	   showInformation("Battery level is low. Plug your phone");
-           else if (action.equals(Intent.ACTION_POWER_CONNECTED))
-        	   showInformation("Your phone has been pluged in");
-           else if (action.equals(Intent.ACTION_POWER_DISCONNECTED))
-        	   showInformation("Your phone is no longer plug in");
-           else if (action.equals(Intent.ACTION_POWER_DISCONNECTED))
-        	   showInformation("Your phone is happy :)");
-           
-        }
-    };
-    
-    @Override
-    protected void onPause(){
-    	super.onPause();
-    	unregisterReceiver(mIntentReceiver);
-    }
-    /** ----------------END BATTERY ------------------------- */
-	
+	private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			String action = intent.getAction();
+			if (action.equals(Intent.ACTION_BATTERY_LOW))
+				showInformation("Battery level is low. Plug your phone");
+			else if (action.equals(Intent.ACTION_POWER_CONNECTED))
+				showInformation("Your phone has been pluged in");
+			else if (action.equals(Intent.ACTION_POWER_DISCONNECTED))
+				showInformation("Your phone is no longer plug in");
+			else if (action.equals(Intent.ACTION_POWER_DISCONNECTED))
+				showInformation("Your phone is happy :)");
+
+		}
+	};
+
+	@Override
+	protected void onPause(){
+		super.onPause();
+		unregisterReceiver(mIntentReceiver);
+	}
+	/** ----------------END BATTERY ------------------------- */
+
 }
