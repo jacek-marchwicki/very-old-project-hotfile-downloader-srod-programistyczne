@@ -49,25 +49,22 @@ public class DownloadList extends Activity {
 				.setOnClickListener(button_stopDownloading);
 		cursorObserver = getContentResolver().query(
 				Variables.CONTENT_URI,
-				new String[] { Variables.DB_KEY_ROWID,
-						Variables.DB_KEY_FILENAME,
-						Variables.DB_KEY_DOWNLOADEDSIZE,
-						Variables.DB_KEY_TOTALSIZE, Variables.DB_REQUESTURI,
-						Variables.DB_COLUMN_STATUS,
-						Variables.DB_DELETED},
+				new String[] { Variables.DB_COLUMN_ID,
+						Variables.DB_COLUMN_FILENAME,
+						Variables.DB_COLUMN_DOWNLOADEDSIZE,
+						Variables.DB_COLUMN_TOTALSIZE, Variables.DB_COLUMN_REQUESTURI,
+						Variables.DB_COLUMN_STATUS},
 				null, null, null);
 		ll = (LinearLayout) findViewById(R.id.layoutDownloadItemList);
-		idColumn = cursorObserver.getColumnIndexOrThrow(Variables.DB_KEY_ROWID);
+		idColumn = cursorObserver.getColumnIndexOrThrow(Variables.DB_COLUMN_ID);
 		fileName = cursorObserver
-				.getColumnIndexOrThrow(Variables.DB_KEY_FILENAME);
+				.getColumnIndexOrThrow(Variables.DB_COLUMN_FILENAME);
 		currentSize = cursorObserver
-				.getColumnIndexOrThrow(Variables.DB_KEY_DOWNLOADEDSIZE);
+				.getColumnIndexOrThrow(Variables.DB_COLUMN_DOWNLOADEDSIZE);
 		totalSize = cursorObserver
-				.getColumnIndexOrThrow(Variables.DB_KEY_TOTALSIZE);
+				.getColumnIndexOrThrow(Variables.DB_COLUMN_TOTALSIZE);
 		requestUri = cursorObserver
-				.getColumnIndexOrThrow(Variables.DB_REQUESTURI);
-		statusColumn = cursorObserver
-		.getColumnIndexOrThrow(Variables.DB_COLUMN_STATUS);
+				.getColumnIndexOrThrow(Variables.DB_COLUMN_REQUESTURI);
 		try {
 			if (cursorObserver.getCount() > 0){
 				downloadAdapter = new DownloadAdapter(getApplicationContext(),
@@ -148,7 +145,7 @@ public class DownloadList extends Activity {
 	
 	private void deleteDownload(final int id){
 		ContentValues contentValues = new ContentValues();
-		contentValues.put(Variables.DB_DELETED, true);
+		contentValues.put(Variables.DB_COLUMN_STATUS, Variables.STATUS_END);
 		getContentResolver().update(ContentUris.withAppendedId(Variables.CONTENT_URI, id), contentValues, null, null);
 		cursorObserver.requery();
 	}
@@ -217,7 +214,7 @@ public class DownloadList extends Activity {
 	public class DownloadAdapter extends CursorAdapter {
 		private Context context;
 		private Cursor cursor;
-		private int idColumn, fileName, currentSize, totalSize, deleted;
+		private int idColumn, fileName, currentSize, totalSize, statusCol, reqUri;
 		public DownloadAdapter(Context context, Cursor cursor, LinearLayout ll) {
 			super(context, cursor);
 			this.context = context;
@@ -228,9 +225,8 @@ public class DownloadList extends Activity {
 			currentSize = cursor
 					.getColumnIndexOrThrow(Variables.DB_COLUMN_DOWNLOADEDSIZE);
 			totalSize = cursor.getColumnIndexOrThrow(Variables.DB_COLUMN_TOTALSIZE);
-			cursor.getColumnIndexOrThrow(Variables.DB_COLUMN_REQUESTURI);
-			totalSize = cursor.getColumnIndexOrThrow(Variables.DB_COLUMN_TOTALSIZE);
-			deleted = cursor.getColumnIndexOrThrow(Variables.DB_DELETED);
+			reqUri = cursor.getColumnIndexOrThrow(Variables.DB_COLUMN_REQUESTURI);
+			statusCol = cursor.getColumnIndexOrThrow(Variables.DB_COLUMN_STATUS);
 		}
 
 		@Override
@@ -239,7 +235,7 @@ public class DownloadList extends Activity {
 		}
 
 		private void bindView(View customView) {
-			if(cursor.getInt(deleted)==0){
+			if(cursor.getInt(statusCol)==Variables.STATUS_END){
 			Long contentSize = cursor.getLong(totalSize);
 			long id = cursor.getLong(idColumn);
 			idStatusMap.put(id, cursor.getLong(statusColumn));
@@ -258,7 +254,7 @@ public class DownloadList extends Activity {
 
 		@Override
 		public View newView(Context arg0, Cursor arg1, ViewGroup arg2) {
-			if(cursor.getInt(deleted)==0){
+			if(cursor.getInt(statusCol)==Variables.STATUS_END){
 			LayoutInflater ly = (LayoutInflater) 
 				context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			View customView = ly.inflate(R.layout.download_progress_window, null);
