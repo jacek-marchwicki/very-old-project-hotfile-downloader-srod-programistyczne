@@ -22,13 +22,10 @@ import android.util.Log;
 public class DownloadingHotFileThread extends Thread {
 
 	Context context;
-	ExtraManaging extraManaging;
 	DownloadItem downloadItem;
 
-	public DownloadingHotFileThread(Context context,
-			ExtraManaging extraManaging, DownloadItem downloadItem) {
+	public DownloadingHotFileThread(Context context, DownloadItem downloadItem) {
 		this.context = context;
-		this.extraManaging = extraManaging;
 		this.downloadItem = downloadItem;
 	}
 
@@ -40,14 +37,14 @@ public class DownloadingHotFileThread extends Thread {
 
 		public State(DownloadItem downloadItem) {
 			// TODO FROM DOWNLOADTHREAD
-			downloadItem.filename = getFilename(Uri
-					.parse(downloadItem.filename));
-			this.filename = downloadItem.filename;
-			this.directUri = downloadItem.directUri;
-			this.requestApi = downloadItem.requestApi;
-			DownloadService.UsernamePasswordMD5Storage
+			downloadItem.setFilename(getFilename(Uri
+					.parse(downloadItem.getFilename())));
+			this.filename = downloadItem.getFilename();
+			this.directUri = downloadItem.getDirectUri();
+			this.requestApi = downloadItem.getRequestApi();
+			UsernamePasswordMD5Storage
 					.getUsername();
-			DownloadService.UsernamePasswordMD5Storage
+			UsernamePasswordMD5Storage
 					.getPasswordMD5();
 		}
 
@@ -60,13 +57,13 @@ public class DownloadingHotFileThread extends Thread {
 		}
 	}
 
-	private class Error extends Throwable {
+	private class DownloadException extends Throwable {
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = -7844545551234278643L;
 
-		public Error(String message) {
+		public DownloadException(String message) {
 			super(message);
 		}
 	}
@@ -96,7 +93,7 @@ public class DownloadingHotFileThread extends Thread {
 			PowerManager powerManager = (PowerManager) this.context
 					.getSystemService(Context.POWER_SERVICE);
 			wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-					Variables.TAG);
+					Variables.TAG); // TODO SOME Tag from constans
 			wakeLock.acquire();
 			boolean finished = false;
 			while (!finished) {
@@ -107,16 +104,16 @@ public class DownloadingHotFileThread extends Thread {
 					runDownload(state, httpclient, getDirectLink);
 					finished = true;
 				} catch (RetryDownload e) {
+					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}finally{
 					getDirectLink.abort();
 					getDirectLink = null;
 				}
 					// TODO notify download complete
-					downloadItem.mHasActiveThread = false;
 				}
 			}
-		catch (Error e) {
+		catch (DownloadException e) {
 			Log.v(Variables.TAG, e.toString());
 		}
 		catch(Throwable e){
@@ -134,7 +131,7 @@ public class DownloadingHotFileThread extends Thread {
 	}
 
 	public void runDownload(State state, DefaultHttpClient defaultHttpClient,
-			HttpPost apiDirectLink) throws Error, RetryDownload {
+			HttpPost apiDirectLink) throws DownloadException, RetryDownload {
 		android.os.Debug.waitForDebugger();
 		InnerState innerState = new InnerState();
 		HttpGet request = null;
@@ -156,9 +153,10 @@ public class DownloadingHotFileThread extends Thread {
 					state.fileOutputStream = new FileOutputStream(
 							Variables.directory + "/" + state.filename, true);
 					innerState.bytesDownloaded = (int) bytesDownloaded;
+					// TODO UZUPELNIC GDY BEDZIE DOWNLOADINFO CLASS, moze
 					// wymagane dodanie e-tagow if=match
-					if (downloadItem.contentSize != -1) {
-						innerState.contentSize = (int) downloadItem.contentSize;
+					if (downloadItem.getTotalSize() != -1) {
+						innerState.contentSize = (int) downloadItem.getTotalSize();
 					}
 					innerState.continuingDownload = true;
 				}
@@ -183,13 +181,13 @@ public class DownloadingHotFileThread extends Thread {
 						+ innerState.bytesDownloaded + "-");
 			response = defaultHttpClient.execute(request);
 			if (response.getStatusLine().getStatusCode() / 100 != 2
-					|| downloadItem.contentSize < 1) // HTTP ERROR or WRONG SIZE
-				throw new Error("DON't HAVE DIRECT LINK");
+					|| downloadItem.getTotalSize() < 1) // HTTP ERROR or WRONG SIZE
+				throw new DownloadException("Don't have direct link");
 			if (!innerState.continuingDownload) {
 				Header header = response.getFirstHeader("Content-Length");
 				if (header != null) {
 					innerState.contentSize = Long.parseLong(header.getValue());
-					downloadItem.contentSize = innerState.contentSize;
+					downloadItem.setTotalSize(innerState.contentSize);
 				}
 			}
 
@@ -198,14 +196,6 @@ public class DownloadingHotFileThread extends Thread {
 				// TODO filename + miejsce do zapisu
 				state.fileOutputStream = new FileOutputStream(
 						file.getAbsolutePath());
-
-				ContentValues contentValues = new ContentValues();
-				contentValues.put(Variables.DB_KEY_TOTALSIZE,
-						downloadItem.contentSize);
-				context.getContentResolver().update(
-						downloadItem.getMyDownloadUrl(), contentValues, null,
-						null);
-
 				InputStream entityStream = response.getEntity().getContent();
 				int bytesRead = 0;
 				byte data[] = new byte[Variables.MAX_BUFFER_SIZE];
@@ -213,32 +203,22 @@ public class DownloadingHotFileThread extends Thread {
 					try {
 						bytesRead = entityStream.read(data);
 					} catch (IOException e) {
-						/*
-						 * TODO I thing that we should remember downloaded size
-						 * rather that already stored content size to restore
-						 * downloading after this crash
-						 */
-						contentValues.put(Variables.DB_KEY_TOTALSIZE,
-								downloadItem.contentSize);
-						context.getContentResolver().update(
-								downloadItem.getMyDownloadUrl(), contentValues,
-								null, null);
+						downloadItem.setDownloadSize(innerState.bytesDownloaded);
 						break;
-
 					}
 					if (bytesRead == -1) {
-						contentValues.put(Variables.DB_KEY_TOTALSIZE,
-								downloadItem.contentSize);
-						contentValues.put(Variables.DB_DELETED, true);
-						context.getContentResolver().update(
-								downloadItem.getMyDownloadUrl(), contentValues,
-								null, null);
-						return;
+						downloadItem.setDownloadSize(innerState.bytesDownloaded);
+						downloadItem.setStatus(Variables.STATUS_END);
+						// TODO set totalSize
+						break;
 					}
 					writeDownloadedData(state, data, bytesRead);
 					innerState.bytesDownloaded += bytesRead;
-					updateProgress(state, innerState);
-					checkIfNeedToPause(state, innerState);
+					updateProgressPeriodically(state, innerState);
+					if (checkIfNeedToPause(state)) {
+						downloadItem.setDownloadSize(innerState.bytesDownloaded);
+						break;
+					}
 				}
 			}
 		} catch (Exception e) {
@@ -259,7 +239,7 @@ public class DownloadingHotFileThread extends Thread {
 	}
 
 	private void writeDownloadedData(State state, byte[] data, int bytesRead)
-			throws Error {
+			throws DownloadException {
 		while (true) {
 			try {
 				if (state.fileOutputStream == null)
@@ -275,7 +255,7 @@ public class DownloadingHotFileThread extends Thread {
 	/**
 	 * Report progress
 	 */
-	private void updateProgress(State state, InnerState innerState) {
+	private void updateProgressPeriodically(State state, InnerState innerState) {
 		long now = System.currentTimeMillis();
 		boolean longAgoUpdated = 
 			now - innerState.lastNotificationTime > Variables.DELAY_TIME;
@@ -291,22 +271,19 @@ public class DownloadingHotFileThread extends Thread {
 
 	private void updateDownloadesSizeInContentResolver(long bytesDownloaded) {
 		ContentValues contentValues = new ContentValues();
-		contentValues.put(Variables.DB_KEY_DOWNLOADEDSIZE,
+		contentValues.put(Variables.DB_COLUMN_DOWNLOADEDSIZE,
 				bytesDownloaded);
 		context.getContentResolver().update(
 				downloadItem.getMyDownloadUrl(), contentValues, null, null);
 	}
 
-	private void checkIfNeedToPause(State state, InnerState innerState) throws Error {
+	private boolean checkIfNeedToPause(State state) {
 		synchronized (downloadItem) {
-			if (downloadItem.status == Variables.STATUS_PAUSE){
-				downloadItem.mHasActiveThread = false;
-				updateDownloadesSizeInContentResolver(innerState.bytesDownloaded);
-				innerState.bytesNotified = innerState.bytesDownloaded;
-				throw new Error("PAUSE download, id="+downloadItem.requestUri);
-			}
-			if (downloadItem.status == Variables.STATUS_CANCEL)
-				throw new Error("stop download");
+			if (downloadItem.getStatus() == Variables.STATUS_PAUSE)
+				return true;
+			if (downloadItem.getStatus() == Variables.STATUS_CANCEL)
+				return true;
+			return false;
 		}
 	}
 

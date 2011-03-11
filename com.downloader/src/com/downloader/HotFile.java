@@ -14,6 +14,8 @@ import java.util.regex.Pattern;
 import org.apache.http.client.ClientProtocolException;
 
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningServiceInfo;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -37,11 +39,11 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.downloader.prepareActions.ParseException;
 import com.downloader.Services.DownloadItem;
 import com.downloader.Services.DownloadManager;
-import com.downloader.Services.DownloadService;
+import com.downloader.Services.UsernamePasswordMD5Storage;
 import com.downloader.Services.Variables;
+import com.downloader.prepareActions.ParseException;
 
 /*
  * 																							1. sprawdzanie miejsca w pamieci do zapisu podczas downloadu
@@ -108,8 +110,18 @@ public class HotFile extends Activity {
 				.setOnClickListener(buttonAddLinkFromClipboard);
 		((Button) findViewById(R.id.Button_addlink))
 				.setOnClickListener(buttonAddLink);
-		if(DownloadManager.isServiceRunning())
-			startDownload.setText("Stop download");
+
+		ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+		List<RunningServiceInfo> services = activityManager
+				.getRunningServices(Integer.MAX_VALUE);
+		for (RunningServiceInfo runningServiceInfo : services)
+			if (runningServiceInfo.service.getPackageName().equals(
+					getPackageName()))
+				if (runningServiceInfo.service.getClassName().equals(
+						"com.downloader.Services.DownloadService")) {
+					startDownload.setText("Stop download");
+					break;
+				}
 		check = new prepareActions();
 		checkPreferences();
 		Log.v(LOG_TAG, "Running program...");
@@ -119,8 +131,6 @@ public class HotFile extends Activity {
 	public void onResume() {
 		super.onResume();
 		batteryState();
-		if(DownloadManager.isServiceRunning())
-			startDownload.setText("Stop download");
 	}
 
 	private final int CODEAddLinksFile = 1;
@@ -238,7 +248,7 @@ public class HotFile extends Activity {
 	 * Check if preferences are set
 	 */
 	private void checkPreferences() {
-		DownloadService.UsernamePasswordMD5Storage
+		UsernamePasswordMD5Storage
 				.setUsernameAndPasswordMD5(preferences
 						.getString("username", ""), Md5Create
 						.generateMD5Hash(preferences.getString("password", "")));
@@ -284,7 +294,7 @@ public class HotFile extends Activity {
 						!password.equals(preferences.getString("password"," "))&&
 						preferences.contains("username") &&
 						!username.equals(preferences.getString("username"," "))) {
-					DownloadService.UsernamePasswordMD5Storage.setUsernameAndPasswordMD5(preferences.getString("username", ""), 
+					UsernamePasswordMD5Storage.setUsernameAndPasswordMD5(preferences.getString("username", ""), 
 							preferences.getString("password", ""));
 					showInformation("The username/password has been changed");
 				} else{
@@ -353,9 +363,17 @@ public class HotFile extends Activity {
 				addNewFiles(list); // passing the list of lines from file to the
 									// method
 			}
+		} catch (ParseException e) {
+			Log.v(LOG_TAG, "error while parsing information from server \n" + e.getStackTrace().toString());
+			showInformation("Error while parsing information from server");
+		} catch (ClientProtocolException e) {
+			Log.v(LOG_TAG, "Error while getting HTTP response \n" + e.getStackTrace().toString());
+			showInformation("Error while getting HTTP response");
 		} catch (Exception e) {
-			Log.v(LOG_TAG, "error " + e.toString());
-			showInformation("Error occured when adding links from a file");
+	
+			throw new RuntimeException(e);
+			//Log.v(LOG_TAG, "error " + e.toString());
+			//showInformation("Error occured when adding links from a file");
 		}
 	}
 
@@ -370,8 +388,8 @@ public class HotFile extends Activity {
 		if (preparedLinks.size() > 0) {
 			downList = check.prepareFilesToDownload(preparedLinks);
 			for (DownloadItem downloadItem : downList) {
-				downloadManager.enqueue(downloadItem.requestUri,
-						downloadItem.contentSize);
+				downloadManager.enqueue(downloadItem.getRequestUri(),
+						downloadItem.getTotalSize());
 			}
 			showInformation(downList.size() + " files have been added");
 		} else
@@ -455,12 +473,13 @@ public class HotFile extends Activity {
 	 */
 	private OnClickListener buttonOnClickDownload = new OnClickListener() {
 		public void onClick(View v) {
-			if (!(DownloadService.UsernamePasswordMD5Storage.getUsername().equals("") && DownloadService.UsernamePasswordMD5Storage
-					.getPasswordMD5().equals(""))) {
+			if (!(UsernamePasswordMD5Storage.getUsername().length() == 0
+					 && UsernamePasswordMD5Storage
+					.getPasswordMD5().length() == 0)) {
 				if (checkInternetAccess()
 						&& startDownload.getText().equals("Start download")) {
 					startDownload.setText("Stop download");
-					downloadManager.startServiceForAllDownloads();
+					downloadManager.startService();
 				} else {
 					startDownload.setText("Start download");
 					downloadManager.stopService();

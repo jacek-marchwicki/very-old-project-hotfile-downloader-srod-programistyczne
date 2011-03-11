@@ -1,14 +1,12 @@
 package com.downloader;
 
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.ArrayList;
+import java.util.List;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
 import android.app.Dialog;
-import android.content.ContentUris;
-import android.content.ContentValues;
+import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.database.ContentObserver;
@@ -18,8 +16,8 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.CursorAdapter;
 import android.widget.LinearLayout;
@@ -27,47 +25,45 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.downloader.Services.DownloadManager;
+import com.downloader.Services.DownloadItem;
 import com.downloader.Services.Variables;
 import com.downloader.Widgets.TextProgressBar;
 
 public class DownloadList extends Activity {
 
-	Map <Long, Long> idStatusMap = new TreeMap<Long, Long>();
+	List<DownloadItem> downloadItems;
 	Cursor cursorObserver;
 	ListView listView;
 	LinearLayout ll;
-	int idColumn, fileName, currentSize, totalSize, requestUri, statusColumn;
+	int idColumn, fileName, currentSize, totalSize, requestUri;
 	private DownloadAdapter downloadAdapter;
 	private ProgressObserver progressObserver = new ProgressObserver();
-
 	@Override
 	public void onCreate(Bundle bundle) {
 		super.onCreate(bundle);
 		prepareView();
+		
 		((Button) findViewById(R.id.button_stopDownloading))
 				.setOnClickListener(button_stopDownloading);
+
+		downloadItems = new ArrayList<DownloadItem>();
 		cursorObserver = getContentResolver().query(
 				Variables.CONTENT_URI,
-				new String[] { Variables.DB_KEY_ROWID,
-						Variables.DB_KEY_FILENAME,
-						Variables.DB_KEY_DOWNLOADEDSIZE,
-						Variables.DB_KEY_TOTALSIZE, Variables.DB_REQUESTURI,
-						Variables.DB_COLUMN_STATUS,
-						Variables.DB_DELETED},
+				new String[] { Variables.DB_COLUMN_ID,
+						Variables.DB_COLUMN_FILENAME,
+						Variables.DB_COLUMN_DOWNLOADEDSIZE,
+						Variables.DB_COLUMN_TOTALSIZE, Variables.DB_COLUMN_REQUESTURI },
 				null, null, null);
 		ll = (LinearLayout) findViewById(R.id.layoutDownloadItemList);
-		idColumn = cursorObserver.getColumnIndexOrThrow(Variables.DB_KEY_ROWID);
+		idColumn = cursorObserver.getColumnIndexOrThrow(Variables.DB_COLUMN_ID);
 		fileName = cursorObserver
-				.getColumnIndexOrThrow(Variables.DB_KEY_FILENAME);
+				.getColumnIndexOrThrow(Variables.DB_COLUMN_FILENAME);
 		currentSize = cursorObserver
-				.getColumnIndexOrThrow(Variables.DB_KEY_DOWNLOADEDSIZE);
+				.getColumnIndexOrThrow(Variables.DB_COLUMN_DOWNLOADEDSIZE);
 		totalSize = cursorObserver
-				.getColumnIndexOrThrow(Variables.DB_KEY_TOTALSIZE);
+				.getColumnIndexOrThrow(Variables.DB_COLUMN_TOTALSIZE);
 		requestUri = cursorObserver
-				.getColumnIndexOrThrow(Variables.DB_REQUESTURI);
-		statusColumn = cursorObserver
-		.getColumnIndexOrThrow(Variables.DB_COLUMN_STATUS);
+				.getColumnIndexOrThrow(Variables.DB_COLUMN_REQUESTURI);
 		try {
 			if (cursorObserver.getCount() > 0){
 				downloadAdapter = new DownloadAdapter(getApplicationContext(),
@@ -101,7 +97,8 @@ public class DownloadList extends Activity {
 	public void handleDownloadChanged() {
 		// Set<Long> allIds = new HashSet<Long>();
 		// cursorObserver.moveToFirst()
-
+		if (cursorObserver.getCount() <= 0)
+			return;
 	}
 
 	public void showNotification(String notification) {
@@ -133,72 +130,55 @@ public class DownloadList extends Activity {
 		showDialog(10);
 	}
 	
-	private void startDownload(final int id){
-		ContentValues contentValues = new ContentValues();
-		contentValues.put(Variables.DB_COLUMN_STATUS, Variables.STATUS_WAITING);
-		getContentResolver().update(ContentUris.withAppendedId(Variables.CONTENT_URI, id), contentValues, null, null);
-		DownloadManager.startServiceOnly();
-	}
-	
-	private void pauseDownload(final int id){
-		ContentValues contentValues = new ContentValues();
-		contentValues.put(Variables.DB_COLUMN_STATUS, Variables.STATUS_PAUSE);
-		getContentResolver().update(ContentUris.withAppendedId(Variables.CONTENT_URI, id), contentValues, null, null);
-	}
-	
-	private void deleteDownload(final int id){
-		ContentValues contentValues = new ContentValues();
-		contentValues.put(Variables.DB_DELETED, true);
-		getContentResolver().update(ContentUris.withAppendedId(Variables.CONTENT_URI, id), contentValues, null, null);
-		cursorObserver.requery();
-	}
-	
 	@Override
-	protected Dialog onCreateDialog(final int id) {
-		int currentState = idStatusMap.get((long)id).intValue();
-		boolean serviceRunning = DownloadManager.isServiceRunning();
-		boolean status = (currentState==Variables.STATUS_PAUSE||
-				(currentState==Variables.STATUS_WAITING && !serviceRunning)?true:false);
-		String start = status?"Start":"";
-		String pause = (currentState==Variables.STATUS_RUNNING && serviceRunning?"Pause":"");
-		String delete = "Delete";
-		if(pause.equals("") && start.equals(""))
-			start = "Start";
+	protected Dialog onCreateDialog(int id) {
+		switch (id) {
+		case 10:
 			// Create our AlertDialog
 			Builder builder = new AlertDialog.Builder(this);
-			builder.setMessage("Choose an action\nCurrent state: "
-					+(status?"paused":"running"))
-					.setCancelable(true).setPositiveButton(start,
+			builder.setMessage("Choose an action\nCurrent state: ")// +chosenItem.getFileState())
+					.setCancelable(true).setPositiveButton("Start",
 							new DialogInterface.OnClickListener() {
 								@Override
-								public void onClick(DialogInterface dialog,int which) {
-									startDownload(id);
-									showNotification("Download started");
+								public void onClick(DialogInterface dialog,
+										int which) {
+									showNotification("Start");
+									// startDownloadingtem();
+									// ShowMyDialog.this.finish();
 								}
 							})
-					.setNeutralButton(pause,
+
+					/*
+					 * .setNegativeButton("Restart", // new
+					 * DialogInterface.OnClickListener() { // // @Override //
+					 * public void onClick(DialogInterface dialog, // int which)
+					 * { // showNotification("Activity will continue"); // } })
+					 */
+					.setNeutralButton("Pause",
 							new DialogInterface.OnClickListener() {
 								@Override
 								public void onClick(DialogInterface dialog,
 										int which) {
-									pauseDownload(id);
-									showNotification("Paused");
+									showNotification("Pause");
+									// pauseDownloadingItem();
+									// ShowMyDialog.this.finish();
 								}
-							}).setNegativeButton(delete,
+							}).setNegativeButton("Delete",
 							new DialogInterface.OnClickListener() {
 								@Override
 								public void onClick(DialogInterface dialog,
 										int which) {
-									deleteDownload(id);
-									showNotification("Deleted");
+									showNotification("Delete");
+									// deleteDownloadingItem();
+									// ShowMyDialog.this.finish();
 								}
 							});
 			AlertDialog dialog = builder.create();
 			dialog.show();
+
+		}
 		return super.onCreateDialog(id);
 	}
-	
-	
 	
 	private class ProgressObserver extends ContentObserver {
 
@@ -217,20 +197,18 @@ public class DownloadList extends Activity {
 	public class DownloadAdapter extends CursorAdapter {
 		private Context context;
 		private Cursor cursor;
-		private int idColumn, fileName, currentSize, totalSize, deleted;
+		private int idColumn, fileName, currentSize, totalSize;
 		public DownloadAdapter(Context context, Cursor cursor, LinearLayout ll) {
 			super(context, cursor);
 			this.context = context;
 			this.cursor = cursor;
 			context.getResources();
-			idColumn = cursor.getColumnIndexOrThrow(Variables.DB_KEY_ROWID);
-			fileName = cursor.getColumnIndexOrThrow(Variables.DB_KEY_FILENAME);
+			idColumn = cursor.getColumnIndexOrThrow(Variables.DB_COLUMN_ID);
+			fileName = cursor.getColumnIndexOrThrow(Variables.DB_COLUMN_FILENAME);
 			currentSize = cursor
-					.getColumnIndexOrThrow(Variables.DB_KEY_DOWNLOADEDSIZE);
-			totalSize = cursor.getColumnIndexOrThrow(Variables.DB_KEY_TOTALSIZE);
-			cursor.getColumnIndexOrThrow(Variables.DB_REQUESTURI);
-			totalSize = cursor.getColumnIndexOrThrow(Variables.DB_KEY_TOTALSIZE);
-			deleted = cursor.getColumnIndexOrThrow(Variables.DB_DELETED);
+					.getColumnIndexOrThrow(Variables.DB_COLUMN_DOWNLOADEDSIZE);
+			totalSize = cursor.getColumnIndexOrThrow(Variables.DB_COLUMN_TOTALSIZE);
+			cursor.getColumnIndexOrThrow(Variables.DB_COLUMN_REQUESTURI);
 		}
 
 		@Override
@@ -239,10 +217,9 @@ public class DownloadList extends Activity {
 		}
 
 		private void bindView(View customView) {
-			if(cursor.getInt(deleted)==0){
-			Long contentSize = cursor.getLong(totalSize);
-			long id = cursor.getLong(idColumn);
-			idStatusMap.put(id, cursor.getLong(statusColumn));
+			long contentSize = cursor.getLong(totalSize);
+		//	String rUri = cursor.getString(requestUri);
+			
 			TextView textBoxUpper = (TextView) customView.findViewById(R.id.status_text);
 			TextProgressBar textBoxInProgress = (TextProgressBar) customView.findViewById(R.id.status_progress);
 			textBoxInProgress.setIndeterminate(contentSize == -1);
@@ -251,21 +228,17 @@ public class DownloadList extends Activity {
 			textBoxInProgress.setMax(100);
 			textBoxInProgress.setText(percentLevel + "%");
 			textBoxUpper.setText(cursor.getString(fileName));
-			customView.setId((int)id);
+			customView.setId((int) cursor.getLong(idColumn));
 			customView.setOnLongClickListener(relativeLayoutListener);
-			}
+
 		}
 
 		@Override
 		public View newView(Context arg0, Cursor arg1, ViewGroup arg2) {
-			if(cursor.getInt(deleted)==0){
 			LayoutInflater ly = (LayoutInflater) 
 				context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			View customView = ly.inflate(R.layout.download_progress_window, null);
 			return customView;
-			}
-			else
-			return new View(arg0);
 		}
 		
 		// called when the download item is pressed -- details buttons
@@ -274,7 +247,7 @@ public class DownloadList extends Activity {
 			@Override
 			public boolean onLongClick(View v) {
 				try {
-					openMyDialog(v.getId());
+					openMyDialog();
 
 				} catch (Exception e) {
 					showNotification("Exception " + e.toString());
@@ -290,8 +263,8 @@ public class DownloadList extends Activity {
 		}
 		
 
-		public void openMyDialog(int id) {
-			showDialog(id);
+		public void openMyDialog() {
+			showDialog(10);
 		}
 
 		

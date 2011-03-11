@@ -22,7 +22,7 @@ public class DownloadsContentProvider extends ContentProvider
 
 	private static final String TAG = "DownloadFilesContentProvider";
 
-	private static final int DATABASE_VERSION = 6;
+	private static final int DATABASE_VERSION = 7;
 
 	private static final UriMatcher sUriMatcher;
 
@@ -36,15 +36,14 @@ public class DownloadsContentProvider extends ContentProvider
 		private static final String DATABASE_CREATE =
 			"create table "+Variables.DB_DATABASE_TABLE+
 			" ("+
-			Variables.DB_KEY_ROWID+" integer primary key autoincrement, "+
-			Variables.DB_REQUESTURI + " text not null unique, " +
-			Variables.DB_DIRECTURI + " text, " +
-			Variables.DB_KEY_FILENAME +" text not null, "+
-			Variables.DB_KEY_TOTALSIZE +" integer not null, "+
-			Variables.DB_KEY_DOWNLOADEDSIZE +" integer, "+
-			Variables.DB_KEY_WIFIONLY+" integer, "+
-			Variables.DB_COLUMN_STATUS +" integer, "+
-			Variables.DB_DELETED +" integer)";
+			Variables.DB_COLUMN_ID+" integer primary key autoincrement, "+
+			Variables.DB_COLUMN_REQUESTURI + " text not null unique, " +
+			Variables.DB_COLUMN_DIRECTURI + " text, " +
+			Variables.DB_COLUMN_FILENAME +" text not null, "+
+			Variables.DB_COLUMN_TOTALSIZE +" integer not null, "+
+			Variables.DB_COLUMN_DOWNLOADEDSIZE +" integer, "+
+			Variables.DB_COLUMN_WIFIONLY+" integer, "+
+			Variables.DB_COLUMN_STATUS +" integer)";
 		DatabaseHelper(Context context) {
 			super(context, Variables.DB_DATABASE_NAME, null, DATABASE_VERSION);
 		}
@@ -77,7 +76,7 @@ public class DownloadsContentProvider extends ContentProvider
 
 			long itemId = Long.parseLong(uri.getLastPathSegment());
 			count = db.delete(Variables.DB_DATABASE_TABLE, 
-					Variables.DB_KEY_ROWID + " = ? ", new String[] { String.valueOf(itemId)});
+					Variables.DB_COLUMN_ID + " = ? ", new String[] { String.valueOf(itemId)});
 
 			break;
 
@@ -163,7 +162,7 @@ public class DownloadsContentProvider extends ContentProvider
 
 			long itemId = Long.parseLong(uri.getLastPathSegment());
 			count = db.update(Variables.DB_DATABASE_TABLE, values, 
-					Variables.DB_KEY_ROWID + " = ? ", new String[] { String.valueOf(itemId)});
+					Variables.DB_COLUMN_ID + " = ? ", new String[] { String.valueOf(itemId)});
 
 			break;
 
@@ -182,15 +181,14 @@ public class DownloadsContentProvider extends ContentProvider
 
 		downloadProjectionMap = new HashMap<String, String>();
 
-		downloadProjectionMap.put(Variables.DB_KEY_ROWID, Variables.DB_KEY_ROWID);
-		downloadProjectionMap.put(Variables.DB_REQUESTURI, Variables.DB_REQUESTURI);
-		downloadProjectionMap.put(Variables.DB_DIRECTURI, Variables.DB_DIRECTURI);
-		downloadProjectionMap.put(Variables.DB_KEY_FILENAME, Variables.DB_KEY_FILENAME);
-		downloadProjectionMap.put(Variables.DB_KEY_TOTALSIZE, Variables.DB_KEY_TOTALSIZE);
-		downloadProjectionMap.put(Variables.DB_KEY_DOWNLOADEDSIZE, Variables.DB_KEY_DOWNLOADEDSIZE);
-		downloadProjectionMap.put(Variables.DB_KEY_WIFIONLY, Variables.DB_KEY_WIFIONLY);
+		downloadProjectionMap.put(Variables.DB_COLUMN_ID, Variables.DB_COLUMN_ID);
+		downloadProjectionMap.put(Variables.DB_COLUMN_REQUESTURI, Variables.DB_COLUMN_REQUESTURI);
+		downloadProjectionMap.put(Variables.DB_COLUMN_DIRECTURI, Variables.DB_COLUMN_DIRECTURI);
+		downloadProjectionMap.put(Variables.DB_COLUMN_FILENAME, Variables.DB_COLUMN_FILENAME);
+		downloadProjectionMap.put(Variables.DB_COLUMN_TOTALSIZE, Variables.DB_COLUMN_TOTALSIZE);
+		downloadProjectionMap.put(Variables.DB_COLUMN_DOWNLOADEDSIZE, Variables.DB_COLUMN_DOWNLOADEDSIZE);
+		downloadProjectionMap.put(Variables.DB_COLUMN_WIFIONLY, Variables.DB_COLUMN_WIFIONLY);
 		downloadProjectionMap.put(Variables.DB_COLUMN_STATUS, Variables.DB_COLUMN_STATUS);
-		downloadProjectionMap.put(Variables.DB_DELETED, Variables.DB_DELETED);
 
 	}
 

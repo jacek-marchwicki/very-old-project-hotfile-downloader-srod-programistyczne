@@ -19,7 +19,7 @@ public class Preferences extends PreferenceActivity {
 			addPreferencesFromResource(R.xml.preferences);
 		     ListPreference deflt = (ListPreference) findPreference("chooseDir");
 		     List<String> list = new ArrayList<String>();
-		     String cmd = "/system/bin/mount";
+		     String cmd = "/system/xbin/mount";
 		     try {
 		     Runtime rt = Runtime.getRuntime();
 		     Process ps = rt.exec(cmd);

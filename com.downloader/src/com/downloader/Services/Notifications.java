@@ -1,98 +1,82 @@
 package com.downloader.Services;
 
-import java.util.Collection;
-import java.util.HashMap;
-
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.view.View;
+import android.database.Cursor;
+import android.util.Log;
 import android.widget.RemoteViews;
 
-import com.downloader.DownloadList;
 import com.downloader.R;
 
 public class Notifications {
+	private static final int NOTIFICATION_ID = 0;
+	private static final String LOG_TAG = "Notfications";
 	Context context;
-	HashMap<String, NotificationItem> notifications;
-	private ExtraManaging extraManaging;
-	
-	
-	public static class NotificationItem{
-		int id;
-		long totalBytes = 0;
-		long currentBytes = 0;
-		String title;
-		
-		public void addItem(String title, long currentBytes, long totalBytes){
-			this.currentBytes += currentBytes;
-			if(totalBytes <= 0 || this.totalBytes == -1)
-				this.totalBytes = -1;
-			else
-				this.totalBytes += totalBytes;
-			if(title != null) 
-				this.title = title;
-		}
-	}
-	
-	public Notifications(Context context, ExtraManaging extraManaging) {
+	private NotificationManager notificationManager;
+	private Notification notification = null;
+	private RemoteViews remoteViews;
+
+	public Notifications(Context context) {
 		this.context = context;
-		this.extraManaging = extraManaging;
-		notifications = new HashMap<String, Notifications.NotificationItem>();
+		notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 	}
-	
-	public void updateNotification(Collection<DownloadItem> downloads){
-		updateActive(downloads);
-	}
-	
-	
-	
-	private void updateActive(Collection<DownloadItem> downloads){
-		notifications.clear();
-		for(DownloadItem downloadItem : downloads){
-			//TODO MOZE COS DO SKOPIOWANIA Z DNotification
-			String name = downloadItem.filename;
-			long max = downloadItem.contentSize;
-			long progress = downloadItem.currentSize;
-			long id = downloadItem.id;
-			NotificationItem notificationItem;
-			if(notifications.containsKey(name)){
-				notificationItem = notifications.get(name);
-				notificationItem.addItem(name, progress, max);
-			}else
-			{
-				notificationItem = new NotificationItem();
-				notificationItem.id = (int)id;
-				notificationItem.title = name;
-				notificationItem.addItem(name, progress, max);
-				notifications.put(downloadItem.requestUri, notificationItem);
+
+
+	public void updateNotification() {
+		long downloadedSize = 0;
+		long totalSize = 0;
+		Cursor cursor = context.getContentResolver().query(
+				Variables.CONTENT_URI, null, null, null, null);
+		try {
+			DownloadItem.Warehouse reader = new DownloadItem.Warehouse(
+					cursor);
+			if (cursor.getCount() > 0) {
+				cursor.moveToFirst();
+				do {
+					DownloadItem downloadItem = reader.addNewItem(context);
+					long status = downloadItem.getStatus();
+					if (status != Variables.STATUS_RUNNING &&
+							status != Variables.STATUS_WAITING) {
+						continue;
+					}
+					totalSize += downloadItem.getTotalSize();
+					downloadedSize += downloadItem.getDownloadSize();
+				} while (cursor.moveToNext());
 			}
+		} finally {
+			cursor.close();
+		}
+		if (totalSize == 0)
+		{
+			if (notification != null) {
+				notificationManager.cancel(NOTIFICATION_ID);
+				notification = null;
+			}
+			return;
 		}
 		
-		if(notifications.size() > 0){
-			NotificationItem notificationItem = notifications.values().iterator().next();
-			Notification notification = new Notification(R.drawable.icon, "", System.currentTimeMillis());
+		if (notification == null) {
+			notification = new Notification(R.drawable.icon, "", System.currentTimeMillis());
+			
 			notification.flags = notification.flags | Notification.FLAG_AUTO_CANCEL;
-			RemoteViews  remoteViews = new RemoteViews(context.getPackageName(), R.layout.download_progress_up);
-			if(notifications.size() > 1)
-				remoteViews.setTextViewText(R.id.status_text, notificationItem.title + "(other downloads: " + (notifications.size()-1)+")");
-			else
-				remoteViews.setTextViewText(R.id.status_text, notificationItem.title);
-			remoteViews.setProgressBar(R.id.status_progress, (int)notificationItem.totalBytes, 
-					(int)notificationItem.currentBytes, notificationItem.totalBytes == -1);
-			remoteViews.setViewVisibility(R.id.status_progress, View.VISIBLE);
-			remoteViews.setViewVisibility(R.id.status_text, View.VISIBLE);
+			
+			remoteViews = new RemoteViews(context.getPackageName(), R.layout.download_progress_up);
+			//remoteViews.setImageViewResource(R.id.status_icon, R.drawable.ic_menu_save);
+			remoteViews.setTextViewText(R.id.status_text, "HF");
 			notification.contentView = remoteViews;
-			Intent intent = new Intent(context, DownloadList.class);
-			if(notifications.size() > 1){
-				intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-	                    | Intent.FLAG_ACTIVITY_SINGLE_TOP
-	                    | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			}
-			PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0); //<-- pewnie to niszczy wszystko.
-			notification.contentIntent = pendingIntent;
-			extraManaging.insertNotification(notificationItem.id, notification);
+			Intent notificationIntent = new Intent(context, DownloadService.class);
+			PendingIntent contentIntent = PendingIntent.getService(context, 0, notificationIntent, 0);
+			notification.contentIntent = contentIntent;
 		}
+		
+		long percent = downloadedSize * 100 / totalSize;
+		Log.v(LOG_TAG, "Downloading: "+percent +"% "+downloadedSize+"/"+totalSize);
+		
+		remoteViews.setProgressBar(R.id.progress_bar, (int)100, 
+				(int)percent, false);
+		notificationManager.notify(NOTIFICATION_ID, notification);
 	}	
 }

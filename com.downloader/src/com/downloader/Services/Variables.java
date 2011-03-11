@@ -4,57 +4,45 @@ import android.net.Uri;
 
 public final class Variables {
 	
-	public static final boolean VERBOSE = true;
-	
 	public static final String AUTHORITY = "hotfile_downloader";
 	public static final String DB_DATABASE_TABLE = "downloads";
 	
-	
 	public static final Uri CONTENT_URI = Uri.parse("content://"+AUTHORITY+"/"+DB_DATABASE_TABLE);
 	
-	/** DATABASE CONSTANS */
+	/* DATABASE CONSTANS */
 	
+	/** database name */
 	public static final String DB_DATABASE_NAME = "hotfiledownloader";
 	
-	public static final int DB_DATABASE_VERSION = 1;
-	/**
-	 * ID IN DB
-	 */ 
-	public static final String DB_KEY_ROWID = "_id";
-	
-	/**  
-	 * REQUEST URI  / INPUT BY USER
-	 */
-	public static final String DB_REQUESTURI  = "ruri";
-	
-	/**
-	 * DIRECT URI, GET FROM HOTFILE API
-	 */
-	public static final String DB_DIRECTURI  = "duri";
-	
-	/**
-	 * PATH where FILE IS STORED
-	 */
-	public static final String DB_KEY_FILENAME = "filename";
-	
-	
-    /**
-     * CONTENT SIZE
-     */
-    public static final String DB_KEY_TOTALSIZE = "size";
-    
-    /**
-     * DOWNLOADED SIZE
-     */
-    public static final String DB_KEY_DOWNLOADEDSIZE = "dsize";
-    
-    /**
-     * SET TO TRUE IF DOWNLOAD ONLY VIA WIFI
-     */
-    public static final String DB_KEY_WIFIONLY = "wifionly";
-    
+	/** 
+	 * rows names 
+	 * */
+	/** ID */
+	public static final String DB_COLUMN_ID = "_id";
+	/** REQUEST URI  / INPUT BY USER */
+	public static final String DB_COLUMN_REQUESTURI  = "ruri";
+	/** DIRECT URI, GET FROM HOTFILE API */
+	public static final String DB_COLUMN_DIRECTURI  = "duri";
+	/** PATH where FILE IS STORED */
+	public static final String DB_COLUMN_FILENAME = "filename";
+    /** CONTENT SIZE */
+    public static final String DB_COLUMN_TOTALSIZE = "size";
+    /** DOWNLOADED SIZE */
+    public static final String DB_COLUMN_DOWNLOADEDSIZE = "dsize";
+    /** SET TO TRUE IF DOWNLOAD ONLY VIA WIFI */
+    public static final String DB_COLUMN_WIFIONLY = "wifionly";
+    /** status */
     public static final String DB_COLUMN_STATUS = "status";
-    public static final String DB_DELETED = "deleted"; //if true downloaded was finished and row can be deleted from db
+    
+    /**
+     * download status
+     */
+    public static final int STATUS_WAITING = 10;
+    public static final int STATUS_RUNNING = 11;
+    public static final int STATUS_ERROR = 12;
+    public static final int STATUS_CANCEL = 13;
+    public static final int STATUS_PAUSE = 14;
+    public static final int STATUS_END = 15;
     
     public static final int DB_DONTCHANGE = -1;
     
@@ -87,17 +75,6 @@ public final class Variables {
     public static final int MAX_DB_SIZE = 1000;
     public static final String COLUMN_LAST_MODIFICATION = "lastmod";
     public static final int MAX_BUFFER_SIZE = 1024;
-    
-    /**
-     * DOWNLOAD CONTROL
-     */
-    public static final int CONTROL_RUN = 0;
-    public static final int CONTROL_PAUSE = 1;
-    public static final int STATUS_WAITING = 10;
-    public static final int STATUS_RUNNING = 11;
-    public static final int STATUS_ERROR = 12;
-    public static final int STATUS_CANCEL = 13;
-    public static final int STATUS_PAUSE = 14;
     
     /**
      * INTENT ACTIONS
