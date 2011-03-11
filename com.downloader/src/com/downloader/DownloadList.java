@@ -235,7 +235,7 @@ public class DownloadList extends Activity {
 		}
 
 		private void bindView(View customView) {
-			if(cursor.getInt(statusCol)==Variables.STATUS_END){
+			if(cursor.getInt(statusCol)!=Variables.STATUS_END){
 			Long contentSize = cursor.getLong(totalSize);
 			long id = cursor.getLong(idColumn);
 			idStatusMap.put(id, cursor.getLong(statusColumn));
@@ -254,7 +254,7 @@ public class DownloadList extends Activity {
 
 		@Override
 		public View newView(Context arg0, Cursor arg1, ViewGroup arg2) {
-			if(cursor.getInt(statusCol)==Variables.STATUS_END){
+			if(cursor.getInt(statusCol)!=Variables.STATUS_END){
 			LayoutInflater ly = (LayoutInflater) 
 				context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			View customView = ly.inflate(R.layout.download_progress_window, null);
