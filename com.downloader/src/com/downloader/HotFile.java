@@ -110,18 +110,8 @@ public class HotFile extends Activity {
 				.setOnClickListener(buttonAddLinkFromClipboard);
 		((Button) findViewById(R.id.Button_addlink))
 				.setOnClickListener(buttonAddLink);
-
-		ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
-		List<RunningServiceInfo> services = activityManager
-				.getRunningServices(Integer.MAX_VALUE);
-		for (RunningServiceInfo runningServiceInfo : services)
-			if (runningServiceInfo.service.getPackageName().equals(
-					getPackageName()))
-				if (runningServiceInfo.service.getClassName().equals(
-						"com.downloader.Services.DownloadService")) {
-					startDownload.setText("Stop download");
-					break;
-				}
+		if(DownloadManager.isServiceRunning())
+			startDownload.setText("Stop download");
 		check = new prepareActions();
 		checkPreferences();
 		Log.v(LOG_TAG, "Running program...");
@@ -131,6 +121,8 @@ public class HotFile extends Activity {
 	public void onResume() {
 		super.onResume();
 		batteryState();
+		if(DownloadManager.isServiceRunning())
+			startDownload.setText("Stop download");
 	}
 
 	private final int CODEAddLinksFile = 1;
@@ -479,7 +471,7 @@ public class HotFile extends Activity {
 				if (checkInternetAccess()
 						&& startDownload.getText().equals("Start download")) {
 					startDownload.setText("Stop download");
-					downloadManager.startService();
+					downloadManager.startServiceForAllDownloads();
 				} else {
 					startDownload.setText("Start download");
 					downloadManager.stopService();
