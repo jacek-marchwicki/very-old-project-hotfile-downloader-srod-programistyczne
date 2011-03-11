@@ -11,10 +11,8 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.database.ContentObserver;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,7 +37,6 @@ public class DownloadList extends Activity {
 	LinearLayout ll;
 	int idColumn, fileName, currentSize, totalSize, requestUri, statusColumn;
 	private DownloadAdapter downloadAdapter;
-	private ProgressObserver progressObserver = new ProgressObserver();
 
 	@Override
 	public void onCreate(Bundle bundle) {
@@ -95,12 +92,6 @@ public class DownloadList extends Activity {
 		}
 	};
 
-	public void handleDownloadChanged() {
-		// Set<Long> allIds = new HashSet<Long>();
-		// cursorObserver.moveToFirst()
-
-	}
-
 	public void showNotification(String notification) {
 		Toast.makeText(DownloadList.this, notification, Toast.LENGTH_LONG)
 				.show();
@@ -109,21 +100,11 @@ public class DownloadList extends Activity {
 	@Override
 	protected void onPause() {
 		super.onPause();
-		if (haveCursor())
-			cursorObserver.unregisterContentObserver(progressObserver);
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
-		if (haveCursor()) {
-			cursorObserver.registerContentObserver(progressObserver);
-			cursorObserver.requery();
-		}
-	}
-
-	private boolean haveCursor() {
-		return cursorObserver != null;
 	}
 
 	public void openDialog(){
@@ -193,21 +174,6 @@ public class DownloadList extends Activity {
 			AlertDialog dialog = builder.create();
 			dialog.show();
 		return super.onCreateDialog(id);
-	}
-	
-	
-	
-	private class ProgressObserver extends ContentObserver {
-
-		public ProgressObserver() {
-			super(new Handler());
-		}
-
-		@Override
-		public void onChange(boolean selfChange) {
-			handleDownloadChanged();
-		}
-
 	}
 
 	

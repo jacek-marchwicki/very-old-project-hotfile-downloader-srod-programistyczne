@@ -59,12 +59,14 @@ public class DownloadServiceThread extends Thread {
 
 	@Override
 	public void run() {
+		Log.v(LOG_TAG, "Starting DownloadServiceThread");
 		Looper.prepare();
 		notifications = new Notifications(context);
 		DownloadContentObserver downloadContentObserver;
 		downloadContentObserver = new DownloadContentObserver();
 		context.getContentResolver().registerContentObserver(Variables.CONTENT_URI,
 				true, downloadContentObserver);
+		contentProviderChanged();
 		Looper.loop();
 		context.getContentResolver().unregisterContentObserver(downloadContentObserver);
 	}

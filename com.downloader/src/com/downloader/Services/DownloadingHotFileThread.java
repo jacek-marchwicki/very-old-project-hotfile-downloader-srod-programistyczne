@@ -43,9 +43,9 @@ public class DownloadingHotFileThread extends Thread {
 			this.directUri = downloadItem.getDirectUri();
 			this.requestApi = downloadItem.getRequestApi();
 			UsernamePasswordMD5Storage
-					.getUsername();
+			.getUsername();
 			UsernamePasswordMD5Storage
-					.getPasswordMD5();
+			.getPasswordMD5();
 		}
 
 		private String getFilename(Uri uri) {
@@ -91,7 +91,7 @@ public class DownloadingHotFileThread extends Thread {
 		// TODO SOMETHING STATIC VAR
 		try {
 			PowerManager powerManager = (PowerManager) this.context
-					.getSystemService(Context.POWER_SERVICE);
+			.getSystemService(Context.POWER_SERVICE);
 			wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
 					Variables.TAG); // TODO SOME Tag from constans
 			wakeLock.acquire();
@@ -110,9 +110,9 @@ public class DownloadingHotFileThread extends Thread {
 					getDirectLink.abort();
 					getDirectLink = null;
 				}
-					// TODO notify download complete
-				}
+				// TODO notify download complete
 			}
+		}
 		catch (DownloadException e) {
 			Log.v(Variables.TAG, e.toString());
 		}
@@ -120,12 +120,12 @@ public class DownloadingHotFileThread extends Thread {
 			Log.v(Variables.TAG, e.toString());
 		}
 		finally {
-				if (wakeLock != null) {
-					wakeLock.release();
-					wakeLock = null;
-				}
-				if (httpclient != null) {
-					httpclient = null;
+			if (wakeLock != null) {
+				wakeLock.release();
+				wakeLock = null;
+			}
+			if (httpclient != null) {
+				httpclient = null;
 			}
 		}
 	}
@@ -239,7 +239,7 @@ public class DownloadingHotFileThread extends Thread {
 	}
 
 	private void writeDownloadedData(State state, byte[] data, int bytesRead)
-			throws DownloadException {
+	throws DownloadException {
 		while (true) {
 			try {
 				if (state.fileOutputStream == null)
@@ -259,14 +259,14 @@ public class DownloadingHotFileThread extends Thread {
 		long now = System.currentTimeMillis();
 		boolean longAgoUpdated = 
 			now - innerState.lastNotificationTime > Variables.DELAY_TIME;
-		boolean bigProgressChange = 
-			innerState.bytesDownloaded - innerState.bytesNotified
-			> Variables.PROGRESS_UPDATE_WAIT;
-		if ( bigProgressChange && longAgoUpdated) {
-			updateDownloadesSizeInContentResolver(innerState.bytesDownloaded);
-			innerState.bytesNotified = innerState.bytesDownloaded;
-			innerState.lastNotificationTime = now;
-		}
+			boolean bigProgressChange = 
+				innerState.bytesDownloaded - innerState.bytesNotified
+				> Variables.PROGRESS_UPDATE_WAIT;
+				if ( bigProgressChange && longAgoUpdated) {
+					updateDownloadesSizeInContentResolver(innerState.bytesDownloaded);
+					innerState.bytesNotified = innerState.bytesDownloaded;
+					innerState.lastNotificationTime = now;
+				}
 	}
 
 	private void updateDownloadesSizeInContentResolver(long bytesDownloaded) {

@@ -137,6 +137,20 @@ public class DownloadItem {
 	}
 
 	public long getStatus() {
+		ContentValues contentValues = new ContentValues();
+		contentValues.put(Variables.DB_COLUMN_STATUS, Variables.STATUS_END);
+		Cursor cursor = 
+			context.getContentResolver()
+			.query(
+					Variables.CONTENT_URI,
+					new String[] {Variables.DB_COLUMN_STATUS}, 
+					Variables.DB_COLUMN_ID + " = ?",
+					new String[] {Long.toString(id)}
+					, null);
+		if (!cursor.moveToFirst()) {
+			throw new RuntimeException("Row removed");
+		}
+		status = cursor.getLong(cursor.getColumnIndexOrThrow(Variables.DB_COLUMN_STATUS));
 		return status;
 	}
 

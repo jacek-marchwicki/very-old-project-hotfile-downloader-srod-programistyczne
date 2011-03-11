@@ -6,12 +6,18 @@ import android.os.IBinder;
 
 public class DownloadService extends Service {
 	private DownloadServiceThread downloadServiceThread;
+	private boolean started = false;
 
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		int returnValue = super.onStartCommand(intent, flags, startId);
-		downloadServiceThread.start();
+		synchronized (this) {
+			if (!started) {
+				downloadServiceThread.start();
+				started = true;
+			}
+		}
 		return returnValue;
 	}
 
